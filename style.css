@@ -202,7 +202,6 @@ margin-bottom: 70px;
   margin-top: 0px;
   margin-left: 90px;
   margin-right: 90px;
-  min-width: 400px;
   overflow-y: auto;
   max-height: calc(100% - 50px);
 }
@@ -227,8 +226,8 @@ margin-bottom: 70px;
 /* Tablets */
 @media screen and (min-width: 660px) and (max-width: 1024px) {
   .content-container {
-    margin-left: 60px;
-    margin-right: 60px;
+    margin-left: 50px;
+    margin-right: 50px;
   }
 }
 
