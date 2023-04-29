@@ -104,26 +104,6 @@ body.overlay-open {
   flex-direction: column;
 }
 
-.popupprices {
-  background-color: rgba(228, 255, 230, 0.8);
-  position: fixed;
-  top: 16%;
-  opacity: o;
-  left: 50%;
-  bottom: 10%;
-  transform: translate(-50%);
-  width: 80%;
-  max-width: 640px;
-  max-height: 730px;
-  padding: 0px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-  z-index: 1001;
-  border-radius: 18px;
-  animation: showOverlay 5s forwards;
-  display: flex;
-  flex-direction: column;
-}
-
 /* Add keyframes for the showPopup animation */
 @keyframes showPopup {
   0% {
@@ -148,7 +128,6 @@ body.overlay-open {
     bottom: 0;
     transform: none;
     width: 100%;
-    max-width: 100%;
     min-height: 85%;
     border-radius: 0;
   }
@@ -157,7 +136,7 @@ body.overlay-open {
 /* Large phones */
 @media screen and (min-width: 321px) and (max-width: 767px) {
   #popup {
-    width: 100%;
+    width: 90%;
   }
 }
 
