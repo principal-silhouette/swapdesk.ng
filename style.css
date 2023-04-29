@@ -7,7 +7,17 @@ body {
   color: #1d1d1f;
   font-style: normal;
   padding-left: 22px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
+
+@media screen and (max-width: 600px) {
+  body {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 
 body {
   background-size: cover;
