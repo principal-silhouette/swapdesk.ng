@@ -94,8 +94,6 @@ button {
   border-radius: 30px;
   padding: 10px 16px;
   margin-top: 10px;
-  margin-left: 0px;
-  margin-right: 10px;
   margin-bottom: 10px;
   min-width: 30%;
   width: auto; /* Reduce width by 60% */
@@ -109,8 +107,6 @@ button {
   color: white;
   border-radius: 26px;
   padding: 10px 16px;
-  margin-right: 10px;
-  margin-right: 10px;
   max-width: 55%;
   height: auto; /* Adjust height automatically */
   text-align: center;
@@ -147,7 +143,6 @@ button {
   font-weight: 540;
   width: 62%;
   text-align: center; /* Align text to the left */
-  padding-left: 0px; /* Add padding to the left of the text */
   margin-bottom: 70px;
 }
 
@@ -235,8 +230,6 @@ button {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 22px;
-  margin-left: 70px;
-  margin-right: 70px;
   margin-bottom: 5px;
   max-width: 69%;
   font-size: 16px;
@@ -251,8 +244,6 @@ button {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 22px;
-  margin-left: 70px;
-  margin-right: 70px;
   margin-bottom: 55px;
   max-width: 69%;
   font-size: 16px;
@@ -262,6 +253,7 @@ button {
 
 button {
   margin-bottom: 15px;
+  max-width: 370px;
 }
 
 .selected-button {
@@ -272,8 +264,6 @@ button {
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 22px;
-  margin-left: 70px;
-  margin-right: 70px;
   margin-bottom: 15px;
   width: 66%;
   font-size: 18px;
@@ -326,7 +316,6 @@ h3 {
   font-size: 2em;
   margin-top: 80px;
   margin-bottom: 0px;
-  padding-left: 80px;
 }
 
 h4 {
@@ -334,7 +323,6 @@ h4 {
   margin-top: 0px;
   margin-bottom: 8px;
   line-height: 1;
-  padding-left: 80px;
 }
 
 h5 {
@@ -350,7 +338,6 @@ h6 {
   margin-top: 20px;
   margin-bottom: 8px;
   line-height: 1;
-  padding-left: 80px;
 }
 
 .hwelcome {
@@ -359,7 +346,6 @@ h6 {
   margin-top: 0px;
   margin-bottom: 8px;
   line-height: 1;
-  padding-left: 0px;
 }
 
 .htradein {
@@ -368,22 +354,18 @@ h6 {
   margin-top: 35px;
   margin-bottom: 8px;
   line-height: 1;
-  padding-left: 0px;
 }
 
 .hswap {
   font-size: 2em;
   margin-top: 80px;
   margin-bottom: 28px;
-  padding-left: 80px;
 }
 
 p {
   display: block;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 80px;
-  margin-inline-end: 0px;
   margin-top: 8;
   margin-bottom: 30px;
 }
@@ -392,8 +374,6 @@ p {
   display: block;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 80px;
-  margin-inline-end: 95px;
   margin-top: 8;
   margin-bottom: 00px;
 }
@@ -403,8 +383,6 @@ p {
   font-weight: 600;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 80px;
-  margin-inline-end: 0px;
   margin-top: 8;
   margin-bottom: 10px;
 }
@@ -417,12 +395,8 @@ p {
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 70px;
-  margin-inline-end: 70px;
   margin-top: 8;
   margin-bottom: 25px;
-  padding-left: 45px;
-  padding-right: 45px;
 }
 
 .par5 {
@@ -430,12 +404,8 @@ p {
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 70px;
-  margin-inline-end: 70px;
   margin-top: 10px;
   margin-bottom: 25px;
-  padding-left: 35px;
-  padding-right: 35px;
 }
 
 .par6 {
@@ -443,12 +413,8 @@ p {
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 70px;
-  margin-inline-end: 70px;
   margin-top: 90px;
   margin-bottom: 8px;
-  padding-left: 25px;
-  padding-right: 25px;
 }
 
 .par7 {
@@ -456,12 +422,8 @@ p {
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 70px;
-  margin-inline-end: 70px;
   margin-top: 15px;
   margin-bottom: 25px;
-  padding-left: 35px;
-  padding-right: 35px;
 }
 
 .par8 {
@@ -469,20 +431,14 @@ p {
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-start: 70px;
-  margin-inline-end: 70px;
   margin-top: 10px;
   margin-bottom: 10px;
-  padding-left: 35px;
-  padding-right: 35px;
 }
 
 li {
     display: block;
     margin-block-start: 0em;
     margin-block-end: 1em;
-    margin-inline-start: 80px;
-    margin-inline-end: 0px;
     margin-top: 8;
     margin-bottom: 00px;
 }
@@ -538,6 +494,7 @@ a {
 #popup {
   background-color: rgb(244, 244, 244);
   position: fixed;
+  opacity: 70%;
   top: 16%;
   left: 50%;
   bottom: 10%;
@@ -549,7 +506,19 @@ a {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
   z-index: 1001;
   border-radius: 18px;
-  animation: showOverlay 6s forwards;
+  animation: showOverlay 8s forwards;
+}
+
+@media screen and (max-width: 600px) {
+  #popup {
+    top: 15%;
+    left: 0;
+    transform: none;
+    width: 90%;
+    max-width: 100%;
+    max-height: 85%;
+    border-radius: 0;
+  }
 }
 
 .header-container {
@@ -572,18 +541,16 @@ a {
 
 .content-container {
   margin-top: 0px;
+  margin-left: 100px;
+  margin-right: 100px;
   overflow-y: auto;
   max-height: calc(100% - 50px); /* set the max-height to fill the remaining space */
 }
 
 @media screen and (max-width: 600px) {
-  #popup {
-    top: 15%;
-    left: 0;
-    transform: none;
-    width: 100%;
-    max-width: 100%;
-    border-radius: 0;
+  .content-container {
+    margin-left: 20px; /* Adjust this value according to your design */
+    margin-right: 20px; /* Adjust this value according to your design */
   }
 }
 
@@ -610,14 +577,6 @@ a {
       background-size: cover;
     }
   }
-
-/* Desktop background and transition */
-@media only screen and (min-width: 768px) {
-  #overlay {
-      background: url("./images/swapdeskdesktop.png") no-repeat center center fixed;
-      background-size: cover;
-  }
-}
 
 #backgroundVideo {
   position: fixed;
