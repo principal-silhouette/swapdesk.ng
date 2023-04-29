@@ -6,17 +6,17 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://apis.google.com/js/api.js" onload="this.onload=function(){}" onreadystatechange="if(this.readyState==='complete')this.onload()"></script>
     <script src="script.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="./dom-to-image.min.js"></script>
     <title>Swap Calculator</title>
 </head>
 <body>
-    <div id="overlay1">
-        <video id="backgroundVideo" autoplay muted playsinline>
-            <source src="./images/desktoptransition.mp4" type="video/mp4">
-        </video>
+    <video id="backgroundVideo" autoplay muted playsinline>
+        <source src="./images/desktop-back.mp4" type="video/mp4">
+    </video>
+    <div id="overlay">
         <div id="popup">
             <div class="header-container">
-                <h5 id="header-text">Trade-in Calculator</h5>
+                <h5 id="header-text">@the.swapdesk Trade Ins</h5>
                 </div>
                 <div class="content-container">
         <div id="app">
@@ -25,12 +25,13 @@
     
         <!-- Phase 1 -->
         <div id="phase1" style="display:block;">
-            <p class="par6"><strong>Welcome to @the.swapdesk</strong></p>
             <h4 class="hwelcome">Trade the gadgets you have</h4>
             <h4 class="hwelcome">for the ones you love 💙</h4>
-            <p class="par5"><strong>Wanna Swap?</strong> We’re here for you. Get up to 80% of the current Value of your Device as <strong>CashBack </strong> when you <strong>Trade In with @the.swapdesk</strong>. Swap 🔄 your iPhones,⌚️Watch, MacBook or AirPods to Save when you Upgrade 💃</p>
+            <p class="par6"><strong>Ready to Swap? 🔄 We’re Here for You 💃🏻</strong></p>
+            <p class="par5">Get up to <strong>80%</strong> of the current Value of your Device as <strong>CashBack </strong> when you <strong>Trade In with @the.swapdesk</strong>.</p>
+            <p class="par55">Swap 🔄 your iPhones,⌚️Watch, MacBook or AirPods to Save when you <strong>Upgrade</strong>. 💃</p>
             <div class="button-container">
-                <button class="hidden selection-button" id="CheckPriceButton">Check Price</button>
+                <button class="selection-button-whatsapp" id="CheckPriceButton">Check for Prices</button>
             </div>
             <div class="button-container">
                 <button class="selection-button" id="tradeInButton">Check My Trade-In Value</button>
@@ -44,8 +45,7 @@
         <div id="phase2TradeIn" class="step" style="display:none;">
             <h3>Trade In Values 📲</h3>
             <p><strong>Ready to Swap & Upgrade to something new?</strong></p>
-            <p class="par2">Let's find out the trade-in value of your device.</p>
-            <p>First, select the type of device you want to trade in:</p>
+            <p class="par2">Let's find out the trade-in value of your device. First, select the type of device you want to trade in:</p>
             <div id="deviceTypeTradeIn" class="buttons-container" onclick="handleDeviceTypeClick(event)">
                 <!-- Add device types dynamically -->
             </div>
@@ -54,11 +54,11 @@
             </div>
             <div id="tradeInTableContainer"></div>
             <div class="buttons-container">
-                <button class="outcome-button" id="viewTradeInValueButton" onclick="displayTradeInTable()" style="display:none;">View Trade-In Value</button>
-             </div>
+               </div>
             <div class="buttons-container">
                 <button class="go-back-button" onclick="goBackFromPhase2TradeIn()">Go Back</button>
-                <button class="transition-button" onclick="continueToPhase3()" id="checkForSwapButton" style="display:none;">Continue</button>
+                <button class="transition-button" id="viewTradeInValueButton" onclick="displayTradeInTable()" style="display:none;">View Trade-In Value</button>
+                <button class="transition-button" id="ResetTradeInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Check Again</button>
             </div>
         </div>
 
@@ -68,7 +68,7 @@
             <h3>Select your Current</h3>
             <h4>Device to Get</h4>
             <h4>Started.</h4>
-            <p>First, What kind of device do you want to Trade In?</p>
+            <p class="par2">First, What kind of device do you want to Trade In?</p>
             <div id="deviceTypeSwap" class="buttons-container" onclick="handleDeviceTypeClickTradeIn(event)">
                 <!-- Add device types dynamically -->
             </div>
@@ -84,10 +84,8 @@
         <!-- Phase 3: Original Device Info & Swap Rate -->
         <div id="phase3" class="step" style="display:none;">
             <h3>Which model do you have?</h3>
-            <p><strong>Here's how to find it</strong></p>
-            <p class="par2">On your iPhone, go to Settings > General > About.</p>
-            <p class="par2">You should find the Model Name & Storage</p>
-            <p>Capacity for your iPhone.</p>
+            <p><strong>Here's how to find it ⤵️</strong></p>
+            <p class="par2">For Apple Devices, go to Settings > General > About. You should find the Model Name & Storage Capacity for your iPhone.</p>
             <div id="deviceNameContainer" class="buttons-container">
                 <!-- Add device names dynamically -->
             </div>
@@ -110,7 +108,7 @@
             <h3>Select your Desired</h3>
             <h4>Device to Get</h4>
             <h4>Started.</h4>
-            <p>First, What kind of device do you want to get?</p>
+            <p class="par2">First, What kind of device do you want to get?</p>
             <div id="swapDeviceTypeContainer" class="buttons-container" onclick="handleSwapDeviceTypeClick(event)">
             <!-- Add swap device types dynamically -->
             </div>
@@ -126,7 +124,8 @@
         
         <!-- Phase 5: Swap Device Info & Swap Rate Output -->
         <div id="phase5" class="step" style="display:none;">
-            <h3 class="hswap">Which model do you want?</h3>
+            <h4 class="hswap">Which model do you want?</h4>
+            <p class="par2">Kindly Select the device you love to Swap to?</p>
             <div id="swapDeviceNameContainer" class="buttons-container">
             <!-- Add swap device names dynamically -->
             </div>
@@ -168,8 +167,8 @@
     </div>
     <div id="phase7" class="hidden">
         <h3>You're almost there... 📍</h3>
-        <p class="par2">To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
-        <p><strong>Kindly select your city ⤵️</strong></p>
+        <p>To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
+        <p class="par2"><strong>Kindly select your city ⤵️</strong></p>
         <div class="buttons-container" id="locationButtonsContainer">
           <button id="locationPortHarcourt" onclick="onLocationButtonClick('Port Harcourt', event)">Port Harcourt</button>
           <button id="locationYenagoa" onclick="onLocationButtonClick('Yenagoa', event)">Yenagoa</button>
@@ -180,19 +179,12 @@
         </div>
         <div id="swapBreakdown"></div>
         <div class="buttons-container">
-            <button id="downloadPdf" class="hidden download-button" onclick="downloadSwapBreakdownPdf()">Download as PDF</button>
-            <button id="downloadJpeg" class="hidden download-button" onclick="downloadSwapBreakdownPdf()">Download Image</button>
+            <button id="downloadJpeg" class="hidden download-button" onclick="downloadSwapBreakdownImage()">Download</button>
           </div>          
     </div>
 
-    <div id="overlay2" style="display: none;">
-        <video id="pricesTransitionVideo" autoplay muted playsinline style="display:none;">
-            <source src="./images/upgradedesktop.mp4" type="video/mp4">
-        <video id="pricesTransitionVideoMobile" playsinline autoplay muted>
-            <source src="./images/upgradedesktop.mp4" type="video/mp4">
-            </video>
-        </video>
-        <div id="popup2">
+    <div id="overlay" style="display: none;">
+        <div id="popup">
             <div class="header-container">
                 <h5 id="header-text">Check Device Prices</h5>
                 </div>
@@ -216,6 +208,7 @@
             <div class="buttons-container">
                 <button class="go-back-button" onclick="goBackFromPricesPhase()">Go Back</button>
                 <button class="transition-button" onclick="clearAndCheckAnotherDevice()" style="display:none;">Check for Another Device</button>
+                <button class="transition-button" id="ResetPricesInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Check Again</button>
             </div>
             <p>Ready to shop? 🛍️ Head over to our Instagram page and shop your heart out! ❤️</p>
             <button class="instagram-button" onclick="window.open('https://www.instagram.com/upgrade.hub/')">Shop on Instagram</button>
