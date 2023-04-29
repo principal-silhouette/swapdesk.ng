@@ -509,7 +509,7 @@ a {
   animation: showOverlay 8s forwards;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 900px) {
   #popup {
     position: fixed;
     top: 50%; /* Adjust this value according to your design */
