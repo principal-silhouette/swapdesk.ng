@@ -1,11 +1,3 @@
-@font-face {
-  font-family: 'LeagueSpartan';
-  src: url('./league-spartan-master/webfonts/leaguespartan-bold.woff2') format('woff2'),
-       url('./league-spartan-master/webfonts/leaguespartan-bold.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-
 body {
   font-family: SF Pro Text, SF Pro Icons, AOS Icons, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 17px;
