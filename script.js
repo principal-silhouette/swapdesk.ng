@@ -29,6 +29,10 @@ swapConfiguration = {
   swapRate: 0
 };
 
+// Declare global variables at the beginning of your script
+let swapData = {};
+
+
 // Load data from Google Sheet
 async function loadData() {
   try {
@@ -39,17 +43,12 @@ async function loadData() {
     console.log("Loaded data:", data); // Log the loaded data
 
     populateTradeInDeviceTypes("deviceTypeTradeIn");
-    populateSwapDeviceTypes("deviceTypeSwap");
+    populateTradeInDeviceTypes("deviceTypeSwap");
+    populateTradeInDeviceTypes("deviceTypePrices");
   } catch (error) {
     console.error("Error loading data:", error);
   }
 }
-
-function setBackgroundForOverlay(overlay) {
-  let backgroundImage = overlay.getAttribute("data-background-image");
-  overlay.style.backgroundImage = `url(${backgroundImage})`;
-}
-
 function populateTradeInDeviceTypes(containerId) {
   // Clear the container before populating it
   const container = document.getElementById(containerId);
@@ -62,36 +61,19 @@ function populateTradeInDeviceTypes(containerId) {
       const button = document.createElement("button");
       button.dataset.deviceType = deviceType;
       button.textContent = deviceType;
-      button.addEventListener("click", handleDeviceTypeClickTradeIn);
+      button.addEventListener("click", handleButtonClick);
       container.appendChild(button);
     }
   });
 }
-
-function handleDeviceTypeClickTradeIn(event) {
+function handleDeviceTypeClick(event) {
   const deviceType = event.target.dataset.deviceType;
-  console.log(`Trade-in Device Type Selected: ${deviceType}`);
+  console.log(`Device Type Selected: ${deviceType}`);
 
-  const containerId = "deviceCategoryTradeIn";
+  const containerId = event.target.parentElement.nextElementSibling.id;
   tradeInConfiguration.deviceType = deviceType;
 
-  // Get the unique categories based on the selected device type
-  const categories = Array.from(new Set(data.filter(row => row[0] === deviceType).map(row => row[1])));
-
-  // Clear existing categories
-  const container = document.getElementById(containerId);
-  container.innerHTML = "";
-
-  // Create and append category buttons
-  categories.forEach(category => {
-    const button = document.createElement('button');
-    button.dataset.deviceCategory = category;
-    button.textContent = category;
-    button.addEventListener("click", handleCategoryClickTradeIn);
-    container.appendChild(button);
-  });
-
-  container.classList.remove("hidden");
+  populateCategoryButtons(deviceType, containerId);
 
   // Hide other device type buttons
   const deviceTypeButtons = event.target.parentElement.querySelectorAll("button");
@@ -102,16 +84,15 @@ function handleDeviceTypeClickTradeIn(event) {
 
   event.target.classList.remove("hidden"); // Keep the selected button visible
   event.target.classList.add("selected-button"); // Add the selected-button class
-  document.getElementById("checkForSwapButton").style.display = "block";
+
+  // Update checkForSwapButton display depending on the scenario
+  if (containerId === "deviceCategoryTradeIn") {
+    document.getElementById("checkForSwapButton").style.display = "block";
+  } else if (containerId === "deviceCategorySwap") {
+    document.getElementById("continueButton").style.display = "none";
+  }
 }
-
-function handleDeviceTypeClickSwap(event) {
-  const deviceType = event.target.dataset.deviceType;
-  console.log(`Swap Device Type Selected: ${deviceType}`);
-
-  const containerId = "deviceCategorySwap";
-  swapConfiguration.deviceType = deviceType;
-
+function populateCategoryButtons(deviceType, containerId) {
   // Get the unique categories based on the selected device type
   const categories = Array.from(new Set(data.filter(row => row[0] === deviceType).map(row => row[1])));
 
@@ -119,7 +100,6 @@ function handleDeviceTypeClickSwap(event) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
 
-  // Create and append category buttons
   categories.forEach(category => {
     const button = document.createElement('button');
     button.dataset.deviceCategory = category;
@@ -129,41 +109,7 @@ function handleDeviceTypeClickSwap(event) {
   });
 
   container.classList.remove("hidden");
-
-  // Hide other device type buttons
-  const deviceTypeButtons = event.target.parentElement.querySelectorAll("button");
-  deviceTypeButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
-  });
-
-  event.target.classList.remove("hidden"); // Keep the selected button visible
-  event.target.classList.add("selected-button"); // Add the selected-button class
-  document.getElementById("continueButton").style.display = "block";
 }
-
-
-
-function handleCategoryClickTradeIn(event) {
-  const deviceCategory = event.target.dataset.deviceCategory;
-  console.log(`Device Category Selected: ${deviceCategory}`);
-
-  tradeInConfiguration.deviceCategory = deviceCategory;
-
-  // Hide other category buttons
-  const categoryButtons = event.target.parentElement.querySelectorAll("button");
-  categoryButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
-  });
-
-  event.target.classList.remove("hidden"); // Keep the selected button visible
-  event.target.classList.add("selected-button"); // Add the selected-button class
-
-  // Show the "View Trade-In Value" button
-  document.getElementById("viewTradeInValueButton").style.display = "inline-block";
-}
-
 function handleCategoryClick(event) {
   const deviceCategory = event.target.dataset.deviceCategory;
   console.log(`Device Category Selected: ${deviceCategory}`);
@@ -180,11 +126,16 @@ function handleCategoryClick(event) {
   event.target.classList.remove("hidden"); // Keep the selected button visible
   event.target.classList.add("selected-button"); // Add the selected-button class
 
-  // Show the "Continue" button
-  document.getElementById("continueButton").style.display = "inline-block";
+  const phase1Button = document.querySelector("#phase1 .selected-button");
+
+  if (phase1Button.id === "swapButton") {
+    document.getElementById("continueButton").style.display = "inline-block";
+  } else if (phase1Button.id === "tradeInButton") {
+    displayTradeInTable();
+  } else if (phase1Button.id === "CheckPriceButton") {
+    displayPricesTable();
+  }
 }
-
-
 function displayTradeInTable() {
   console.log("Display Trade-In Table");
 
@@ -229,47 +180,45 @@ function displayTradeInTable() {
     tradeInTableContainer.appendChild(table);
     tradeInTableContainer.style.display = 'block';
   
-   // Hide the viewTradeInValueButton and show the ResetTradeInTable button
-  document.getElementById("viewTradeInValueButton").style.display = "none";
-  document.getElementById("ResetTradeInTable").style.display = "block";
+    // Hide the GoBackButton and show the ResetTradeInTable button
+    document.getElementById("ResetTradeInTable").style.display = "block";
+    document.getElementById("checkForSwapButton").style.display = "block";
 
   } else {
     console.log("Device type or category not selected");
   }
 }
-
-
 function displayPricesTable() {
-  console.log("Display Trade-In Table");
+  console.log("Display Prices Table");
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
     const tradeInData = data
-      .filter(row => row[1] === tradeInConfiguration.deviceCategory && row[0] === tradeInConfiguration.deviceType && row[3] === "Yes")
-      .map(row => ({ deviceName: row[4], condition: row[5], value: row[8] }));
+      .filter(row => row[1] === tradeInConfiguration.deviceCategory && row[0] === tradeInConfiguration.deviceType)
+      .map(row => ({ deviceName: row[4], condition: row[5], value: row[6] }));
 
     console.log(tradeInData);
 
-    let tradeInTableContainer = document.getElementById('tradeInTableContainer');
-    tradeInTableContainer.innerHTML = '';
+    let pricesTableContainer = document.getElementById('pricesTableContainer');
+    pricesTableContainer.innerHTML = '';
 
     let table = document.createElement("table");
-    table.setAttribute("id", "tradeInTable");
-    table.className = 'dd-table';
+    table.setAttribute("id", "pricesTable");
+    table.className = 'dp-table';
 
     let header = table.createTHead();
     let headerRow = header.insertRow(0);
 
     let cell1 = headerRow.insertCell(0);
     let cell2 = headerRow.insertCell(1);
-    cell1.innerHTML = "Your Device";
-    cell2.innerHTML = "Estimated Trade-in Value";
+    cell1.innerHTML = "Device";
+    cell2.innerHTML = "Retail Price";
 
     console.log("Table header created");
 
     let tbody = table.createTBody();
 
-    tradeInData.reverse().forEach(item => {
+    tradeInData.forEach(item => {
       let row = tbody.insertRow();
       let cell1 = row.insertCell(0);
       let cell2 = row.insertCell(1);
@@ -280,41 +229,34 @@ function displayPricesTable() {
       console.log(table);
     });
 
-    tradeInTableContainer.appendChild(table);
-    tradeInTableContainer.style.display = 'block';
+    pricesTableContainer.appendChild(table);
+    pricesTableContainer.style.display = 'block';
   
-
-  // Hide the viewPricesButton and show the ResetPricesInTable button
-  document.getElementById("viewPricesButton").style.display = "none";
-  document.getElementById("ResetPricesInTable").style.display = "block";
-
+    // Show the ResetPricesInTable button, keep the GoBackButton visible
+    document.getElementById("ResetPricesInTable").style.display = "block";
+  
   } else {
     console.log("Device type or category not selected");
   }
 }
-
 function clearAndCheckAnotherDevice() {
   // Hide the tables
   document.getElementById("tradeInTableContainer").style.display = "none";
-  document.getElementById("pricesTable").style.display = "none";
-
-  // Show the viewTradeInValueButton and viewPricesButton
-  document.getElementById("viewTradeInValueButton").style.display = "block";
-  document.getElementById("viewPricesButton").style.display = "block";
+  document.getElementById("pricesTableContainer").style.display = "none";
 
   // Hide the ResetTradeInTable and ResetPricesInTable buttons
   document.getElementById("ResetTradeInTable").style.display = "none";
   document.getElementById("ResetPricesInTable").style.display = "none";
 
   // Show all device type buttons and remove the selected-button class
-  const deviceTypeButtons = document.querySelectorAll("#deviceTypeTradeIn button, #deviceTypeSwap button");
+  const deviceTypeButtons = document.querySelectorAll("#deviceTypeTradeIn button, #deviceTypePrices button");
   deviceTypeButtons.forEach(button => {
     button.classList.remove("hidden");
     button.classList.remove("selected-button");
   });
 
   // Hide the device category buttons
-  const deviceCategoryButtons = document.querySelectorAll("#deviceCategoryTradeIn button, #deviceCategorySwap button");
+  const deviceCategoryButtons = document.querySelectorAll("#deviceCategoryTradeIn button, #deviceCategoryPrices button");
   deviceCategoryButtons.forEach(button => {
     button.classList.add("hidden");
     button.classList.remove("selected-button");
@@ -322,7 +264,7 @@ function clearAndCheckAnotherDevice() {
 
   // Hide the device category containers
   document.getElementById("deviceCategoryTradeIn").classList.add("hidden");
-  document.getElementById("deviceCategorySwap").classList.add("hidden");
+  document.getElementById("deviceCategoryPrices").classList.add("hidden");
 
   // Reset the tradeInConfiguration and swapConfiguration objects
   tradeInConfiguration = {
@@ -346,8 +288,6 @@ function clearAndCheckAnotherDevice() {
     swapRate: 0
   };
 }
-
-
 function populateDeviceNames(deviceCategory) {
   console.log(`Populating device names for category: ${deviceCategory}`);
   // Populate device names based on the selected category
@@ -372,7 +312,6 @@ function populateDeviceNames(deviceCategory) {
     console.log(`Appended button for device name: ${deviceName}`); // Add this console log
   });
 }
-
 function handleDeviceNameClick(event) {
   const deviceName = event.target.dataset.deviceName;
   console.log(`Device Name Selected: ${deviceName}`);
@@ -410,7 +349,6 @@ function handleDeviceNameClick(event) {
 
   deviceConfigurationContainer.classList.remove("hidden");
 }
-
 function handleConfigurationClick(event) {
   const deviceConfiguration = event.target.dataset.deviceConfiguration;
   console.log(`Device Configuration Selected: ${deviceConfiguration}`);
@@ -432,8 +370,6 @@ function handleConfigurationClick(event) {
   // Show the "Continue" button
   document.getElementById("continueButton").style.display = "block";
 }
-
-
 function displayTradeInOutput(deviceName, deviceConfiguration) {
   // Get the trade-in value based on the selected device name and configuration
   const tradeInValueRow = data.find(
@@ -457,8 +393,8 @@ function displayTradeInOutput(deviceName, deviceConfiguration) {
   const tradeInOutputDiv = document.getElementById("tradeInOutput");
   tradeInOutputDiv.innerHTML = `
     <h4 class="htradein">Congratulations!🥳🎉</h4>
-    <p class="par5">You can Get Up to <strong>${value}</strong> when you Trade In📲 your <strong>${deviceConfiguration}, ${deviceName}</strong>. You can either Trade In  for <strong>Cash</strong> 💵 or <strong>Swap</strong> 🔄 to another Device.</p>
-    <p class="par4">Remember that this <strong>Value</strong> only applies if your <strong>${deviceName}</strong> is in <strong>Perfect Condition</strong>✨. If there are any issues we need to know, Please inform our Sales Team👩‍💼👨‍💼.</p>
+    <p class="par5output">You can Get Up to <strong>${value}</strong> when you Trade In📲 your <strong>${deviceConfiguration}, ${deviceName}</strong>. You can either Trade In  for <strong>Cash</strong> 💵 or <strong>Swap</strong> 🔄 to another Device.</p>
+    <p class="par4">Remember that this <strong>Value</strong> only applies if your <strong>${deviceName}</strong> is in <strong>Perfect Condition</strong>✨. If there are any issues, you can inform our Sales Team 👩‍💼👨‍💼 after you've gotten an Estimate for the Swap.</p>
   `;
   tradeInOutputDiv.style.display = "block";
 
@@ -466,8 +402,6 @@ function displayTradeInOutput(deviceName, deviceConfiguration) {
   const continueToPhase4Button = document.getElementById("continueToPhase4Button");
   continueToPhase4Button.style.display = "block";
 }
-
-
 function populateSwapDeviceTypes(containerId) {
   // Clear the container before populating it
   const container = document.getElementById(containerId);
@@ -480,12 +414,11 @@ function populateSwapDeviceTypes(containerId) {
       const button = document.createElement("button");
       button.dataset.deviceType = deviceType;
       button.textContent = deviceType;
-      button.addEventListener("click", handleDeviceTypeClickSwap);
+      button.addEventListener("click", handleSwapDeviceTypeClick);
       container.appendChild(button);
     }
   });
 }
-
 function handleSwapDeviceTypeClick(event) {
   console.log("handleSwapDeviceTypeClick");
   const targetType = event.target.getAttribute("data-device-type");
@@ -521,8 +454,6 @@ function handleSwapDeviceTypeClick(event) {
   event.target.classList.remove("hidden");
   event.target.classList.add("selected-button");
 }
-
-
 function handleSwapCategoryClick(event) {
   console.log("handleSwapCategoryClick");
   const deviceCategory = event.target.dataset.deviceCategory;
@@ -544,7 +475,6 @@ function handleSwapCategoryClick(event) {
   // Show the continue button
   document.getElementById("continueToPhase5Button").style.display = "inline-block";
 }
-
 function populateSwapDeviceNames() {
   console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
   const swapDeviceNameContainer = document.getElementById("swapDeviceNameContainer");
@@ -580,7 +510,6 @@ function populateSwapDeviceNames() {
   // attach event listener to container element
   swapDeviceNameContainer.addEventListener("click", handleSwapDeviceNameClick);
 }
-
 function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
   if (button) {
@@ -630,7 +559,6 @@ function handleSwapDeviceNameClick(event) {
     swapDeviceConfigurationContainer.classList.remove("hidden");
   }
 }
-
 function handleSwapConfigurationClick(event) {
   if (event.target.tagName.toLowerCase() === "button" || event.target.tagName.toLowerCase() === "div") {
     const swapDeviceConfiguration = event.target.closest("button").dataset.swapDeviceConfiguration;
@@ -660,8 +588,6 @@ function handleSwapConfigurationClick(event) {
     document.getElementById("continueToPhase6Button").style.display = "block";
   }
 }
-
-
 function displaySwapRateOutput() {
   console.log("displaySwapRateOutput called");
   // Use global variables instead of passed parameters
@@ -700,19 +626,18 @@ function displaySwapRateOutput() {
     // Upgrade message
     swapRateOutputDiv.innerHTML = `
       <h4 class="htradein">…and we’re done!💃🏻💪🏾</h2>
-      <p class="par5">We can confirm that for <strong>${formattedSwapRate}</strong> we can <strong>Upgrade</strong> your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong> 🥳</p>
-      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know, Please inform our Sales Team👩‍💼👨‍💼.</p>
+      <p class="par5output">We can confirm that for <strong>${formattedSwapRate}</strong> we can <strong>Upgrade</strong> your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong> 🥳</p>
+      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
     `;
   } else {
     // Downgrade message
     swapRateOutputDiv.innerHTML = `
       <h4 class="htradein">…and we’re done!💃🏻💪🏾</h2>
-      <p class="par5">If you choose to <strong>Downgrade</strong> from your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong>, you’d be getting about <strong>${formattedSwapRate}</strong> as CashBack! 🤩</p>
-      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know, Please inform our Sales Team👩‍💼👨‍💼.</p>
+      <p class="par5output">If you choose to <strong>Downgrade</strong> from your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong>, you’d be getting about <strong>${formattedSwapRate}</strong> as CashBack! 🤩</p>
+      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
     `;
   }
-  }
-
+}
 function calculateSwapRate() {
   console.log("calculateSwapRate called");
   // Use global variables instead of passed parameters
@@ -729,6 +654,8 @@ function calculateSwapRate() {
   const currentRetailPrice = newDeviceData ? Number(newDeviceData[6].replace(/[₦,]/g, '')) : 0;
   console.log(`Current Retail Price: ${currentRetailPrice}`); // Log currentRetailPrice
 
+  swapConfiguration.currentRetailPrice = currentRetailPrice
+
   console.log(`Trade-In Value: ${tradeInConfiguration.tradeInValue}`); // Log tradeInConfiguration.tradeInValue
 
   // Calculate the swap rate
@@ -736,7 +663,6 @@ function calculateSwapRate() {
   console.log(`Swap Rate: ${swapConfiguration.swapRate}`); // Log swapConfiguration.swapRate
   return swapConfiguration.swapRate;
 }
-
 function showStep(stepNumber) {
   const steps = document.querySelectorAll('.step');
   steps.forEach((step, index) => {
@@ -747,7 +673,6 @@ function showStep(stepNumber) {
     }
   });
 }
-
 function applyDeduction(deductionType, deductionMultiplier) {
   const deductionAmount = tradeInConfiguration.tradeInValue * deductionMultiplier;
   tradeInConfiguration.tradeInValue -= deductionAmount;
@@ -766,7 +691,6 @@ function applyDeduction(deductionType, deductionMultiplier) {
   // Update the trade-in value
   updateTradeInValue();
 }
-
 function updateTradeInValue() {
   const totalDeductions =
     tradeInConfiguration.bodyConditionDeduction +
@@ -777,7 +701,6 @@ function updateTradeInValue() {
   const finalTradeInValue = tradeInConfiguration.tradeInValue - totalDeductions;
   document.getElementById('tradeInValue').innerText = finalTradeInValue.toFixed(2);
 }
-
 function handleButtonClick(stepNumber, deductionType, deductionMultiplier, nextStep) {
   if (deductionType) {
     applyDeduction(deductionType, deductionMultiplier);
@@ -793,11 +716,6 @@ function handleButtonClick(stepNumber, deductionType, deductionMultiplier, nextS
     showStep(stepNumber + 1);
   }
 }
-
-
-// Declare global variables at the beginning of your script
-let swapData = {};
-
 function completeSwap() {
   // Store the necessary data in the swapData object
   swapData.device = tradeInConfiguration.deviceName;
@@ -814,7 +732,6 @@ function completeSwap() {
   // Proceed to Phase 7
   goToPhase7();
 }
-
 function selectLocation(location) {
   // If the location parameter is an empty string, it means we're resetting the location data
   if (location === "") {
@@ -826,7 +743,6 @@ function selectLocation(location) {
   // Handle the user's location selection
   displayWhatsAppMessage(location);
 }
-
 function displayWhatsAppMessage() {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount);
@@ -834,18 +750,15 @@ function displayWhatsAppMessage() {
 
   const conditionMessage = isPerfectCondition
     ? ""
-    : "\n\nMy device also has some issues you'd need to Review.";
+    : "and My device also has some issues you'd need to Review.";
 
   const message = `
-    I'd like to Swap my *${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}* for *${swapConfiguration.deviceName}, ${swapConfiguration.configuration}.* I've confirmed that my *Trade In Value* is ${formatCurrency(tradeInConfiguration.tradeInValue)} and the *Swap Rate* is ${formatCurrency(swapConfiguration.swapRate)}.
-    I'm currently in ${selectedLocation}.${conditionMessage}
+    I'd like to Swap my *${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}* for *${swapConfiguration.deviceName}, ${swapConfiguration.configuration}.* \n\nI've confirmed that my *Trade In Value* is ${formatCurrency(tradeInConfiguration.tradeInValue)} and the *Swap Rate* is ${formatCurrency(swapConfiguration.swapRate)}. \n\nI'm currently in ${selectedLocation}.${conditionMessage}
   `;
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/+2349163338000?text=${encodedMessage}`;
   window.open(whatsappUrl, '_blank');
 }
-
-// Updated viewSwapBreakdown function
 function viewSwapBreakdown() {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-NG', {
@@ -888,11 +801,7 @@ function viewSwapBreakdown() {
     }
 
     document.getElementById("downloadJpeg").classList.remove("hidden");
-  }
-  
-
-
-
+}
 function onConditionSelected(condition, event) {
   isPerfectCondition = condition === "Yes"; // Store the condition in the global variable
   console.log('Selected condition:', isPerfectCondition ? 'Yes' : 'No');
@@ -917,24 +826,31 @@ function onConditionSelected(condition, event) {
     console.error("goToPhase7 button not found");
   }
 }
-
 function onLocationButtonClick(location, event) {
-  selectedLocation = location; // Store the location in the global variable
+  const locationInstructions = document.getElementById("locationInstructions");
+
+  if (locationInstructions) {
+    // Remove existing location instructions and buttons
+    locationInstructions.remove();
+  }
 
   // Find the closest button element
   const buttonElement = event.target.closest("button");
 
-  // Update the selected button class and hide the other buttons
+  // Update the selected button class and display the other buttons
   const buttons = document.querySelectorAll('#locationButtonsContainer button');
   buttons.forEach((button) => {
-      button.classList.remove('selected');
-      button.style.display = 'none';
+    button.classList.remove('selected-button');
+    button.style.display = 'block';
   });
-  buttonElement.classList.add('selected-button');
-  buttonElement.style.display = 'block';
 
-  const locationInstructions = document.createElement("div");
-  locationInstructions.id = "locationInstructions";
+  buttonElement.classList.add('selected-button');
+
+  // Store the location in the global variable
+  selectedLocation = location;
+
+  const newLocationInstructions = document.createElement("div");
+  newLocationInstructions.id = "locationInstructions";
 
   // Display location-specific instructions
   let instructions = "";
@@ -958,7 +874,7 @@ function onLocationButtonClick(location, event) {
   const instructionsDiv = document.createElement("p");
   instructionsDiv.className = "par7"; // Add the par7 class to the instructions div
   instructionsDiv.textContent = instructions;
-  locationInstructions.appendChild(instructionsDiv);
+  newLocationInstructions.appendChild(instructionsDiv);
 
   const buttonsContainer = document.createElement("div");
   buttonsContainer.className = "buttons-container";
@@ -969,14 +885,14 @@ function onLocationButtonClick(location, event) {
       <button class="selection-button-down" id="startOverButton" onclick="startOver()">Start Over</button>
   `;
 
-  locationInstructions.appendChild(buttonsContainer);
+  newLocationInstructions.appendChild(buttonsContainer);
 
   // Append the new div to the phase7 div
-  document.getElementById("phase7").appendChild(locationInstructions);
+  document.getElementById("phase7").appendChild(newLocationInstructions);
 }
-
-
 async function downloadSwapBreakdownImage() {
+  console.log('downloadSwapBreakdownImage called');
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -992,28 +908,28 @@ async function downloadSwapBreakdownImage() {
   };
 
   const swapBreakdownHtml = `
-    <div style="font-family: Arial, sans-serif; background-image: url('images/your-background-image.jpg'); background-size: cover; padding: 20px;">
-      <h2>Swap Breakdown</h2>
-      <h4 class="htradein">Trade In Device 📱</h4>
-      <p class="par5">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, ${formatCurrency(tradeInConfiguration.tradeInValue)} 💰</p>
-      <p class="par4">Nigerian USED 🇳🇬</p>
-
-      <h4 class="htradein">Issues & Deductions 😞</h4>
-      <p class="par5"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
-      <p class="par5"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
-      <p class="par5"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
-      <p class="par5"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
-
-      <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device 🔄</h4>
-      <p class="par5">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, ${formatCurrency(swapConfiguration.currentRetailPrice)}</p>
-      <p class="par4">${swapConfiguration.deviceQuality}</p>
-
-      <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Rate 💸</h4>
-    </div>
+    <div style="position: relative; font-family: Arial, sans-serif; background-image: url('./images/swap-breakdown.jpg'); background-size: 640px 1136px; background-repeat: no-repeat; width: 640px; height: 1136px; padding: 20px;">
+    <div style="position: absolute; top: 220px; left: 0; right: 0; bottom: 476px;">
+    <h4 class="htradein">Trade In Device 📱</h4>
+    <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
+    <p class="par44">🇳🇬 Nigerian USED</p>
+    <p class="par505">Location: ${selectedLocation}/p>
+    
+    <h4 class="htradein">Issues & Deductions 😞</h4>
+    <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
+    <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
+    <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
+    <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
+    
+    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device 🔄</h4>
+    <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
+    <p class="par44">${swapConfiguration.deviceQuality}</p>
+    <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
+      </div>
   `;
 
-  const domtoimage = require('dom-to-image');
-  const { jsPDF } = require("jspdf");
+  console.log('swapBreakdownHtml:', swapBreakdownHtml);
+
   const img = new Image();
 
   const node = document.createElement('div');
@@ -1024,300 +940,277 @@ async function downloadSwapBreakdownImage() {
     const dataUrl = await domtoimage.toJpeg(node, { quality: 1 });
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'swap-breakdown.jpeg';
+    link.download = '@the.swapdesk.jpeg';
     link.click();
   } catch (error) {
     console.error('Error generating image:', error);
   } finally {
     document.body.removeChild(node);
   }
-  }
+} 
+function goToPricesPhase() {
+  console.log("goToPricesPhase");
 
+  // Hide phase 1
+  const phase1Div = document.getElementById('phase1');
+  phase1Div.style.display = 'none';
 
-  function goToPricesPhase() {
-    console.log("goToPricesPhase");
-  
-    // Slide transitions
-    document.getElementById("phase1").classList.add("slide-out-left");
-    document.getElementById("pricesPhase").classList.add("slide-in-right");
-  
-    setTimeout(() => {
-      // Hide phase 1
-      const phase1Div = document.getElementById('phase1');
-      phase1Div.style.display = 'none';
-  
-      // Show prices phase
-      const pricesPhaseDiv = document.getElementById('pricesPhase');
-      pricesPhaseDiv.style.display = 'block';
-  
-      // Populate device types for prices
-      populateTradeInDeviceTypes("deviceTypePrices");
-  
-      // Hide continue button until a category is selected
-      document.getElementById("viewPricesButton").style.display = "none";
-    }, 500);
-  }
-  
-  // Add event listener to the "Check for Prices" button
-  document.getElementById("CheckPriceButton").addEventListener("click", goToPricesPhase);
-  
+  // Show prices phase
+  const pricesPhaseDiv = document.getElementById('pricesPhase');
+  pricesPhaseDiv.style.display = 'block';
 
-function goToPhase1() {
-  // Remove the prices-phase-background class to restore the original background image
-  document.body.classList.remove("prices-phase-background");
-
-  // Clear any selections made in the prices phase
-  resetTradeInData();
-  document.getElementById("deviceCategoryPrices").innerHTML = "";
-  document.getElementById("deviceCategoryPrices").classList.add("hidden");
-
-  // Slide transitions
-  document.getElementById("pricesPhase").classList.add("slide-out-right");
-  document.getElementById("phase1").classList.add("slide-in-left");
-
-  setTimeout(() => {
-    // Hide the prices phase content
-    document.getElementById("pricesPhase").style.display = "none";
-    document.getElementById("pricesPhase").classList.remove("slide-out-right");
-
-    // Show the phase1 content
-    document.getElementById("phase1").style.display = "block";
-    document.getElementById("phase1").classList.remove("slide-in-left");
-  }, 500);
+  // Populate device types for prices
+  populateTradeInDeviceTypes("deviceTypePrices");
 }
-
 function goToPhase2TradeIn() {
   console.log("goToPhase2TradeIn");
 
-  // Slide transitions
-  document.getElementById("phase1").classList.add("slide-out-left");
-  document.getElementById("phase2TradeIn").classList.add("slide-in-right");
+  // Hide phase 1
+  const phase1Div = document.getElementById('phase1');
+  phase1Div.style.display = 'none';
 
-  setTimeout(() => {
-    // Hide phase 1
-    const phase1Div = document.getElementById('phase1');
-    phase1Div.style.display = 'none';
+  // Show phase 2
+  const phase2Div = document.getElementById('phase2TradeIn');
+  phase2Div.style.display = 'block';
 
-    // Show phase 2
-    const phase2Div = document.getElementById('phase2TradeIn');
-    phase2Div.style.display = 'block';
+  // Populate device types for trade-in
+  populateTradeInDeviceTypes("deviceTypeTradeIn");
 
-    // Populate device types for trade-in
-    populateTradeInDeviceTypes("deviceTypeTradeIn");
-
-    // Hide continue button until a category is selected
-    document.getElementById("checkForSwapButton").style.display = "none";
-  }, 500);
+  // Hide continue button until a category is selected
+  document.getElementById("checkForSwapButton").style.display = "none";
 }
-
 function goToPhase2Swap() {
   console.log("goToPhase2Swap");
 
-  // Slide transitions
-  document.getElementById("phase1").classList.add("slide-out-left");
-  document.getElementById("phase2Swap").classList.add("slide-in-right");
+  // Hide phase 1
+  const phase1Div = document.getElementById('phase1');
+  phase1Div.style.display = 'none';
 
-  setTimeout(() => {
-    // Hide phase 1
-    const phase1Div = document.getElementById('phase1');
-    phase1Div.style.display = 'none';
+  // Show phase 2
+  const phase2Div = document.getElementById('phase2Swap');
+  phase2Div.style.display = 'block';
 
-    // Show phase 2
-    const phase2Div = document.getElementById('phase2Swap');
-    phase2Div.style.display = 'block';
+  // Populate device types for trade-in
+  populateTradeInDeviceTypes("deviceTypeSwap");
 
-    // Show the overlay and popup
-    document.getElementById("overlay1").classList.remove("hidden");
-    document.getElementById("popup").classList.remove("hidden");
-
-    // Populate device types for trade-in
-    populateTradeInDeviceTypes("deviceTypeTradeIn");
-
-    // Hide continue button until a category is selected
-    document.getElementById("continueButton").style.display = "none";
-  }, 500);
+  // Hide continue button until a category is selected
+  document.getElementById("continueButton").style.display = "none";
 }
+function continueToPhase3() {
+  console.log(`Device Category: ${tradeInConfiguration.deviceCategory}`);
 
+  if (tradeInConfiguration.deviceCategory) {
 
+    populateDeviceNames(tradeInConfiguration.deviceCategory);
+
+    // Hide phase 2
+    document.getElementById("phase2TradeIn").style.display = "none";
+    document.getElementById("phase2Swap").style.display = "none";
+
+    // Show phase 3
+    document.getElementById("phase3").style.display = "block";
+  } else {
+    alert("Please select a device category");
+  }
+}
+function goToPhase6() {
+  // Hide phase 3
+  document.getElementById("phase3").style.display = "none";
+
+  // Show phase 6
+  document.getElementById("phase6").style.display = "block";
+}
+function goToPhase4() {
+  console.log("goToPhase4");
+
+  // Hide phase 6
+  document.getElementById("phase6").style.display = "none";
+
+  // Show phase 4
+  document.getElementById("phase4").style.display = "block";
+
+  // Populate device types for swap
+  populateSwapDeviceTypes("swapDeviceTypeContainer");
+}
+function continueToPhase5() {
+  // Hide phase 4
+  document.getElementById("phase4").style.display = "none";
+
+  // Show phase 5
+  document.getElementById("phase5").style.display = "block";
+
+  // Populate swap device names
+  populateSwapDeviceNames();
+}
+function goToPhase7() {
+  // Hide phase 5
+  document.getElementById("phase5").style.display = "none";
+
+  // Show phase 7
+  document.getElementById("phase7").style.display = "block";
+}
+function resetPhase1Selections() {
+  // Get all the buttons in phase 1
+  const buttons = [
+    document.getElementById("CheckPriceButton"),
+    document.getElementById("tradeInButton"),
+    document.getElementById("swapButton")
+  ];
+
+  // Remove the 'selected' class from each button
+  buttons.forEach((button) => {
+    button.classList.remove('selected-button');
+  });
+}
+function clearButtonSelections(containerId) {
+  const container = document.getElementById(containerId);
+  const buttons = container.querySelectorAll('button');
+  
+  buttons.forEach(button => {
+    button.classList.remove('selected');
+  });
+}
+function goBackFromPhase2Prices() {
+  resetTradeInData();
+  document.getElementById("deviceCategoryTradeIn").innerHTML = "";
+  document.getElementById("deviceCategoryTradeIn").classList.add("hidden");
+
+  // Reset selections in Phase 1
+  resetPhase1Selections();
+  clearButtonSelections('deviceTypePrices');
+  clearButtonSelections('deviceCategoryPrices');
+
+  // Hide phase 2
+  document.getElementById("pricesPhase").style.display = "none";
+
+  // Show phase 1
+  document.getElementById("phase1").style.display = "block";
+}
 function goBackFromPhase2TradeIn() {
   resetTradeInData();
   document.getElementById("deviceCategoryTradeIn").innerHTML = "";
   document.getElementById("deviceCategoryTradeIn").classList.add("hidden");
 
-// Slide transitions
-document.getElementById("phase2TradeIn").classList.add("slide-out-left");
-document.getElementById("phase1").classList.add("slide-in-right");
+  // Reset selections in Phase 1
+  resetPhase1Selections();
+  clearButtonSelections('deviceTypeTradeIn');
+  clearButtonSelections('deviceCategoryTradeIn');
 
-setTimeout(() => {
-  updateStepVisibility('phase2TradeIn', 'phase1');
-  document.getElementById("phase2TradeIn").classList.remove("slide-out-left");
-  document.getElementById("phase1").classList.remove("slide-in-right");
-}, 500);
+  // Hide phase 2
+  document.getElementById("phase2TradeIn").style.display = "none";
+
+  // Show phase 1
+  document.getElementById("phase1").style.display = "block";
 }
-
 function goBackFromPhase2Swap() {
   resetSwapData();
   document.getElementById("deviceCategorySwap").innerHTML = "";
   document.getElementById("deviceCategorySwap").classList.add("hidden");
 
-  // Slide transitions
-  document.getElementById("phase2Swap").classList.add("slide-out-left");
-  document.getElementById("phase1").classList.add("slide-in-right");
+  // Reset selections in Phase 1
+  resetPhase1Selections();
+  clearButtonSelections('deviceTypeSwap');
+  clearButtonSelections('deviceCategorySwap');
 
-  setTimeout(() => {
-    updateStepVisibility('phase2Swap', 'phase1');
-    document.getElementById("phase2Swap").classList.remove("slide-out-left");
-    document.getElementById("phase1").classList.remove("slide-in-right");
-  }, 500);
+  // Hide phase 2
+  document.getElementById("phase2Swap").style.display = "none";
+
+  // Show phase 1
+  document.getElementById("phase1").style.display = "block";
 }
-
-
-function continueToPhase3() {
-  console.log(`Device Category: ${tradeInConfiguration.deviceCategory}`);
-
-  if (tradeInConfiguration.deviceCategory) {
-    populateDeviceNames(tradeInConfiguration.deviceCategory);
-
-    // Slide transitions
-    document.getElementById("phase2Swap").classList.add("slide-out-left");
-    document.getElementById("phase3").classList.add("slide-in-right");
-
-    setTimeout(() => {
-      updateStepVisibility("phase2Swap", "phase3");
-      document.getElementById("phase2Swap").classList.remove("slide-out-left");
-      document.getElementById("phase3").classList.remove("slide-in-right");
-    }, 500);
-  } else {
-    alert("Please select a device category");
-  }
-}
-
 function goBackFromPhase3() {
-  // Slide transitions
-  document.getElementById("phase3").classList.add("slide-out-left");
-  document.getElementById("phase2Swap").classList.add("slide-in-right");
+  resetPhase3Data();
 
-  setTimeout(() => {
-    updateStepVisibility("phase3", "phase2Swap");
-    document.getElementById("phase3").classList.remove("slide-out-left");
-    document.getElementById("phase2Swap").classList.remove("slide-in-right");
-  }, 500);
+  clearButtonSelections('deviceNameContainer');
+  clearButtonSelections('deviceConfigurationContainer');
+
+  // Hide phase 3
+  document.getElementById("phase3").style.display = "none";
+
+  // Show phase 2
+  document.getElementById("phase2Swap").style.display = "block";
 }
+function goBackFromPhase6() {
+  resetPhase6Data();
+  clearButtonSelections('step0');
 
-function goToPhase4() {
-  console.log("goToPhase4");
-  // Clear the previous device type selection
-  document.getElementById("deviceTypeSwap").dataset.selectedDeviceType = "";
+  // Hide phase 6
+  document.getElementById("phase6").style.display = "none";
 
-  // Slide transitions
-  document.getElementById("phase3").classList.add("slide-out-left");
-  document.getElementById("phase4").classList.add("slide-in-right");
-
-  setTimeout(() => {
-    // Hide phase 3
-    const phase3Div = document.getElementById('phase3');
-    phase3Div.style.display = 'none';
-
-    // Show phase 4
-    const phase4Div = document.getElementById('phase4');
-    phase4Div.style.display = 'block';
-
-    // Populate device types for swap
-    populateSwapDeviceTypes("swapDeviceTypeContainer");
-  }, 500);
+  // Show phase 3
+  document.getElementById("phase3").style.display = "block";
 }
-
 function goBackFromPhase4() {
-  // Slide transitions
-  document.getElementById("phase4").classList.add("slide-out-left");
-  document.getElementById("phase3").classList.add("slide-in-right");
+  resetPhase4And5Data();
+  clearButtonSelections('swapDeviceTypeContainer');
+  clearButtonSelections('swapDeviceCategory');
 
-  setTimeout(() => {
-    updateStepVisibility("phase4", "phase3");
-    document.getElementById("phase4").classList.remove("slide-out-left");
-    document.getElementById("phase3").classList.remove("slide-in-right");
-    document.getElementById("swapDeviceCategory").classList.add("hidden");
-  }, 500);
+  // Hide phase 4
+  document.getElementById("phase4").style.display = "none";
+
+  // Show phase 6
+  document.getElementById("phase6").style.display = "block";
+
+  document.getElementById("swapDeviceCategory").classList.add("hidden");
 }
-
-// Phase 5 Slide In/Out
-function continueToPhase5() {
-  document.getElementById("phase4").classList.add("slide-out-left");
-  setTimeout(() => {
-    document.getElementById("phase4").style.display = "none";
-    document.getElementById("phase4").classList.remove("slide-out-left");
-  }, 300);
-
-  document.getElementById("phase5").classList.add("slide-in-right");
-  document.getElementById("phase5").style.display = "block";
-  setTimeout(() => {
-    document.getElementById("phase5").classList.remove("slide-in-right");
-  }, 300);
-
-  // Populate swap device names
-  populateSwapDeviceNames();
-}
-
 function goBackFromPhase5() {
-  document.getElementById("phase5").classList.add("slide-out-right");
-  setTimeout(() => {
-    document.getElementById("phase5").style.display = "none";
-    document.getElementById("phase5").classList.remove("slide-out-right");
-  }, 300);
+  resetPhase4And5Data();
+  clearButtonSelections('swapDeviceNameContainer');
+  clearButtonSelections('swapDeviceConfigurationContainer');
 
-  document.getElementById("phase4").classList.add("slide-in-left");
+  // Hide phase 5
+  document.getElementById("phase5").style.display = "none";
+
+  // Show phase 4
   document.getElementById("phase4").style.display = "block";
-  setTimeout(() => {
-    document.getElementById("phase4").classList.remove("slide-in-left");
-  }, 300);
 
   document.getElementById("swapDeviceConfigurationContainer").classList.add("hidden");
 }
-
-// Phase 6 Slide In
-function goToPhase6() {
-  document.getElementById("phase5").classList.add("slide-out-left");
-  setTimeout(() => {
-    document.getElementById("phase5").style.display = "none";
-    document.getElementById("phase5").classList.remove("slide-out-left");
-  }, 300);
-
-  document.getElementById("phase6").classList.add("slide-in-right");
-  document.getElementById("phase6").style.display = "block";
-  setTimeout(() => {
-    document.getElementById("phase6").classList.remove("slide-in-right");
-  }, 300);
-}
-
-function updateTradeInValue() {
-  const tradeInValueElement = document.getElementById('tradeInConfiguration.tradeInValue');
-  tradeInValueElement.textContent = selectedConfiguration.tradeInConfiguration.tradeInValue;
-}
-
-function goToPhase7() {
-  // Hide the current phase
-  const phase6Div = document.getElementById("phase6");
-  phase6Div.style.display = "none";
-
-  // Show the new phase
-  const phase7Div = document.getElementById("phase7");
-  phase7Div.style.display = "block";
-}
-
 function goToNoSwap() {
   document.getElementById('phase6').style.display = 'none';
   document.getElementById('noSwap').style.display = 'block';
 }
-
 function resetTradeInData() {
   tradeInConfiguration.deviceType = null;
   tradeInConfiguration.deviceCategory = null;
+  removeSelectedButtonClass('phase1ButtonsContainer');
 }
-
 function resetSwapData() {
-  // Reset any swap-specific data here
+  tradeInConfiguration.deviceType = null;
+  tradeInConfiguration.deviceCategory = null;
+  removeSelectedButtonClass('phase2ButtonsContainer');
 }
-
+function resetPhase6Data() {
+  isPerfectCondition = true;
+  tradeInConfiguration.bodyConditionDeduction = 0;
+  tradeInConfiguration.screenConditionDeduction = 0;
+  tradeInConfiguration.batteryHealthDeduction = 0;
+  tradeInConfiguration.networkBiometricsDeduction = 0;
+  removeSelectedButtonClass('phase5ButtonsContainer');
+}
+function resetPhase3Data() {
+  tradeInConfiguration.deviceName = "";
+  tradeInConfiguration.deviceType = "";
+  tradeInConfiguration.configuration = "";
+  tradeInConfiguration.tradeInValue = 0;
+  removeSelectedButtonClass('phase3ButtonsContainer');
+}
+function resetPhase4And5Data() {
+  swapConfiguration.deviceName = "";
+  swapConfiguration.deviceType = "";
+  swapConfiguration.deviceCategory = "";
+  swapConfiguration.configuration = "";
+  swapConfiguration.deviceQuality = "";
+  swapConfiguration.currentRetailPrice = 0;
+  swapConfiguration.swapRate = 0;
+  removeSelectedButtonClass('phase4ButtonsContainer');
+}
+function removeSelectedButtonClass(containerId) {
+  const buttonElements = document.querySelectorAll(`#${containerId} button`);
+  buttonElements.forEach((button) => {
+    button.classList.remove('selected-button');
+  });
+}
 function startOver() {
   console.log("startOver called");
 
@@ -1412,18 +1305,47 @@ function startOver() {
 
   console.log("startOver finished");
 }
-
-
+function updateTradeInValue() {
+  const tradeInValueElement = document.getElementById('tradeInConfiguration.tradeInValue');
+  tradeInValueElement.textContent = selectedConfiguration.tradeInConfiguration.tradeInValue;
+}
 function updateStepVisibility(hideStepId, showStepId) {
   document.getElementById(hideStepId).style.display = "none";
   document.getElementById(showStepId).style.display = "block";
 }
+function clearDependentButtons(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  container.classList.add("hidden");
+}
+function handleButtonClick(event) {
+  if (event.target.classList.contains("selected-button")) {
+    console.log("Deselecting button and showing all buttons");
+    const siblingButtons = event.target.parentElement.querySelectorAll("button");
+    siblingButtons.forEach(button => {
+      button.classList.remove("hidden");
+    });
+    event.target.classList.remove("selected-button");
+    event.stopPropagation(); // Stop the event propagation
 
+    // Clear dependent buttons
+    if (event.target.parentElement.id === "deviceTypeTradeIn") {
+      clearDependentButtons("deviceCategoryTradeIn");
+    } else if (event.target.parentElement.id === "deviceTypeSwap") {
+      clearDependentButtons("deviceCategorySwap");
+    } else if (event.target.parentElement.id === "deviceTypePrices") {
+      clearDependentButtons("deviceCategoryPrices");
+    }
+  } else {
+    if (event.target.dataset.deviceType) {
+      handleDeviceTypeClick(event);
+    } else {
+      handleCategoryClick(event);
+    }
+  }
+}
 
 document.addEventListener('DOMContentLoaded', loadData);
-document.getElementById("tradeInButton").addEventListener("click", goToPhase2TradeIn);
-document.getElementById("swapButton").addEventListener("click", goToPhase2Swap);
-document.getElementById("CheckPriceButton").addEventListener("click", showPricesPhase);
 
 // Add event listeners for location buttons
 document.getElementById("locationPortHarcourt").addEventListener("click", () => onLocationButtonClick("Port Harcourt"));
@@ -1432,8 +1354,10 @@ document.getElementById("locationAbuja").addEventListener("click", () => onLocat
 document.getElementById("locationUyo").addEventListener("click", () => onLocationButtonClick("Uyo"));
 document.getElementById("locationLagos").addEventListener("click", () => onLocationButtonClick("Lagos"));
 document.getElementById("locationOtherCities").addEventListener("click", () => onLocationButtonClick("Other Cities"));
+    
+// Add event listener to the "Check for Prices" button
+document.getElementById("CheckPriceButton").addEventListener("click", goToPricesPhase);
 
-document.getElementById('overlay1').classList.add('shown');
 document.addEventListener("DOMContentLoaded", function () {
   const backgroundVideo = document.getElementById("backgroundVideo");
 
@@ -1442,7 +1366,22 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// When the check prices button is clicked, show the popup
-checkPricesButton.addEventListener("click", () => {
-  popupPrices.style.display = "block";
+// Add event listeners to the button containers
+document.querySelectorAll('.button-container').forEach(container => {
+  container.addEventListener('click', handleButtonClick);
 });
+
+// Event listeners for Phase 1 buttons
+document.getElementById("tradeInButton").addEventListener("click", function() {
+  this.classList.add("clicked");
+  goToPhase2TradeIn();
+});
+document.getElementById("swapButton").addEventListener("click", function() {
+  this.classList.add("clicked");
+  goToPhase2Swap();
+});
+document.getElementById("CheckPriceButton").addEventListener("click", function() {
+  this.classList.add("clicked");
+  goToPricesPhase();
+});
+

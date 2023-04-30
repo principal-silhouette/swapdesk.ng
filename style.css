@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'LeagueSpartan';
+  src: url('./league-spartan-master/webfonts/leaguespartan-bold.woff2') format('woff2'),
+       url('./league-spartan-master/webfonts/leaguespartan-bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'LeagueSpartan', sans-serif !important;
+  letter-spacing: -1px !important;
+  line-height: 1.2 !important;
+}
+
 body {
   font-family: SF Pro Text, SF Pro Icons, AOS Icons, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 17px;
@@ -42,13 +56,43 @@ body {
   background-attachment: fixed;
 }
 
+#mobileBackgroundVideo {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -2; /* Lower the z-index value */
+  transform: translate(-50%, -50%);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+}
+
+/* This media query will be triggered for screen sizes less than or equal to 768px */
+@media (max-width: 768px) {
+  #backgroundVideo {
+    display: none;
+  }
+  #mobileBackgroundVideo {
+    display: block;
+  }
+}
+
+#video-container {
+  z-index: -2;
+}
+
 .container {
   max-width: 600px;
   margin: 0 auto;
   text-align: center;
   padding: 20px;
 }
-
 
 #overlay {
   background: url('./images/desktop-back.svg') no-repeat center center fixed;
@@ -139,7 +183,8 @@ body.overlay-open {
     width: 100%;
     max-width: 100%;
     min-height: 85%;
-    border-radius: 0;
+    max-height: 85%;
+    border-radius: 30px;
   }
 }
 
@@ -159,7 +204,7 @@ body.overlay-open {
 
 .header-container {
   background-color: rgb(228, 242, 255, 0, 0);
-  height: 18%;
+  height: 15%;
   border-radius: 18px;
   overflow-y: auto;
 }
@@ -172,7 +217,7 @@ body.overlay-open {
   font-size: 15px;
   font-weight: 400;
   text-align: center;
-  width: 90%;
+  width: 100%;
 }
 
 /* Small phones */
@@ -268,10 +313,11 @@ margin-bottom: 70px;
   font-size: 1em;
   color: white;
   border-radius: 30px;
-  padding: 10px 16px;
+  padding: 10px 26px;
   margin-top: 20px;
-  margin-bottom: 10px;
-  margin-left: 20px;
+  margin-bottom: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
   min-width: 30%;
   width: auto; /* Reduce width by 60% */
   height: 50px; /* Adjust height automatically */
@@ -388,10 +434,10 @@ margin-bottom: 70px;
   border-radius: 30px;
   padding: 10px 25px;
   margin-top: 20px;
-  margin-left: 0px;
-  margin-right: 3px;
-  margin-bottom: 50px;
-  width: 120px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  max-width: 160px;
   height: 50px;
   text-align: center;
 }
@@ -571,7 +617,7 @@ h6 {
 }
 
 .hwelcome {
-  font-size: 2.1em;
+  font-size: 3.2em;
   text-align: center;
   margin-top: 0px;
   margin-bottom: 8px;
@@ -581,24 +627,67 @@ h6 {
 /* Small phones */
 @media screen and (max-width: 440px) {
   .hwelcome {
-font-size: 1.5em;
-margin-inline-start: 25px;
-margin-inline-end: 15px;
-text-align: left;
+font-size: 2.8em;
   }
 }
 
 /* Large phones */
 @media screen and (min-width: 440px) and (max-width: 660px) {
   .hwelcome {
-    font-size: 1.8em;
+    font-size: 3em;
       }
     }
 
 /* Tablets */
 @media screen and (min-width: 660px) and (max-width: 1024px) {
   .hwelcome {
-    font-size: 2em;
+    font-size: 3em;
+      }
+    }
+
+.hwelcome-blue {
+  color: #18577B;
+  font-size: 3.2em;
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.hwelcome-green {
+  font-size: 2.4em;
+  color: #6DA64A;
+  text-align: left;
+  margin-top: 0px;
+  margin-bottom: 18px;
+  line-height: 1;
+}
+
+.hprices {
+  font-size: 2.4em;
+  margin-top: 30px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+/* Small phones */
+@media screen and (max-width: 440px) {
+  .hwelcome-blue {
+font-size: 2.8em;
+  }
+}
+
+/* Large phones */
+@media screen and (min-width: 440px) and (max-width: 660px) {
+  .hwelcome-blue {
+    font-size: 3em;
+      }
+    }
+
+/* Tablets */
+@media screen and (min-width: 660px) and (max-width: 1024px) {
+  .hwelcome-blue {
+    font-size: 3em;
       }
     }
 
@@ -634,6 +723,16 @@ p {
   margin-bottom: 35px;
 }
 
+.par22 {
+  display: block;
+  margin-block-start: 0em;
+  margin-block-end: 1em;
+  margin-inline-end: 25px;
+  margin-top: 0;
+  margin-bottom: 0px;
+}
+
+
 .par3 {
   display: block;
   font-weight: 600;
@@ -649,8 +748,8 @@ p {
   font-size: smaller;
   font-weight: 400;
   text-align: center;
-  margin-block-start: 0em;
-  margin-block-end: 1em;
+  margin-inline-start: 50px;
+  margin-inline-end: 50px;
   margin-top: 8;
   margin-bottom: 25px;
 }
@@ -670,18 +769,25 @@ p {
 .par5 {
   display: block;
   text-align: center;
-  margin-inline-start: 15px;
-  margin-inline-end: 15px;
-  margin-top: 0px;
-  margin-bottom: 8px;
+  margin-inline-start: 40px;
+  margin-inline-end: 40px;
+  margin-top: 26px;
+  margin-bottom: 0px;
+}
+
+.par5output {
+  display: block;
+  text-align: center;
+  margin-inline-start: 40px;
+  margin-inline-end: 40px;
+  margin-top: 8px;
+  margin-bottom: 0px;
 }
 
 /* Small phones */
 @media screen and (max-width: 440px) {
   .par5 {
-    text-align: left;
   size: 10px;
-  margin-inline-start: 25px;
   }
 }
 
@@ -697,9 +803,7 @@ p {
 /* Small phones */
 @media screen and (max-width: 440px) {
   .par55 {
-    text-align: left;
   size: 10px;
-  margin-inline-start: 25px;
   }
 }
 
@@ -713,22 +817,36 @@ p {
 }
 
 .par6 {
-  font-size: 105%;
+  font-size: 120%;
   display: block;
   text-align: center;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-top: 22px;
+  margin-top: 6px;
   margin-bottom: 0px;
 }
 
 /* Small phones */
 @media screen and (max-width: 440px) {
   .par6 {
-    margin-top: 17px;
-    text-align: left;
+  margin-top: 8px;
   size: 12px;
-  margin-inline-start: 25px;
+  }
+}
+
+.par66 {
+  font-size: 120%;
+  display: block;
+  text-align: center;
+  margin-block-start: 0em;
+  margin-block-end: 1em;
+  margin-bottom: 0px;
+}
+
+/* Small phones */
+@media screen and (max-width: 440px) {
+  .par6 {
+  size: 12px;
   }
 }
 
@@ -856,15 +974,55 @@ color: #18577B;
   font-size: 1em;
 }
 
-.slide {
-  transition: transform 1s ease-in;
+
+/* Center the table */
+.dp-table {
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 35px;
 }
 
-.slide-out-left {
-  transform: translateX(-0%);
+.dp-table th {
+  font-weight: normal;
+  background-color: #f2f2f2;
+  font-size: 1em;
+  padding-left: 8px;
+}
+  
+.dp-table td {
+  font-weight: normal;
+  padding-left: 8px;
+}
+  
+.dp-table td:last-child {
+  font-weight: bold;
+  text-align: right;
+  padding-right: 12px;
+  width: 35%;
+}
+  
+.dp-table td:first-child {
+color: #6DA64A;
 }
 
-.slide-in-right {
-  transform: translateX(0%);
+.dp-table th {
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0;
+  padding: 8px;
+  text-align: left;
+  font-size: 1.2em;
 }
 
+
+.dp-table td {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0;
+  padding: 7px;
+  padding-left: 12px;
+  text-align: left;
+  font-size: 1em;
+}
