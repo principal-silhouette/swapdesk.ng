@@ -827,30 +827,22 @@ function onConditionSelected(condition, event) {
   }
 }
 function onLocationButtonClick(location, event) {
-  const locationInstructions = document.getElementById("locationInstructions");
-
-  if (locationInstructions) {
-    // Remove existing location instructions and buttons
-    locationInstructions.remove();
-  }
+  selectedLocation = location; // Store the location in the global variable
 
   // Find the closest button element
   const buttonElement = event.target.closest("button");
 
-  // Update the selected button class and display the other buttons
+  // Update the selected button class and hide the other buttons
   const buttons = document.querySelectorAll('#locationButtonsContainer button');
   buttons.forEach((button) => {
-    button.classList.remove('selected-button');
-    button.style.display = 'block';
+      button.classList.remove('selected');
+      button.style.display = 'none';
   });
-
   buttonElement.classList.add('selected-button');
+  buttonElement.style.display = 'block';
 
-  // Store the location in the global variable
-  selectedLocation = location;
-
-  const newLocationInstructions = document.createElement("div");
-  newLocationInstructions.id = "locationInstructions";
+  const locationInstructions = document.createElement("div");
+  locationInstructions.id = "locationInstructions";
 
   // Display location-specific instructions
   let instructions = "";
@@ -874,7 +866,7 @@ function onLocationButtonClick(location, event) {
   const instructionsDiv = document.createElement("p");
   instructionsDiv.className = "par7"; // Add the par7 class to the instructions div
   instructionsDiv.textContent = instructions;
-  newLocationInstructions.appendChild(instructionsDiv);
+  locationInstructions.appendChild(instructionsDiv);
 
   const buttonsContainer = document.createElement("div");
   buttonsContainer.className = "buttons-container";
@@ -885,10 +877,10 @@ function onLocationButtonClick(location, event) {
       <button class="selection-button-down" id="startOverButton" onclick="startOver()">Start Over</button>
   `;
 
-  newLocationInstructions.appendChild(buttonsContainer);
+  locationInstructions.appendChild(buttonsContainer);
 
   // Append the new div to the phase7 div
-  document.getElementById("phase7").appendChild(newLocationInstructions);
+  document.getElementById("phase7").appendChild(locationInstructions);
 }
 async function downloadSwapBreakdownImage() {
   console.log('downloadSwapBreakdownImage called');

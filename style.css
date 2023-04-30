@@ -6,12 +6,6 @@
   font-style: normal;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'LeagueSpartan', sans-serif !important;
-  letter-spacing: -1px !important;
-  line-height: 1.2 !important;
-}
-
 body {
   font-family: SF Pro Text, SF Pro Icons, AOS Icons, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 17px;
