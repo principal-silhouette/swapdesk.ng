@@ -998,7 +998,9 @@ function goToPhase2TradeIn() {
 
   // Hide continue button until a category is selected
   document.getElementById("checkForSwapButton").style.display = "none";
+
   window.scrollTo(0, 0);
+  
   updateProgressBar(2);
 }
 function goToPhase2Swap() {
@@ -1017,7 +1019,9 @@ function goToPhase2Swap() {
 
   // Hide continue button until a category is selected
   document.getElementById("continueButton").style.display = "none";
+  
   window.scrollTo(0, 0);
+  
   updateProgressBar(2);
 }
 function continueToPhase3() {
@@ -1036,6 +1040,7 @@ function continueToPhase3() {
   } else {
     alert("Please select a device category");
   }
+ 
   window.scrollTo(0, 0);
   updateProgressBar(3);
 }
@@ -1045,7 +1050,9 @@ function goToPhase6() {
 
   // Show phase 6
   document.getElementById("phase6").style.display = "block";
+  
   window.scrollTo(0, 0);
+  
   updateProgressBar(4);
 }
 function goToPhase4() {
@@ -1059,7 +1066,9 @@ function goToPhase4() {
 
   // Populate device types for swap
   populateSwapDeviceTypes("swapDeviceTypeContainer");
+  
   window.scrollTo(0, 0);
+  
   updateProgressBar(5);
 }
 function continueToPhase5() {
@@ -1071,7 +1080,9 @@ function continueToPhase5() {
 
   // Populate swap device names
   populateSwapDeviceNames();
+  
   window.scrollTo(0, 0);
+  
   updateProgressBar(6);
 }
 function goToPhase7() {
@@ -1081,6 +1092,7 @@ function goToPhase7() {
   // Show phase 7
   document.getElementById("phase7").style.display = "block";
   updateProgressBar(7);
+  
   window.scrollTo(0, 0);
 }
 function resetPhase1Selections() {
