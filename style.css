@@ -139,6 +139,14 @@ body.overlay-open {
   height: 100%;
 }
 
+.prices-phase-popup {
+  background-color: rgba(228, 255, 237, 0.85);
+}
+
+.prices-phase-overlay {
+  background-image: url('./images/upgrade-desktop-back.svg');
+}
+
 #popup {
   background-color: rgb(228, 242, 255, 0.85);
   position: fixed;
