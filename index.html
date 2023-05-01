@@ -22,9 +22,9 @@
     <div id="overlay">
         <div id="popup">
             <div class="header-container">
-                <p id="header-text">@the.swapdesk Trade Ins</h5>
-                </div>
-                <div class="content-container">
+                <p id="header-text">@the.swapdesk Trade Ins</p>
+            </div>
+            <div class="content-container">
         <div id="app">
             <input type="hidden" id="mValue">
             <input type="hidden" id="selectedCategory">
@@ -90,10 +90,10 @@
         
         <!-- Phase 2 Swap Scenario -->
         <div id="phase2Swap" class="step" style="display:none;">
-            <h3>Select your Current</h3>
-            <h3 class="h33">Device to Get</h4>
-            <h3 class="h33">Started.</h4>
-            <p class="par2">First, What kind of device do you want to Trade In?</p>
+            <h3>Select your current device to get started.</h3>
+            <h3 class="h33"></h4>
+            <h3 class="h33"></h4>
+            <p class="par2">First, What kind of device do you want to Trade In? ⤵️</p>
             <div id="deviceTypeSwap" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
                 <!-- Add device types dynamically -->
             </div>
@@ -117,6 +117,14 @@
             <div id="deviceConfigurationContainer" class="hidden buttons-container" onclick="handleConfigurationClick(event)">
                 <!-- Add configurations dynamically -->
             </div>
+            <div id="loadingContainer" class="lcc" style="display: none;">
+                <h4 id="loadingHeader" class="hloading">We're Working On It 😊</h2>
+                <p id="loadingSubHeader" class="loading-subheader"></h3>
+                <div class="loading-bar-spinner">
+                  <div class="loading-bar"></div>
+                </div>
+                <div id="loadingTextContainer"></div>
+              </div>  
             <div id="tradeInOutput" style="display:none;">
                 <h2>Trade-In Value</h2>
                 <div id="originalDeviceTradeInValue"></div>
@@ -182,6 +190,14 @@
             <div id="swapDeviceConfigurationContainer" class="hidden buttons-container">
             <!-- Add swap configurations dynamically -->
             </div>
+            <div id="loadingContainerSwap" class="lcc" style="display: none;">
+                <h4 id="loadingHeaderSwap" class="hloading">We're Working On It 😊</h2>
+                <p id="loadingSubHeaderSwap" class="loading-subheader"></h3>
+                <div class="loading-bar-spinner">
+                    <div class="loading-bar"></div>
+                </div>
+                <div id="loadingTextContainerSwap"></div>
+            </div>
             <div id="swapRateOutput" class="hidden"> <!-- Updated style -->
             <!-- Swap Rate Output will be added dynamically -->
             </div>
@@ -192,7 +208,7 @@
         </div>
 
     <div id="phase7" class="hidden">
-        <h3>You're almost there... 📍</h3>
+        <h3>You're almost there...📍</h3>
         <p>To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
         <p class="par2"><strong>Kindly select your city ⤵️</strong></p>
         <div class="buttons-container" id="locationButtonsContainer">
