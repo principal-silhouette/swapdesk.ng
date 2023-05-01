@@ -233,7 +233,7 @@ body.overlay-open {
 @media screen and (max-width: 440px) {
   .header-container {
 font-size: 25%;
-margin-bottom: 70px;
+margin-bottom: 50px;
   }
 }
 
