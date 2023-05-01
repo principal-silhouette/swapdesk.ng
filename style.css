@@ -1079,6 +1079,14 @@ color: #6DA64A;
   margin-bottom: 13px;
 }
 
+/* Small phones */
+@media screen and (max-width: 400px) {
+  .loading-subheader {
+  margin-inline-start: 3%;
+  margin-inline-end: 3%;
+  }
+}
+
 .loading-text {
   color: #18577B;
   text-align: center;
