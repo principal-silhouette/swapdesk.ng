@@ -648,7 +648,7 @@ font-size: 2em;
 }
 
 .hprices {
-  font-size: 2em;
+  font-size: 1.8em;
   margin-top: 30px;
   margin-bottom: 8px;
   line-height: 1;
@@ -706,7 +706,7 @@ p {
   display: block;
   margin-block-start: 0em;
   margin-block-end: 1em;
-  margin-inline-end: 25px;
+  margin-inline-end: 10px;
   margin-top: 0;
   margin-bottom: 0px;
 }
