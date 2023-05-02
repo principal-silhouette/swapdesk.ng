@@ -193,7 +193,7 @@ body.overlay-open {
     max-width: 100%;
     min-height: 85%;
     max-height: 85%;
-    border-radius: 30px;
+    border-radius-top: 30px;
   }
 }
 
