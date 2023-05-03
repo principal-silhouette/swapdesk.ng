@@ -1,7 +1,7 @@
 // Global variables
 const API_KEY = 'AIzaSyCqNBQlnUIqfBK4Oz_SpsNETC8lYuPUpSQ';
 const SPREADSHEET_ID = '1nM67nJrGNMuoHzbYKsSolhTl3W94UUCW0oVW14AuTWk';
-const RANGE = 'Trade In & Retail Price Mngt.!m6:z141';
+const RANGE = '@the.swapdesk Data.!g5:t141';
 let data = [];
 let deviceTypes = [];
 let categories = [];
