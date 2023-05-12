@@ -195,7 +195,7 @@ function displayPricesTable() {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
     const tradeInData = data
       .filter(row => row[1] === tradeInConfiguration.deviceCategory && row[0] === tradeInConfiguration.deviceType)
-      .map(row => ({ deviceName: row[4], condition: row[5], value: row[6] }));
+      .map(row => ({ deviceName: row[4], condition: row[5], quality: row[2], value: row[6] })); // Include quality
 
     console.log(tradeInData);
 
@@ -222,10 +222,21 @@ function displayPricesTable() {
       let row = tbody.insertRow();
       let cell1 = row.insertCell(0);
       let cell2 = row.insertCell(1);
-      cell1.innerHTML = item.deviceName + ", " + item.condition;
+
+      const deviceName = document.createElement("div");
+      deviceName.textContent = item.deviceName + ", " + item.condition; // Include condition
+      cell1.appendChild(deviceName);
+
+      const deviceQuality = document.createElement("div");
+      deviceQuality.style.fontSize = "0.6em"; // Make quality text even smaller
+      deviceQuality.style.paddingTop = "0px"; // Reduce gap
+      deviceQuality.style.color = "grey";
+      deviceQuality.textContent = item.quality; // Display quality
+      cell1.appendChild(deviceQuality);
+
       cell2.innerHTML = item.value;
 
-      console.log("Table row created for condition:", item.condition);
+      console.log("Table row created for quality:", item.quality);
       console.log(table);
     });
 
@@ -369,7 +380,7 @@ function handleConfigurationClick(event) {
   setTimeout(() => {
     hideLoadingAnimation();
     displayTradeInOutput(tradeInConfiguration.deviceName, tradeInConfiguration.configuration);
-  }, 7000);
+  }, 5000);
 
   // Hide other configuration buttons
   const configurationButtons = event.target.parentElement.querySelectorAll("button");
@@ -600,7 +611,7 @@ function handleSwapConfigurationClick(event) {
     setTimeout(() => {
       hideLoadingAnimation();
       displaySwapRateOutput();
-    }, 7000);
+    }, 6000);
 
     // Hide other configuration buttons
     const swapConfigurationButtons = event.target.parentElement.querySelectorAll("button");
@@ -981,6 +992,7 @@ function goToPricesPhase() {
 
   // Populate device types for prices
   populateTradeInDeviceTypes("deviceTypePrices");
+  resetScrollPosition;
 }
 function goToPhase2TradeIn() {
   console.log("goToPhase2TradeIn");
@@ -1002,6 +1014,7 @@ function goToPhase2TradeIn() {
   window.scrollTo(0, 0);
   
   updateProgressBar(2);
+  resetScrollPosition;
 }
 function goToPhase2Swap() {
   console.log("goToPhase2Swap");
@@ -1023,6 +1036,7 @@ function goToPhase2Swap() {
   window.scrollTo(0, 0);
   
   updateProgressBar(2);
+  resetScrollPosition;
 }
 function continueToPhase3() {
   console.log(`Device Category: ${tradeInConfiguration.deviceCategory}`);
@@ -1043,6 +1057,7 @@ function continueToPhase3() {
  
   window.scrollTo(0, 0);
   updateProgressBar(3);
+  resetScrollPosition;
 }
 function goToPhase6() {
   // Hide phase 3
@@ -1054,6 +1069,7 @@ function goToPhase6() {
   window.scrollTo(0, 0);
   
   updateProgressBar(4);
+  resetScrollPosition('.content-container');
 }
 function goToPhase4() {
   console.log("goToPhase4");
@@ -1070,6 +1086,7 @@ function goToPhase4() {
   window.scrollTo(0, 0);
   
   updateProgressBar(5);
+  resetScrollPosition('.content-container');
 }
 function continueToPhase5() {
   // Hide phase 4
@@ -1084,6 +1101,7 @@ function continueToPhase5() {
   window.scrollTo(0, 0);
   
   updateProgressBar(6);
+  resetScrollPosition('.content-container');
 }
 function goToPhase7() {
   // Hide phase 5
@@ -1094,6 +1112,7 @@ function goToPhase7() {
   updateProgressBar(7);
   
   window.scrollTo(0, 0);
+  resetScrollPosition('.content-container');
 }
 function resetPhase1Selections() {
   // Get all the buttons in phase 1
@@ -1265,6 +1284,12 @@ function removeSelectedButtonClass(containerId) {
     button.classList.remove('selected-button');
   });
 }
+function resetScrollPosition() {
+  setTimeout(() => {
+    let contentContainer = document.getElementById('content-container');
+    contentContainer.scrollTop = 0;
+  }, 100);
+}  
 function startOver() {
   console.log("startOver called");
 
@@ -1358,7 +1383,7 @@ function startOver() {
   document.getElementById("swapRateOutput").classList.add("hidden");
 
   removeSelectedButtonClass('SwapButton');
-
+  resetPhase1Selections();
   console.log("startOver finished");
 }
 function updateTradeInValue() {
