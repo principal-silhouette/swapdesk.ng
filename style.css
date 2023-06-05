@@ -215,7 +215,6 @@ body.overlay-open {
   background-color: rgb(228, 242, 255, 0, 0);
   height: 15%;
   border-radius: 18px;
-  overflow-y: auto;
 }
 
 #header-text {
