@@ -630,14 +630,14 @@ h6 {
 /* Small phones */
 @media screen and (max-width: 400px) {
   .hwelcome, .hwelcome-blue, .htradein, .hwelcome-green, h3 {
-font-size: 2em;
+font-size: 1.7em;
   }
 }
 
 /* Large phones */
 @media screen and (min-width: 400px) and (max-width: 660px) {
   .hwelcome, .hwelcome-blue, .htradein, .hwelcome-green, h3 {
-    font-size: 2.3em;
+    font-size: 2em;
       }
     }
 
@@ -1007,7 +1007,7 @@ color: #18577B;
 }
   
 .dp-table td:first-child {
-color: #6DA64A;
+color: #000000;
 font-size: 0.95em;
 }
 
