@@ -110,6 +110,7 @@ function populateCategoryButtons(deviceType, containerId) {
 
   container.classList.remove("hidden");
 }
+
 function handleCategoryClick(event) {
   const deviceCategory = event.target.dataset.deviceCategory;
   console.log(`Device Category Selected: ${deviceCategory}`);
@@ -129,13 +130,14 @@ function handleCategoryClick(event) {
   const phase1Button = document.querySelector("#phase1 .selected-button");
 
   if (phase1Button.id === "swapButton") {
-    document.getElementById("continueButton").style.display = "inline-block";
+    continueToPhase3();
   } else if (phase1Button.id === "tradeInButton") {
     displayTradeInTable();
   } else if (phase1Button.id === "CheckPriceButton") {
     displayPricesTable();
   }
 }
+
 function displayTradeInTable() {
   console.log("Display Trade-In Table");
 
@@ -299,6 +301,7 @@ function clearAndCheckAnotherDevice() {
     swapRate: 0
   };
 }
+
 function populateDeviceNames(deviceCategory) {
   console.log(`Populating device names for category: ${deviceCategory}`);
   // Populate device names based on the selected category
@@ -498,8 +501,9 @@ function handleSwapCategoryClick(event) {
   event.target.classList.add("selected-button"); // Add the selected-button class
 
   // Show the continue button
-  document.getElementById("continueToPhase5Button").style.display = "inline-block";
+  continueToPhase5()
 }
+
 function populateSwapDeviceNames() {
   console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
   const swapDeviceNameContainer = document.getElementById("swapDeviceNameContainer");
@@ -1019,6 +1023,9 @@ function goToPhase2TradeIn() {
 function goToPhase2Swap() {
   console.log("goToPhase2Swap");
 
+   // Scroll the content container to the top
+   document.querySelector('.content-container').scrollTop = 0;
+
   // Hide phase 1
   const phase1Div = document.getElementById('phase1');
   phase1Div.style.display = 'none';
@@ -1041,25 +1048,101 @@ function goToPhase2Swap() {
 function continueToPhase3() {
   console.log(`Device Category: ${tradeInConfiguration.deviceCategory}`);
 
+   // Scroll the content container to the top
+   document.querySelector('.content-container').scrollTop = 0;
+
   if (tradeInConfiguration.deviceCategory) {
-
-    populateDeviceNames(tradeInConfiguration.deviceCategory);
-
     // Hide phase 2
-    document.getElementById("phase2TradeIn").style.display = "none";
-    document.getElementById("phase2Swap").style.display = "none";
+    const phase2TradeIn = document.getElementById("phase2TradeIn");
+    const phase2Swap = document.getElementById("phase2Swap");
+    phase2TradeIn.style.display = "none";
+    phase2Swap.style.display = "none";
 
-    // Show phase 3
-    document.getElementById("phase3").style.display = "block";
-  } else {
-    alert("Please select a device category");
+    // Show loading bar
+    const loadingBar = document.createElement("div");
+    loadingBar.classList.add("loading-bar");
+    const contentContainer = document.querySelector(".content-container");
+    contentContainer.appendChild(loadingBar);
+
+    // Animate the loading bar width
+    const loadingBarAnimation = loadingBar.animate(
+      [{ width: "100%" }, { width: "100%" }],
+      { duration: 1650, iterations: Infinity }
+    );
+
+    // Show phase 3 after the loading animation is complete
+    setTimeout(function () {
+      // Stop the loading bar animation
+      loadingBarAnimation.cancel();
+
+      // Remove the loading bar
+      contentContainer.removeChild(loadingBar);
+
+      // Show phase 3
+      const phase3 = document.getElementById("phase3");
+      phase3.style.display = "block";
+    }, 3000);
   }
- 
+
+  populateDeviceNames(tradeInConfiguration.deviceCategory);
+
   window.scrollTo(0, 0);
   updateProgressBar(3);
   resetScrollPosition;
 }
+function showLoading() {
+  const contentContainer = document.querySelector(".content-container");
+
+  // Create the loading bar element
+  const loadingBar = document.createElement("div");
+  loadingBar.classList.add("loading-bar");
+
+  // Create the loading text container
+  const loadingTextContainer = document.createElement("div");
+  loadingTextContainer.classList.add("loading-text-container");
+
+  // Create the loading text element
+  const loadingText = document.createElement("div");
+  loadingText.classList.add("loading-text");
+
+  // Create an array of loading texts
+  const loadingTexts = ["Searching for Devices 👀", "Populating Device Lists 📝"];
+
+  // Function to rotate through loading texts
+  let index = 0;
+  function rotateLoadingText() {
+    loadingText.textContent = loadingTexts[index];
+    index = (index + 1) % loadingTexts.length;
+  }
+
+  // Initial loading text
+  rotateLoadingText();
+
+  // Set interval to rotate through loading texts
+  const loadingTextInterval = setInterval(rotateLoadingText, 2000);
+
+  // Append the loading text to the loading text container
+  loadingTextContainer.appendChild(loadingText);
+
+  // Append the loading text container to the loading bar
+  loadingBar.appendChild(loadingTextContainer);
+
+  // Append the loading bar to the content container
+  contentContainer.appendChild(loadingBar);
+
+  // Show the loading bar
+  loadingBar.style.display = "block";
+
+  // Function to hide the loading bar and clear the loading text interval
+  function hideLoading() {
+    clearInterval(loadingTextInterval);
+    loadingBar.style.display = "none";
+  }
+}
 function goToPhase6() {
+   // Scroll the content container to the top
+  document.querySelector('.content-container').scrollTop = 0;
+  
   // Hide phase 3
   document.getElementById("phase3").style.display = "none";
 
@@ -1073,6 +1156,9 @@ function goToPhase6() {
 }
 function goToPhase4() {
   console.log("goToPhase4");
+
+     // Scroll the content container to the top
+     document.querySelector('.content-container').scrollTop = 0;
 
   // Hide phase 6
   document.getElementById("phase6").style.display = "none";
@@ -1089,21 +1175,52 @@ function goToPhase4() {
   resetScrollPosition('.content-container');
 }
 function continueToPhase5() {
+
+     // Scroll the content container to the top
+     document.querySelector('.content-container').scrollTop = 0;
+
   // Hide phase 4
-  document.getElementById("phase4").style.display = "none";
+  const phase4 = document.getElementById("phase4");
+  phase4.style.display = "none";
 
-  // Show phase 5
-  document.getElementById("phase5").style.display = "block";
+  // Show loading bar
+  const loadingBar = document.createElement("div");
+  loadingBar.classList.add("loading-bar");
+  const contentContainer = document.querySelector(".content-container");
+  contentContainer.appendChild(loadingBar);
 
-  // Populate swap device names
-  populateSwapDeviceNames();
-  
-  window.scrollTo(0, 0);
-  
-  updateProgressBar(6);
-  resetScrollPosition('.content-container');
+  // Animate the loading bar width
+  const loadingBarAnimation = loadingBar.animate(
+    [{ width: "100%" }, { width: "100%" }],
+    { duration: 1700, iterations: Infinity }
+  );
+
+  // Wait for the loading animation to complete
+  setTimeout(function () {
+    // Stop the loading bar animation
+    loadingBarAnimation.cancel();
+
+    // Remove the loading bar
+    contentContainer.removeChild(loadingBar);
+
+    // Show phase 5
+    const phase5 = document.getElementById("phase5");
+    phase5.style.display = "block";
+
+    // Populate swap device names
+    populateSwapDeviceNames();
+
+    window.scrollTo(0, 0);
+
+    updateProgressBar(6);
+    resetScrollPosition('.content-container');
+  }, 700);
 }
 function goToPhase7() {
+
+     // Scroll the content container to the top
+     document.querySelector('.content-container').scrollTop = 0;
+     
   // Hide phase 5
   document.getElementById("phase5").style.display = "none";
 
