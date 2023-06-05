@@ -232,7 +232,6 @@ body.overlay-open {
 @media screen and (max-width: 440px) {
   .header-container {
 font-size: 25%;
-margin-bottom: 50px;
   }
 }
 
@@ -240,7 +239,7 @@ margin-bottom: 50px;
 @media screen and (min-width: 440px) and (max-width: 660px) {
   .header-container {
     font-size: 22%;
-    margin-bottom: 50px;
+    margin-bottom: 30px;
       }
     }
 /* Tablets */
@@ -330,6 +329,7 @@ margin-bottom: 50px;
   margin-right: 10px;
   min-width: 30%;
   width: auto; /* Reduce width by 60% */
+  min-width: 160px;
   height: 50px; /* Adjust height automatically */
   text-align: center;
 }
@@ -1045,12 +1045,6 @@ font-size: 0.95em;
   }
 }
 
-.loading-bar-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .loading-bar {
   width: 80%;
   height: 10px;
@@ -1114,6 +1108,13 @@ font-size: 0.95em;
   margin-bottom: 10px;
 }
 
+.loading-bar-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Added */
+}
+
 .spinner {
   width: 40px;
   height: 40px;
@@ -1121,20 +1122,12 @@ font-size: 0.95em;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.spinner::before {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 4px;
-  background-color: #18577B;
-  border-radius: 2px;
-  left: 50%;
-  top: 0;
-  transform-origin: center bottom;
-  animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
   0% {
