@@ -93,8 +93,15 @@ function handleDeviceTypeClick(event) {
   }
 }
 function populateCategoryButtons(deviceType, containerId) {
-  // Get the unique categories based on the selected device type
-  const categories = Array.from(new Set(data.filter(row => row[0] === deviceType).map(row => row[1])));
+  // Filter the data based on device type and eligibility
+  console.log("Filtering data based on device type and eligibility");
+  const filteredData = data.filter(row => row[0] === deviceType && row[3] === 'Yes');
+  console.log("Filtered Data:", filteredData);
+
+  // Get the unique categories from the filtered data
+  console.log("Getting unique categories from filtered data");
+  const categories = Array.from(new Set(filteredData.map(row => row[1])));
+  console.log("Unique Categories:", categories);
 
   // Clear existing categories
   const container = document.getElementById(containerId);
@@ -110,6 +117,7 @@ function populateCategoryButtons(deviceType, containerId) {
 
   container.classList.remove("hidden");
 }
+
 
 function handleCategoryClick(event) {
   const deviceCategory = event.target.dataset.deviceCategory;
@@ -304,12 +312,12 @@ function clearAndCheckAnotherDevice() {
 
 function populateDeviceNames(deviceCategory) {
   console.log(`Populating device names for category: ${deviceCategory}`);
-  // Populate device names based on the selected category
+  // Populate device names based on the selected category and eligibility
   const deviceNameContainer = document.getElementById("deviceNameContainer");
   deviceNameContainer.innerHTML = "";
 
   const deviceNames = data
-    .filter((device) => device[1] === deviceCategory)
+    .filter((device) => device[1] === deviceCategory && device[3] === 'Yes')
     .map((device) => device[4]);
 
   // Remove duplicates
@@ -323,18 +331,19 @@ function populateDeviceNames(deviceCategory) {
     button.textContent = deviceName;
     button.addEventListener("click", handleDeviceNameClick);
     deviceNameContainer.appendChild(button);
-    console.log(`Appended button for device name: ${deviceName}`); // Add this console log
+    console.log(`Appended button for device name: ${deviceName}`);
   });
 }
+
 function handleDeviceNameClick(event) {
   const deviceName = event.target.dataset.deviceName;
   console.log(`Device Name Selected: ${deviceName}`);
 
   tradeInConfiguration.deviceName = deviceName;
 
-  // Get the unique configurations based on the selected device name
+  // Get the unique configurations based on the selected device name and eligibility
   const configurations = Array.from(
-    new Set(data.filter(row => row[4] === deviceName).map(row => row[5]))
+    new Set(data.filter(row => row[4] === deviceName && row[3] === 'Yes').map(row => row[5]))
   );
 
   console.log(`Configurations: ${JSON.stringify(configurations)}`);
@@ -363,6 +372,7 @@ function handleDeviceNameClick(event) {
 
   deviceConfigurationContainer.classList.remove("hidden");
 }
+
 function handleConfigurationClick(event) {
   const deviceConfiguration = event.target.dataset.deviceConfiguration;
   console.log(`Device Configuration Selected: ${deviceConfiguration}`);
@@ -447,6 +457,7 @@ function populateSwapDeviceTypes(containerId) {
     }
   });
 }
+
 function handleSwapDeviceTypeClick(event) {
   console.log("handleSwapDeviceTypeClick");
   const targetType = event.target.getAttribute("data-device-type");
@@ -454,8 +465,8 @@ function handleSwapDeviceTypeClick(event) {
 
   swapConfiguration.deviceType = targetType;
 
-  // Get the unique categories based on the selected device type
-  const categories = Array.from(new Set(data.filter(row => row[0] === targetType).map(row => row[1])));
+ // Get the unique categories based on the selected device type, excluding "Samsung"
+ const categories = Array.from(new Set(data.filter(row => row[0] === targetType && row[1] !== "Samsung").map(row => row[1])));
 
   const swapDeviceCategory = document.getElementById("swapDeviceCategory");
   swapDeviceCategory.innerHTML = "";
@@ -482,6 +493,7 @@ function handleSwapDeviceTypeClick(event) {
   event.target.classList.remove("hidden");
   event.target.classList.add("selected-button");
 }
+
 function handleSwapCategoryClick(event) {
   console.log("handleSwapCategoryClick");
   const deviceCategory = event.target.dataset.deviceCategory;
@@ -503,7 +515,6 @@ function handleSwapCategoryClick(event) {
   // Show the continue button
   continueToPhase5()
 }
-
 function populateSwapDeviceNames() {
   console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
   const swapDeviceNameContainer = document.getElementById("swapDeviceNameContainer");
@@ -513,7 +524,7 @@ function populateSwapDeviceNames() {
     (device) => device[0] === swapConfiguration.deviceType && device[1] === swapConfiguration.deviceCategory
   );
 
-  const uniqueDeviceData = [...new Map(deviceData.map(item => [item[4], item])).values()];
+  const uniqueDeviceData = [...new Map(deviceData.map(item => [`${item[4]}_${item[2]}`, item])).values()];
 
   console.log(`Unique swap device data: ${JSON.stringify(uniqueDeviceData)}`);
 
@@ -539,6 +550,7 @@ function populateSwapDeviceNames() {
   // attach event listener to container element
   swapDeviceNameContainer.addEventListener("click", handleSwapDeviceNameClick);
 }
+
 function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
   if (button) {
@@ -1067,7 +1079,7 @@ function continueToPhase3() {
     // Animate the loading bar width
     const loadingBarAnimation = loadingBar.animate(
       [{ width: "100%" }, { width: "100%" }],
-      { duration: 1650, iterations: Infinity }
+      { duration: 1150, iterations: Infinity }
     );
 
     // Show phase 3 after the loading animation is complete
@@ -1192,7 +1204,7 @@ function continueToPhase5() {
   // Animate the loading bar width
   const loadingBarAnimation = loadingBar.animate(
     [{ width: "100%" }, { width: "100%" }],
-    { duration: 1700, iterations: Infinity }
+    { duration: 1100, iterations: Infinity }
   );
 
   // Wait for the loading animation to complete
@@ -1220,7 +1232,7 @@ function goToPhase7() {
 
      // Scroll the content container to the top
      document.querySelector('.content-container').scrollTop = 0;
-     
+
   // Hide phase 5
   document.getElementById("phase5").style.display = "none";
 
