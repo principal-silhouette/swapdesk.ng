@@ -240,7 +240,7 @@ margin-bottom: 50px;
 @media screen and (min-width: 440px) and (max-width: 660px) {
   .header-container {
     font-size: 22%;
-    margin-bottom: 70px;
+    margin-bottom: 50px;
       }
     }
 /* Tablets */
@@ -398,7 +398,7 @@ margin-bottom: 50px;
 }
 
 .selection-button, .selection-button-down, .selection-button-blue, .selection-button-whatsapp {
-  min-width: 310px;
+  min-width: 260px;
 }
 
 .selection-button-blue:hover:not(:disabled) {
