@@ -713,8 +713,8 @@ p {
   margin-block-start: 0em;
   margin-block-end: 1em;
   margin-inline-end: 25px;
-  margin-top: 0;
-  margin-bottom: 35px;
+  margin-top: 25px;
+  margin-bottom: 0px;
 }
 
 .par22 {
