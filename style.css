@@ -886,6 +886,20 @@ ul {
   margin-bottom: 0px;
 }
 
+/* Small phones */
+@media screen and (max-width: 440px) {
+  ul {
+font-size: 80%;
+  }
+}
+
+/* Large phones */
+@media screen and (min-width: 440px) and (max-width: 660px) {
+  ul {
+font-size: 90%;
+  }
+}
+
 .hidden {
   display: none;
 }
