@@ -713,8 +713,8 @@ p {
   margin-block-start: 0em;
   margin-block-end: 1em;
   margin-inline-end: 25px;
-  margin-top: 25px;
-  margin-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 25px;
 }
 
 .par22 {
@@ -883,13 +883,13 @@ li {
 ul {
   list-style-type: disc;
   padding-left: 0em;
-  margin-bottom: 0px;
+  margin-bottom: 10px;
 }
 
 /* Small phones */
 @media screen and (max-width: 440px) {
   ul {
-font-size: 80%;
+font-size: 85%;
   }
 }
 
