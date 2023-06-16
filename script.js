@@ -1,7 +1,7 @@
 // Global variables
 const API_KEY = 'AIzaSyCqNBQlnUIqfBK4Oz_SpsNETC8lYuPUpSQ';
 const SPREADSHEET_ID = '1nM67nJrGNMuoHzbYKsSolhTl3W94UUCW0oVW14AuTWk';
-const RANGE = 'g5:t141';
+const RANGE = 'g5:t141,w6:ae62';
 let data = [];
 let deviceTypes = [];
 let categories = [];
@@ -39,6 +39,14 @@ async function loadData() {
     const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`);
     const json = await response.json();
     data = json.values.slice(1).filter(row => row[0]); // Filter out rows with empty categories
+
+    
+    // Process the existing range data
+    data = values.slice(0, 137).filter(row => row[0]);
+
+    // Process the new range data
+    const newRangeData = values.slice(137);
+    // ... Process the new range data as needed
 
     console.log("Loaded data:", data); // Log the loaded data
 
