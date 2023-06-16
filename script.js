@@ -811,7 +811,7 @@ function displayWhatsAppMessage() {
     I'd like to Swap my *${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}* for *${swapConfiguration.deviceName}, ${swapConfiguration.configuration}.* \n\nI've confirmed that my *Trade In Value* is ${formatCurrency(tradeInConfiguration.tradeInValue)} and the *Swap Rate* is ${formatCurrency(swapConfiguration.swapRate)}. \n\nI'm currently in ${selectedLocation}.${conditionMessage}
   `;
   const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/+2349163338000?text=${encodedMessage}`;
+  const whatsappUrl = `https://wa.me/+2347037853959?text=${encodedMessage}`;
   window.open(whatsappUrl, '_blank');
 }
 function viewSwapBreakdown() {
