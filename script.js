@@ -33,14 +33,12 @@ swapConfiguration = {
 let swapData = {};
 
 
-// Load data from Google Sheet
 async function loadData() {
   try {
     const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`);
     const json = await response.json();
-    data = json.values.slice(1).filter(row => row[0]); // Filter out rows with empty categories
+    const values = json.values;
 
-    
     // Process the existing range data
     data = values.slice(0, 137).filter(row => row[0]);
 
@@ -57,6 +55,7 @@ async function loadData() {
     console.error("Error loading data:", error);
   }
 }
+
 function populateTradeInDeviceTypes(containerId) {
   // Clear the container before populating it
   const container = document.getElementById(containerId);
