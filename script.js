@@ -1359,7 +1359,7 @@ function goBackFromPhase5() {
   removeSelectedButtonClass('swapDeviceConfigurationContainer');
 
   // Reset the trade-in output and swap rate output text
-  document.getElementById("swapRateOutput").style.display = 'none';
+  document.getElementById("swapRateOutput").style.display = 'hidden';
   
   // Hide phase 5
   document.getElementById("phase5").style.display = "none";
