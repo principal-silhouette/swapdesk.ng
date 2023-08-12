@@ -956,7 +956,7 @@ async function downloadSwapBreakdownImage() {
 
   const swapBreakdownHtml = `
     <div style="position: relative; font-family: Arial, sans-serif; background-image: url('./images/swap-breakdown.jpg'); background-size: 1280px 2272px; background-repeat: no-repeat; width: 1280px; height: 2272px; padding: 20px;">
-    <div style="position: absolute; top: 400px; left: 0; right: 0; bottom: 972px;">
+    <div style="position: absolute; top: 400px; left: 0; right: 0; bottom: 1380px;">
     <h4 class="htradein">Trade In Device 📱</h4>
     <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
     <p class="par44">🇳🇬 Nigerian USED</p>
