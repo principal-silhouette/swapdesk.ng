@@ -1,7 +1,7 @@
 // Global variables
 const API_KEY = 'AIzaSyCqNBQlnUIqfBK4Oz_SpsNETC8lYuPUpSQ';
 const SPREADSHEET_ID = '1nM67nJrGNMuoHzbYKsSolhTl3W94UUCW0oVW14AuTWk';
-const RANGE = 'g5:t170';
+const RANGE = 'g5:t200';
 let data = [];
 let deviceTypes = [];
 let categories = [];
