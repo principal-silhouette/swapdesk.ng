@@ -996,6 +996,10 @@ const swapBreakdownHtml = `
     document.body.removeChild(node);
   }
 } 
+
+function goToPricesPhase() {
+   console.log("goToPricesPhase");
+  
   // Hide phase 1
   const phase1Div = document.getElementById('phase1');
   phase1Div.style.display = 'none';
