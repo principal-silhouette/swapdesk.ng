@@ -1690,4 +1690,3 @@ document.getElementById("swapButton").addEventListener("click", function () {
 document.getElementById("tradeInButton").addEventListener("click", function () {
   document.getElementById("progressBar").style.display = "block";
 });
-
