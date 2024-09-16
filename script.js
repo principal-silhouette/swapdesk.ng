@@ -937,6 +937,7 @@ function onLocationButtonClick(location, event) {
   // Append the new div to the phase7 div
   document.getElementById("phase7").appendChild(locationInstructions);
 }
+
 async function downloadSwapBreakdownImage() {
   console.log('downloadSwapBreakdownImage called');
 
@@ -954,26 +955,27 @@ async function downloadSwapBreakdownImage() {
     return value === 0 ? "None" : formatCurrency(value);
   };
 
-const swapBreakdownHtml = `
-    <div style="position: relative; font-family: Arial, sans-serif; background-image: url('./images/swap-breakdown.jpg'); background-size: 1280px 2272px; background-repeat: no-repeat; width: 1280px; height: 2272px; padding: 20px;">
-    <div style="position: absolute; top: 400px; left: 0; right: 0; bottom: 1380px;">
-    <h4 class="htradein">Trade In Device 📱</h4>
-    <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
-    <p class="par44">🇳🇬 Nigerian USED</p>
-    <p class="par505">Location: ${selectedLocation}/p>
-    
-    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
-    <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
-    <p class="par44">${swapConfiguration.deviceQuality}</p>
-    <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
-    
-    <h4 class="htradein">Issues & Deductions</h4>
-    <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
-    <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
-    <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
-    <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
-    
+  // Adjusted swapBreakdownHtml for the 1080x1920 resolution
+  const swapBreakdownHtml = `
+    <div style="position: relative; font-family: Arial, sans-serif; background-image: url('./images/swap-breakdown.jpg'); background-size: 1080px 1920px; background-repeat: no-repeat; width: 1080px; height: 1920px; padding: 20px;">
+      <div style="position: absolute; top: 40%; left: 0; right: 0; bottom: 40%; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <h4 class="htradein" style="margin-bottom: 10px;">Trade In Device 📱</h4>
+        <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
+        <p class="par44">🇳🇬 Nigerian USED</p>
+        <p class="par505">Location: ${selectedLocation}</p>
+        
+        <h4 class="htradein" style="margin-top: 20px;">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device 🔄</h4>
+        <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong></p>
+        <p class="par44">${swapConfiguration.deviceQuality}</p>
+        <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
+        
+        <h4 class="htradein" style="margin-top: 20px;">Issues & Deductions</h4>
+        <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
+        <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
+        <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
+        <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
       </div>
+    </div>
   `;
 
   console.log('swapBreakdownHtml:', swapBreakdownHtml);
@@ -995,7 +997,7 @@ const swapBreakdownHtml = `
   } finally {
     document.body.removeChild(node);
   }
-} 
+}
 
 function goToPricesPhase() {
    console.log("goToPricesPhase");
