@@ -832,16 +832,16 @@ function viewSwapBreakdown() {
   <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
   <p class="par44">🇳🇬 Nigerian USED</p>
   
-  <h4 class="htradein">Issues & Deductions😞</h4>
-  <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
-  <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
-  <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
-  <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
-  
   <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
   <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
   <p class="par44">${swapConfiguration.deviceQuality}</p>
   <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
+
+    <h4 class="htradein">Issues & Deductions😞</h4>
+  <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
+  <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
+  <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
+  <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
 `;
 
     // Display the swap breakdown in a suitable element
@@ -954,80 +954,48 @@ async function downloadSwapBreakdownImage() {
     return value === 0 ? "None" : formatCurrency(value);
   };
 
-const preloadImage = (url) => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = url;
-        img.onload = () => resolve(img);
-        img.onerror = (err) => reject(err);
-    });
-};
+const swapBreakdownHtml = `
+    <div style="position: relative; font-family: Arial, sans-serif; background-image: url('./images/swap-breakdown.jpg'); background-size: 1280px 2272px; background-repeat: no-repeat; width: 1280px; height: 2272px; padding: 20px;">
+    <div style="position: absolute; top: 400px; left: 0; right: 0; bottom: 1380px;">
+    <h4 class="htradein">Trade In Device 📱</h4>
+    <p class="par505">${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, <strong>${formatCurrency(tradeInConfiguration.tradeInValue)}</strong> 💰</p>
+    <p class="par44">🇳🇬 Nigerian USED</p>
+    <p class="par505">Location: ${selectedLocation}/p>
+    
+    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
+    <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
+    <p class="par44">${swapConfiguration.deviceQuality}</p>
+    <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
+    
+    <h4 class="htradein">Issues & Deductions</h4>
+    <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
+    <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
+    <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
+    <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
+    
+      </div>
+  `;
 
-const generateImage = async () => {
-    try {
-        // Adjust the path to the actual directory where the background image is stored
-        const backgroundImage = await preloadImage('./images/swap-breakdown.jpg'); // Ensure this path is correct
-        
-        // This HTML structure needs to match any class names, ID references, and text placeholders in your original function
-        const swapBreakdownHtml = `
-        <div style="position: relative; font-family: Arial, sans-serif; background-image: url(${backgroundImage.src}); background-size: 1280px 2272px; background-repeat: no-repeat; width: 1280px; height: 2272px;">
-            <div style="display: flex; justify-content: center; align-items: center; height: 48%; position: absolute; top: 24%; left: 0; right: 0; text-align: center;">
-                <div style="width: 80%; text-align: left;">
+  console.log('swapBreakdownHtml:', swapBreakdownHtml);
 
-                    <h4 class="htradein">Trade In Device 📱</h4>
-                    <p class="par505" style="font-size: 20px; line-height: 1.5;">
-                        ${tradeInConfiguration.deviceName}, ${tradeInConfiguration.configuration}, 
-                        <strong>${tradeInConfiguration.tradeInValue && !isNaN(tradeInConfiguration.tradeInValue) ? formatCurrency(tradeInConfiguration.tradeInValue) : "₦ ——"}</strong> 💰
-                    </p>
-                    <p class="par44" style="font-size: 18px;">🇳🇬 Nigerian USED</p>
-                    <p class="par505" style="font-size: 18px;">Location: ${selectedLocation ? selectedLocation : "No Location Selected"}</p>
+  const img = new Image();
 
-                    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
-                    <p class="par505" style="font-size: 20px;">
-                        ${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, 
-                        <strong>${swapConfiguration.currentRetailPrice && !isNaN(swapConfiguration.currentRetailPrice) ? formatCurrency(swapConfiguration.currentRetailPrice) : "₦ ——"}</strong>
-                    </p>
-                    <p class="par44" style="font-size: 18px;">${swapConfiguration.deviceQuality}</p>
-                    <p class="par505" style="font-size: 20px;">
-                        <strong>Swap Rate:</strong> 
-                        <strong>${swapConfiguration.swapRate && !isNaN(swapConfiguration.swapRate) ? formatCurrency(swapConfiguration.swapRate) : "₦ ——"}</strong> 💸
-                    </p>
+  const node = document.createElement('div');
+  node.innerHTML = swapBreakdownHtml;
+  document.body.appendChild(node);
 
-                    <h4 class="htradein">Issues & Deductions</h4>
-                    <p class="par505" style="font-size: 18px;"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
-                    <p class="par505" style="font-size: 18px;"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
-                    <p class="par505" style="font-size: 18px;"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
-                    <p class="par505" style="font-size: 18px;"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
-                    
-                </div>
-            </div>
-        </div>
-        `;
-
-        // Create a new DOM node with the generated HTML
-        const node = document.createElement('div');
-        node.innerHTML = swapBreakdownHtml;
-        document.body.appendChild(node);
-
-        // Generate image using PNG format to avoid blurriness
-        const dataUrl = await domtoimage.toPng(node, { quality: 1 });
-        
-        // Create a download link for the image
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = '@the.swapdesk.png';
-        link.click();
-        
-    } catch (error) {
-        console.error('Error generating image:', error);
-    }
-};
-
-// Call the generate image function
-generateImage();
-function goToPricesPhase() {
-  console.log("goToPricesPhase");
-
+  try {
+    const dataUrl = await domtoimage.toJpeg(node, { quality: 1 });
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = '@the.swapdesk.jpeg';
+    link.click();
+  } catch (error) {
+    console.error('Error generating image:', error);
+  } finally {
+    document.body.removeChild(node);
+  }
+} 
   // Hide phase 1
   const phase1Div = document.getElementById('phase1');
   phase1Div.style.display = 'none';
