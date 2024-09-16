@@ -962,16 +962,17 @@ async function downloadSwapBreakdownImage() {
     <p class="par44">🇳🇬 Nigerian USED</p>
     <p class="par505">Location: ${selectedLocation}/p>
     
+    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
+    <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
+    <p class="par44">${swapConfiguration.deviceQuality}</p>
+    <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
+    
     <h4 class="htradein">Issues & Deductions</h4>
     <p class="par505"><strong>Spots, Scratches & Dents:</strong> ${formatDeduction(tradeInConfiguration.bodyConditionDeduction)}</p>
     <p class="par505"><strong>Display & Touchscreen:</strong> ${formatDeduction(tradeInConfiguration.screenConditionDeduction)}</p>
     <p class="par505"><strong>Battery Health:</strong> ${formatDeduction(tradeInConfiguration.batteryHealthDeduction)}</p>
     <p class="par505"><strong>Network & Biometrics:</strong> ${formatDeduction(tradeInConfiguration.networkBiometricsDeduction)}</p>
     
-    <h4 class="htradein">${swapConfiguration.swapRate > 0 ? "Upgrade" : "Downgrade"} Device🔄</h4>
-    <p class="par505">${swapConfiguration.deviceName}, ${swapConfiguration.configuration}, <strong>${formatCurrency(swapConfiguration.currentRetailPrice)}</strong> </p>
-    <p class="par44">${swapConfiguration.deviceQuality}</p>
-    <p class="par505"><strong>Swap Rate:</strong> <strong>${formatCurrency(swapConfiguration.swapRate)}</strong> 💸</p>
       </div>
   `;
 
