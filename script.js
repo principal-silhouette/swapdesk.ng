@@ -555,12 +555,16 @@ function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
   if (button) {
     const swapDeviceName = button.dataset.deviceName;
-    console.log(`Device Name Selected: ${swapDeviceName}`);
+    const swapDeviceQuality = button.querySelector("div:nth-child(2)").textContent; // Extract the quality text
+    console.log(`Device Name Selected: ${swapDeviceName}, Device Quality: ${swapDeviceQuality}`);
 
-    swapConfiguration.deviceName = swapDeviceName; // Set the global variable
+    // Update swap configuration with the selected device name and quality
+    swapConfiguration.deviceName = swapDeviceName;
+    swapConfiguration.deviceQuality = swapDeviceQuality;
 
+    // Filter configurations based on both device name and quality
     const configurations = Array.from(
-      new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[5]))
+      new Set(data.filter(row => row[4] === swapDeviceName && row[2] === swapDeviceQuality).map(row => row[5]))
     );
 
     console.log(`Configurations: ${JSON.stringify(configurations)}`);
@@ -568,7 +572,7 @@ function handleSwapDeviceNameClick(event) {
     swapDeviceConfigurationContainer.innerHTML = "";
 
     configurations.forEach(configuration => {
-      const price = data.find(row => row[4] === swapDeviceName && row[5] === configuration)[6];
+      const price = data.find(row => row[4] === swapDeviceName && row[5] === configuration && row[2] === swapDeviceQuality)[6];
 
       const button = document.createElement("button");
       button.dataset.swapDeviceConfiguration = configuration;
@@ -600,6 +604,7 @@ function handleSwapDeviceNameClick(event) {
     swapDeviceConfigurationContainer.classList.remove("hidden");
   }
 }
+
 function handleSwapConfigurationClick(event) {
   if (event.target.tagName.toLowerCase() === "button" || event.target.tagName.toLowerCase() === "div") {
     const swapDeviceConfiguration = event.target.closest("button").dataset.swapDeviceConfiguration;
