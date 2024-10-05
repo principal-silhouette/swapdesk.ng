@@ -29,7 +29,17 @@ swapConfiguration = {
   swapRate: 0
 };
 
-// Declare global variables at the beginning of your script
+let currentQuestionIndex = 0;
+const conditionQuestions = [
+  { question: "Does the device have any body defects?", deductionType: "bodyCondition", multiplier: 0.1 },
+  { question: "Is the screen or True Tone damaged?", deductionType: "screenCondition", multiplier: 0.15 },
+  { question: "Is the battery health below acceptable level?", deductionType: "batteryHealth", multiplier: 0.1 },
+  { question: "Are there issues with network or biometrics?", deductionType: "networkBiometrics", multiplier: 0.05 },
+  { question: "Does the earpiece or speaker have problems?", deductionType: "earpieceSpeaker", multiplier: 0.05 },
+  { question: "Is the camera malfunctioning?", deductionType: "camera", multiplier: 0.1 },
+  { question: "Does the charging port, mic, or speaker have issues?", deductionType: "chargingMicSpeaker", multiplier: 0.05 }
+];
+
 let swapData = {};
 
 
@@ -735,27 +745,80 @@ function showStep(stepNumber) {
 }
 
 
+// Handle condition selection
 function onConditionSelected(condition, event) {
-  isPerfectCondition = condition === "Yes"; // Store the condition in the global variable
-
-  // Hide other condition buttons
+  isPerfectCondition = condition === "Yes";
+  
+  if (condition === "No") {
+    // Display condition questions
+    document.getElementById('conditionQuestions').style.display = 'block';
+    // Hide phase 6 transition button
+    document.getElementById('goToPhase7Button').style.display = 'none';
+    showNextConditionQuestion();
+  } else {
+    // Hide condition questions
+    document.getElementById('conditionQuestions').style.display = 'none';
+    // Show phase 6 transition button for perfect condition
+    document.getElementById('goToPhase7Button').style.display = 'inline-block';
+  }
+  
+  // Hide condition selection buttons
   const conditionButtons = event.target.parentElement.querySelectorAll("button");
   conditionButtons.forEach(button => {
     button.classList.add("hidden");
-    button.classList.remove("selected-button");
   });
 
-  // Add the selected-button class to the selected button
+  // Highlight selected button
   event.target.classList.remove("hidden");
   event.target.classList.add("selected-button");
+}
 
-  if (!isPerfectCondition) {
-    // Show additional questions for specific conditions
-    showConditionQuestions();
+// Show next condition question
+function showNextConditionQuestion() {
+  const questionContainer = document.getElementById('questionSteps');
+  
+  // Clear previous question
+  questionContainer.innerHTML = '';
+  
+  if (currentQuestionIndex < conditionQuestions.length) {
+    const currentQuestion = conditionQuestions[currentQuestionIndex];
+    
+    // Create question element
+    const questionElement = document.createElement('div');
+    questionElement.innerHTML = `
+      <p>${currentQuestion.question}</p>
+      <button onclick="handleConditionResponse('Yes', '${currentQuestion.deductionType}', ${currentQuestion.multiplier})">Yes</button>
+      <button onclick="handleConditionResponse('No', '${currentQuestion.deductionType}', ${currentQuestion.multiplier})">No</button>
+    `;
+    
+    // Append question element to the container
+    questionContainer.appendChild(questionElement);
   } else {
-    // Show the goToPhase7 button
-    showGoToPhase7Button();
+    // All questions are done, show proceed button
+    document.getElementById('goToPhase7Button').style.display = 'inline-block';
   }
+}
+
+// Handle user response to each question
+function handleConditionResponse(response, deductionType, deductionMultiplier) {
+  if (response === 'Yes') {
+    applyDeduction(deductionType, deductionMultiplier);
+  }
+  
+  // Move to the next question
+  currentQuestionIndex++;
+  showNextConditionQuestion();
+}
+
+// Update trade-in value
+function applyDeduction(deductionType, deductionMultiplier) {
+  const deductionAmount = tradeInConfiguration.tradeInValue * deductionMultiplier;
+  tradeInConfiguration.tradeInValue -= deductionAmount;
+
+  // Track the applied deduction
+  tradeInConfiguration[`${deductionType}Deduction`] = deductionAmount;
+  
+  updateTradeInValue();
 }
 
 function showConditionQuestions() {
