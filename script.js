@@ -515,6 +515,7 @@ function handleSwapCategoryClick(event) {
   // Show the continue button
   continueToPhase5()
 }
+
 function populateSwapDeviceNames() {
   console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
   const swapDeviceNameContainer = document.getElementById("swapDeviceNameContainer");
@@ -524,7 +525,7 @@ function populateSwapDeviceNames() {
     (device) => device[0] === swapConfiguration.deviceType && device[1] === swapConfiguration.deviceCategory
   );
 
-  const uniqueDeviceData = [...new Map(deviceData.map(item => [`${item[4]}_${item[2]}`, item])).values()];
+  const uniqueDeviceData = [...new Map(deviceData.map(item => [item[4], item])).values()];
 
   console.log(`Unique swap device data: ${JSON.stringify(uniqueDeviceData)}`);
 
@@ -533,52 +534,89 @@ function populateSwapDeviceNames() {
     button.dataset.deviceName = device[4];
 
     const deviceName = document.createElement("div");
-    deviceName.textContent = device[4];
+    deviceName.textContent = device[4]; // Display the device name
     button.appendChild(deviceName);
-
-    const deviceQuality = document.createElement("div");
-    deviceQuality.style.fontSize = "smaller";
-    deviceQuality.style.paddingTop = "5px";
-    deviceQuality.style.color = "grey";
-    deviceQuality.textContent = device[2];
-    button.appendChild(deviceQuality);
 
     swapDeviceNameContainer.appendChild(button);
     console.log(`Appended button for device name: ${device[4]}`);
   });
 
-  // attach event listener to container element
+  // Attach event listener to handle device name selection
   swapDeviceNameContainer.addEventListener("click", handleSwapDeviceNameClick);
 }
 
+// New function to handle Device Name selection and display Quality options
 function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
   if (button) {
     const swapDeviceName = button.dataset.deviceName;
-    const swapDeviceQuality = button.querySelector("div:nth-child(2)").textContent; // Extract the quality text
-    console.log(`Device Name Selected: ${swapDeviceName}, Device Quality: ${swapDeviceQuality}`);
+    console.log(`Device Name Selected: ${swapDeviceName}`);
 
-    // Update swap configuration with the selected device name and quality
-    swapConfiguration.deviceName = swapDeviceName;
-    swapConfiguration.deviceQuality = swapDeviceQuality;
+    swapConfiguration.deviceName = swapDeviceName; // Store selected device name
+
+    // Get unique device quality options for the selected device
+    const deviceQualities = Array.from(
+      new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[2]))
+    );
+
+    console.log(`Available Qualities: ${JSON.stringify(deviceQualities)}`);
+
+    const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
+    swapDeviceQualityContainer.innerHTML = ""; // Clear any existing quality options
+
+    // Loop through each device quality and create a button with starting price
+    deviceQualities.forEach((quality) => {
+      const price = Math.min(...data.filter(row => row[4] === swapDeviceName && row[2] === quality).map(row => row[6]));
+
+      const button = document.createElement("button");
+      button.dataset.deviceQuality = quality;
+
+      const qualityElement = document.createElement("div");
+      qualityElement.textContent = quality;
+      button.appendChild(qualityElement);
+
+      const startingPrice = document.createElement("div");
+      startingPrice.style.fontSize = "smaller";
+      startingPrice.style.paddingTop = "5px";
+      startingPrice.style.color = "grey";
+      startingPrice.textContent = `Starting at ₦ ${price}`;
+      button.appendChild(startingPrice);
+
+      button.addEventListener("click", handleSwapDeviceQualityClick); // Attach event listener for quality selection
+      swapDeviceQualityContainer.appendChild(button);
+    });
+
+    swapDeviceQualityContainer.classList.remove("hidden"); // Make quality options visible
+  }
+}
+
+// Rename and update existing handleSwapDeviceNameClick to handle quality selection
+function handleSwapDeviceQualityClick(event) {
+  const button = event.target.closest("button");
+  if (button) {
+    const swapDeviceQuality = button.dataset.deviceQuality;
+    console.log(`Device Quality Selected: ${swapDeviceQuality}`);
+
+    swapConfiguration.deviceQuality = swapDeviceQuality; // Set global variable for quality
 
     // Filter configurations based on both device name and quality
     const configurations = Array.from(
-      new Set(data.filter(row => row[4] === swapDeviceName && row[2] === swapDeviceQuality).map(row => row[5]))
+      new Set(data.filter(row => row[4] === swapConfiguration.deviceName && row[2] === swapDeviceQuality).map(row => row[5]))
     );
 
     console.log(`Configurations: ${JSON.stringify(configurations)}`);
 
+    const swapDeviceConfigurationContainer = document.getElementById("swapDeviceConfigurationContainer");
     swapDeviceConfigurationContainer.innerHTML = "";
 
     configurations.forEach(configuration => {
-      const price = data.find(row => row[4] === swapDeviceName && row[5] === configuration && row[2] === swapDeviceQuality)[6];
+      const price = data.find(row => row[4] === swapConfiguration.deviceName && row[5] === configuration && row[2] === swapDeviceQuality)[6];
 
       const button = document.createElement("button");
       button.dataset.swapDeviceConfiguration = configuration;
 
       const configElement = document.createElement("div");
-      configElement.textContent = configuration;
+      configElement.textContent = configuration; // Display the configuration name
       button.appendChild(configElement);
 
       const retailPrice = document.createElement("div");
@@ -592,31 +630,19 @@ function handleSwapDeviceNameClick(event) {
       swapDeviceConfigurationContainer.appendChild(button);
     });
 
-    const swapDeviceNameButtons = event.currentTarget.querySelectorAll("button");
-    swapDeviceNameButtons.forEach(div => {
-      div.classList.add("hidden");
-      div.classList.remove("selected-swap");
-    });
-
-    button.classList.remove("hidden");
-    button.classList.add("selected-button");
-
-    swapDeviceConfigurationContainer.classList.remove("hidden");
+    swapDeviceConfigurationContainer.classList.remove("hidden"); // Show configurations
   }
 }
 
+// Configuration click handler with loading animation and swap rate calculation
 function handleSwapConfigurationClick(event) {
   if (event.target.tagName.toLowerCase() === "button" || event.target.tagName.toLowerCase() === "div") {
     const swapDeviceConfiguration = event.target.closest("button").dataset.swapDeviceConfiguration;
-    swapConfiguration.configuration = swapDeviceConfiguration; // Set the global variable
+    swapConfiguration.configuration = swapDeviceConfiguration; // Set the configuration globally
 
-    swapConfiguration.deviceName = document.getElementById("swapDeviceNameContainer")
-      .querySelector(".selected-button")
-      .dataset.deviceName;
-
-    // Save the retail price of the selected configuration to the global variable
+    // Get the retail price from the button
     const retailPrice = event.target.closest("button").querySelector("div:last-child").textContent;
-    swapConfiguration.retailPrice = parseFloat(retailPrice.replace(/[^0-9.-]+/g, "")); // Remove non-numeric characters and convert to float
+    swapConfiguration.retailPrice = parseFloat(retailPrice.replace(/[^0-9.-]+/g, ""));
 
     // Show loading animation with swap loading text
     const subHeaderText = "Please Be Patient While We Calculate the Swap Rate 🔄💰";
@@ -642,12 +668,13 @@ function handleSwapConfigurationClick(event) {
     });
 
     event.target.closest("button").classList.remove("hidden"); // Keep the selected button visible
-    event.target.closest("button").classList.add("selected-button"); // Add the selected-swap class
+    event.target.closest("button").classList.add("selected-button");
 
     // Show the "Continue" button
     document.getElementById("continueToPhase6Button").style.display = "block";
   }
 }
+
 
 function displaySwapRateOutput() {
   console.log("displaySwapRateOutput called");
