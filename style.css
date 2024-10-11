@@ -630,7 +630,7 @@ h6 {
   font-size: 2.8em !important; /* Keep this size */
   font-weight: bold; /* Ensure the text is bold */
   text-align: center;
-  margin-top: 35px; /* Space above the header */
+  margin-top: 20px; /* Space above the header */
   margin-bottom: 0; /* No space below the header */
   line-height: 1; /* Tight line height */
   padding-top: 20px; /* Padding only at the top */
