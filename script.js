@@ -140,14 +140,14 @@ function handleCategoryClick(event) {
   if (phase1Button.id === "swapButton") {
     continueToPhase3();
   } else if (phase1Button.id === "tradeInButton") {
-    TradeInTable();
+    displayTradeInTable();
   } else if (phase1Button.id === "CheckPriceButton") {
-    PricesTable();
+    displayPricesTable();
   }
 }
 
-function TradeInTable() {
-  console.log(" Trade-In Table");
+function displayTradeInTable() {
+  console.log("Display Trade-In Table");
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
@@ -188,18 +188,18 @@ function TradeInTable() {
     });
 
     tradeInTableContainer.appendChild(table);
-    tradeInTableContainer.style. = 'block';
+    tradeInTableContainer.style.display = 'block';
   
     // Hide the GoBackButton and show the ResetTradeInTable button
-    document.getElementById("ResetTradeInTable").style. = "block";
-    document.getElementById("checkForSwapButton").style. = "block";
+    document.getElementById("ResetTradeInTable").style.display = "block";
+    document.getElementById("checkForSwapButton").style.display = "block";
 
   } else {
     console.log("Device type or category not selected");
   }
 }
-function PricesTable() {
-  console.log(" Prices Table");
+function displayPricesTable() {
+  console.log("Display Prices Table");
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
@@ -241,7 +241,7 @@ function PricesTable() {
       deviceQuality.style.fontSize = "0.6em"; // Make quality text even smaller
       deviceQuality.style.paddingTop = "0px"; // Reduce gap
       deviceQuality.style.color = "grey";
-      deviceQuality.textContent = item.quality; //  quality
+      deviceQuality.textContent = item.quality; // Display quality
       cell1.appendChild(deviceQuality);
 
       cell2.innerHTML = item.value;
@@ -251,10 +251,10 @@ function PricesTable() {
     });
 
     pricesTableContainer.appendChild(table);
-    pricesTableContainer.style. = 'block';
+    pricesTableContainer.style.display = 'block';
   
     // Show the ResetPricesInTable button, keep the GoBackButton visible
-    document.getElementById("ResetPricesInTable").style. = "block";
+    document.getElementById("ResetPricesInTable").style.display = "block";
   
   } else {
     console.log("Device type or category not selected");
@@ -262,12 +262,12 @@ function PricesTable() {
 }
 function clearAndCheckAnotherDevice() {
   // Hide the tables
-  document.getElementById("tradeInTableContainer").style. = "none";
-  document.getElementById("pricesTableContainer").style. = "none";
+  document.getElementById("tradeInTableContainer").style.display = "none";
+  document.getElementById("pricesTableContainer").style.display = "none";
 
   // Hide the ResetTradeInTable and ResetPricesInTable buttons
-  document.getElementById("ResetTradeInTable").style. = "none";
-  document.getElementById("ResetPricesInTable").style. = "none";
+  document.getElementById("ResetTradeInTable").style.display = "none";
+  document.getElementById("ResetPricesInTable").style.display = "none";
 
   // Show all device type buttons and remove the selected-button class
   const deviceTypeButtons = document.querySelectorAll("#deviceTypeTradeIn button, #deviceTypePrices button");
@@ -699,6 +699,9 @@ function displaySwapRateOutput() {
         <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
       `;
     }
+  } else {
+    console.error("Oops! We couldn’t find the Prices for your Selected Device Configurations. Please Double-check your Selections and try again.");
+  }
 }
 
 function calculateSwapRate() {
