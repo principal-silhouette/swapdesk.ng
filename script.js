@@ -550,43 +550,61 @@ function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
   if (button) {
     const swapDeviceName = button.dataset.deviceName;
+
     console.log(`Device Name Selected: ${swapDeviceName}`);
 
-    swapConfiguration.deviceName = swapDeviceName; // Store selected device name
+    // Update swap configuration with the selected device name
+    swapConfiguration.deviceName = swapDeviceName;
 
-    // Get unique device quality options for the selected device
+    // Filter the available device qualities based on the selected device name
     const deviceQualities = Array.from(
       new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[2]))
     );
 
-    console.log(`Available Qualities: ${JSON.stringify(deviceQualities)}`);
+    console.log(`Device Qualities: ${JSON.stringify(deviceQualities)}`);
 
-    const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
-    swapDeviceQualityContainer.innerHTML = ""; // Clear any existing quality options
+    // Clear the existing buttons for device quality
+    swapDeviceQualityContainer.innerHTML = "";
 
-    // Loop through each device quality and create a button with starting price
-    deviceQualities.forEach((quality) => {
-      const price = Math.min(...data.filter(row => row[4] === swapDeviceName && row[2] === quality).map(row => row[6]));
+    // Create and append buttons for each device quality
+    deviceQualities.forEach(quality => {
+      const price = Math.min(
+        ...data.filter(row => row[4] === swapDeviceName && row[2] === quality).map(row => row[6])
+      );
 
-      const button = document.createElement("button");
-      button.dataset.deviceQuality = quality;
+      const qualityButton = document.createElement("button");
+      qualityButton.dataset.deviceQuality = quality;
 
+      // Format the button with subtext (starting price)
       const qualityElement = document.createElement("div");
       qualityElement.textContent = quality;
-      button.appendChild(qualityElement);
+      qualityButton.appendChild(qualityElement);
 
       const startingPrice = document.createElement("div");
       startingPrice.style.fontSize = "smaller";
       startingPrice.style.paddingTop = "5px";
       startingPrice.style.color = "grey";
-      startingPrice.textContent = `Starting at ₦ ${price}`;
-      button.appendChild(startingPrice);
+      startingPrice.textContent = `Starting at ₦ ${price}`; // Include price subtext
+      qualityButton.appendChild(startingPrice);
 
-      button.addEventListener("click", handleSwapDeviceQualityClick); // Attach event listener for quality selection
-      swapDeviceQualityContainer.appendChild(button);
+      // Attach the event listener for the quality click
+      qualityButton.addEventListener("click", handleSwapDeviceQualityClick);
+      swapDeviceQualityContainer.appendChild(qualityButton);
     });
 
-    swapDeviceQualityContainer.classList.remove("hidden"); // Make quality options visible
+    // Hide other device name buttons
+    const swapDeviceNameButtons = event.currentTarget.querySelectorAll("button");
+    swapDeviceNameButtons.forEach(div => {
+      div.classList.add("hidden");
+      div.classList.remove("selected-button");
+    });
+
+    // Show only the selected device button
+    button.classList.remove("hidden");
+    button.classList.add("selected-button");
+
+    // Display the device quality buttons
+    swapDeviceQualityContainer.classList.remove("hidden");
   }
 }
 
