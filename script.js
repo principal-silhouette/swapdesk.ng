@@ -563,7 +563,7 @@ function handleSwapDeviceNameClick(event) {
 
     console.log(`Device Qualities: ${JSON.stringify(deviceQualities)}`);
 
-     // Select the container for device quality
+    // Select the container for device quality
     const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
 
     // Ensure that swapDeviceQualityContainer is defined
@@ -571,29 +571,34 @@ function handleSwapDeviceNameClick(event) {
       console.error("swapDeviceQualityContainer element not found in the DOM");
       return;
     }
-    
+
     // Clear the existing buttons for device quality
     swapDeviceQualityContainer.innerHTML = "";
 
     // Create and append buttons for each device quality
     deviceQualities.forEach(quality => {
+      // Retrieve the price and format it correctly
       const price = Math.min(
-        ...data.filter(row => row[4] === swapDeviceName && row[2] === quality).map(row => row[6])
+        ...data
+          .filter(row => row[4] === swapDeviceName && row[2] === quality)
+          .map(row => Number(row[6].replace(/[₦,]/g, ''))) // Parse and clean up the price string
       );
 
+      // Create the button for the quality
       const qualityButton = document.createElement("button");
       qualityButton.dataset.deviceQuality = quality;
 
-      // Format the button with subtext (starting price)
+      // Create a div for the quality name
       const qualityElement = document.createElement("div");
       qualityElement.textContent = quality;
       qualityButton.appendChild(qualityElement);
 
+      // Create a div for the starting price
       const startingPrice = document.createElement("div");
       startingPrice.style.fontSize = "smaller";
       startingPrice.style.paddingTop = "5px";
       startingPrice.style.color = "grey";
-      startingPrice.textContent = `Starting at ₦ ${price}`; // Include price subtext
+      startingPrice.textContent = `Starting at ₦ ${price.toLocaleString()}`; // Format price with commas
       qualityButton.appendChild(startingPrice);
 
       // Attach the event listener for the quality click
@@ -624,6 +629,29 @@ function handleSwapDeviceQualityClick(event) {
     const swapDeviceQuality = button.dataset.deviceQuality;
     console.log(`Device Quality Selected: ${swapDeviceQuality}`);
 
+    // Check if the button is already selected
+    const isSelected = button.classList.contains("selected-button");
+
+    // Deselect functionality (toggle selection)
+    if (isSelected) {
+      button.classList.remove("selected-button");
+
+    // Show all quality buttons when deselected
+      document.querySelectorAll("#swapDeviceQualityContainer button").forEach(btn => btn.classList.remove("hidden"));
+
+      swapConfiguration.deviceQuality = ""; // Reset the selected quality
+      document.getElementById("swapDeviceConfigurationContainer").classList.add("hidden"); // Hide configurations
+    } else {
+      // Hide other quality buttons and select the current one
+      document.querySelectorAll("#swapDeviceQualityContainer button").forEach(btn => {
+        btn.classList.add("hidden");
+        btn.classList.remove("selected-button");
+      });
+
+      // Show only the selected button
+      button.classList.remove("hidden");
+      button.classList.add("selected-button");
+      
     swapConfiguration.deviceQuality = swapDeviceQuality; // Set global variable for quality
 
     // Filter configurations based on both device name and quality
@@ -757,29 +785,33 @@ function displaySwapRateOutput() {
 
 function calculateSwapRate() {
   console.log("calculateSwapRate called");
-  // Use global variables instead of passed parameters
+
   const newDevice = swapConfiguration.deviceName;
   const newConfig = swapConfiguration.configuration;
+  const selectedQuality = swapConfiguration.deviceQuality;
 
-  console.log(`New Device: ${newDevice}`); // Log newDevice
-  console.log(`New Config: ${newConfig}`); // Log newConfig
+  console.log(`New Device: ${newDevice}`);
+  console.log(`New Config: ${newConfig}`);
+  console.log(`Selected Quality: ${selectedQuality}`);
 
-  // Find the current retail price for the new device and configuration
-  const newDeviceData = data.find(row => row[4] === newDevice && row[5] === newConfig);
-  console.log(`New Device Data: ${JSON.stringify(newDeviceData)}`); // Log newDeviceData
+  // Ensure you are fetching the correct entry by using both the device and quality
+  const newDeviceData = data.find(row => row[4] === newDevice && row[5] === newConfig && row[2] === selectedQuality);
+  console.log(`New Device Data: ${JSON.stringify(newDeviceData)}`);
 
+  // If the data is valid, parse the retail price; otherwise, default to 0
   const currentRetailPrice = newDeviceData ? Number(newDeviceData[6].replace(/[₦,]/g, '')) : 0;
-  console.log(`Current Retail Price: ${currentRetailPrice}`); // Log currentRetailPrice
+  console.log(`Current Retail Price: ${currentRetailPrice}`);
 
-  swapConfiguration.currentRetailPrice = currentRetailPrice
+  swapConfiguration.currentRetailPrice = currentRetailPrice;
 
-  console.log(`Trade-In Value: ${tradeInConfiguration.tradeInValue}`); // Log tradeInConfiguration.tradeInValue
+  console.log(`Trade-In Value: ${tradeInConfiguration.tradeInValue}`);
 
   // Calculate the swap rate
   swapConfiguration.swapRate = currentRetailPrice - tradeInConfiguration.tradeInValue;
-  console.log(`Swap Rate: ${swapConfiguration.swapRate}`); // Log swapConfiguration.swapRate
+  console.log(`Swap Rate: ${swapConfiguration.swapRate}`);
   return swapConfiguration.swapRate;
 }
+  
 function showStep(stepNumber) {
   const steps = document.querySelectorAll('.step');
   steps.forEach((step, index) => {
