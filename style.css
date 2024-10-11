@@ -627,11 +627,46 @@ h6 {
 }
 
 .hwelcome, .hwelcome-blue {
-  font-size: 2,8em !important;
+  font-size: 2.8em !important; /* Keep this size */
+  font-weight: bold; /* Ensure the text is bold */
   text-align: center;
-  margin-top: 0px;
-  margin-bottom: 8px;
-  line-height: 1;
+  margin-top: 20px; /* Space above the header */
+  margin-bottom: 0; /* No space below the header */
+  line-height: 1; /* Tight line height */
+  padding: 20px; /* Padding around the header */
+}
+
+/* Adjust media queries as previously defined... */
+/* Small phones */
+@media screen and (max-width: 400px) {
+  .hwelcome, .hwelcome-blue {
+    font-size: 1.7em;
+    padding: 15px; /* Adjust padding for smaller screens */
+  }
+}
+
+/* Large phones */
+@media screen and (min-width: 400px) and (max-width: 660px) {
+  .hwelcome, .hwelcome-blue {
+    font-size: 2em;
+    padding: 15px; /* Consistent padding */
+  }
+}
+
+/* Tablets */
+@media screen and (min-width: 660px) and (max-width: 1024px) {
+  .hwelcome, .hwelcome-blue {
+    font-size: 2.6em;
+    padding: 20px; /* Adjust padding as needed */
+  }
+}
+
+/* Desktops */
+@media screen and (min-width: 1024px) {
+  .hwelcome, .hwelcome-blue {
+    font-size: 3em; /* Larger size for desktop */
+    padding: 30px; /* More padding for a spacious look */
+  }
 }
 
 /* Small phones */
