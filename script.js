@@ -648,6 +648,7 @@ function handleSwapConfigurationClick(event) {
     document.getElementById("continueToPhase6Button").style.display = "block";
   }
 }
+
 function displaySwapRateOutput() {
   console.log("displaySwapRateOutput called");
 
@@ -655,24 +656,22 @@ function displaySwapRateOutput() {
   const oldConfig = tradeInConfiguration.configuration;
   const newDevice = swapConfiguration.deviceName;
   const newConfig = swapConfiguration.configuration;
-  const selectedQuality = swapConfiguration.deviceQuality;  // Ensure this is captured during selection
+  const selectedQuality = swapConfiguration.deviceQuality;
 
-  // Calculate swap rate using the selected quality along with the other parameters
   swapConfiguration.swapRate = calculateSwapRate(oldDevice, oldConfig, newDevice, newConfig, selectedQuality);
   console.log("Calculated Swap Rate:", swapConfiguration.swapRate);
 
-  // Round down the swap rate to the nearest 1000
   swapConfiguration.swapRate = Math.floor(swapConfiguration.swapRate / 1000) * 1000;
 
   // Ensure we retrieve the correct price using both configuration and quality
+  console.log("Looking for:", newDevice, newConfig, selectedQuality);
   const deviceData = data.find(
     (row) => row[4] === newDevice && row[5] === newConfig && row[2] === selectedQuality
   );
 
   if (deviceData) {
-    console.log("Device Quality:", selectedQuality);
-    
-    // Format swap rate
+    console.log("Device Data Found:", deviceData);
+
     const formattedSwapRate = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "NGN",
@@ -685,14 +684,12 @@ function displaySwapRateOutput() {
     swapRateOutputDiv.classList.remove("hidden");
 
     if (swapConfiguration.swapRate > 0) {
-      // Display upgrade message
       swapRateOutputDiv.innerHTML = `
         <h4 class="htradein">…and we’re done!💃🏻💪🏾</h4>
         <p class="par5output">We can confirm that for <strong>${formattedSwapRate}</strong> we can <strong>Upgrade</strong> your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${selectedQuality}</strong> <strong>${newConfig} ${newDevice}</strong> 🥳</p>
         <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
       `;
     } else {
-      // Display downgrade message
       swapRateOutputDiv.innerHTML = `
         <h4 class="htradein">…and we’re done!💃🏻💪🏾</h4>
         <p class="par5output">If you choose to <strong>Downgrade</strong> from your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${selectedQuality}</strong> <strong>${newConfig} ${newDevice}</strong>, you’d be getting about <strong>${formattedSwapRate}</strong> as CashBack! 🤩</p>
@@ -700,7 +697,7 @@ function displaySwapRateOutput() {
       `;
     }
   } else {
-    console.error("Oops! We couldn’t find the Prices for your Selected Device Configurations. Please Double-check your Selections and try again.");
+    console.error("Device data not found for the selected configuration and quality.");
   }
 }
 
