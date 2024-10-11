@@ -673,7 +673,7 @@ h6 {
 /* Desktops */
 @media screen and (min-width: 1024px) {
   .hwelcome, .hwelcome-blue {
-    font-size: 3em; /* Larger size for desktop */
+    font-size: 5em; /* Larger size for desktop */
     padding-top: 30px; /* More padding for top */
     padding-left: 30px; /* More padding for side */
     padding-right: 30px; /* More padding for side */
@@ -819,7 +819,6 @@ p {
   text-align: center;
   margin-inline-start: 40px;
   margin-inline-end: 40px;
-  margin-top: 26px;
   margin-bottom: 0px;
 }
 
