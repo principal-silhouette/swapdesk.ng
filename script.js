@@ -140,14 +140,14 @@ function handleCategoryClick(event) {
   if (phase1Button.id === "swapButton") {
     continueToPhase3();
   } else if (phase1Button.id === "tradeInButton") {
-    displayTradeInTable();
+    TradeInTable();
   } else if (phase1Button.id === "CheckPriceButton") {
-    displayPricesTable();
+    PricesTable();
   }
 }
 
-function displayTradeInTable() {
-  console.log("Display Trade-In Table");
+function TradeInTable() {
+  console.log(" Trade-In Table");
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
@@ -188,18 +188,18 @@ function displayTradeInTable() {
     });
 
     tradeInTableContainer.appendChild(table);
-    tradeInTableContainer.style.display = 'block';
+    tradeInTableContainer.style. = 'block';
   
     // Hide the GoBackButton and show the ResetTradeInTable button
-    document.getElementById("ResetTradeInTable").style.display = "block";
-    document.getElementById("checkForSwapButton").style.display = "block";
+    document.getElementById("ResetTradeInTable").style. = "block";
+    document.getElementById("checkForSwapButton").style. = "block";
 
   } else {
     console.log("Device type or category not selected");
   }
 }
-function displayPricesTable() {
-  console.log("Display Prices Table");
+function PricesTable() {
+  console.log(" Prices Table");
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
@@ -241,7 +241,7 @@ function displayPricesTable() {
       deviceQuality.style.fontSize = "0.6em"; // Make quality text even smaller
       deviceQuality.style.paddingTop = "0px"; // Reduce gap
       deviceQuality.style.color = "grey";
-      deviceQuality.textContent = item.quality; // Display quality
+      deviceQuality.textContent = item.quality; //  quality
       cell1.appendChild(deviceQuality);
 
       cell2.innerHTML = item.value;
@@ -251,10 +251,10 @@ function displayPricesTable() {
     });
 
     pricesTableContainer.appendChild(table);
-    pricesTableContainer.style.display = 'block';
+    pricesTableContainer.style. = 'block';
   
     // Show the ResetPricesInTable button, keep the GoBackButton visible
-    document.getElementById("ResetPricesInTable").style.display = "block";
+    document.getElementById("ResetPricesInTable").style. = "block";
   
   } else {
     console.log("Device type or category not selected");
@@ -262,12 +262,12 @@ function displayPricesTable() {
 }
 function clearAndCheckAnotherDevice() {
   // Hide the tables
-  document.getElementById("tradeInTableContainer").style.display = "none";
-  document.getElementById("pricesTableContainer").style.display = "none";
+  document.getElementById("tradeInTableContainer").style. = "none";
+  document.getElementById("pricesTableContainer").style. = "none";
 
   // Hide the ResetTradeInTable and ResetPricesInTable buttons
-  document.getElementById("ResetTradeInTable").style.display = "none";
-  document.getElementById("ResetPricesInTable").style.display = "none";
+  document.getElementById("ResetTradeInTable").style. = "none";
+  document.getElementById("ResetPricesInTable").style. = "none";
 
   // Show all device type buttons and remove the selected-button class
   const deviceTypeButtons = document.querySelectorAll("#deviceTypeTradeIn button, #deviceTypePrices button");
@@ -650,54 +650,57 @@ function handleSwapConfigurationClick(event) {
 }
 function displaySwapRateOutput() {
   console.log("displaySwapRateOutput called");
-  // Use global variables instead of passed parameters
+
   const oldDevice = tradeInConfiguration.deviceName;
   const oldConfig = tradeInConfiguration.configuration;
   const newDevice = swapConfiguration.deviceName;
   const newConfig = swapConfiguration.configuration;
+  const selectedQuality = swapConfiguration.deviceQuality;  // Ensure this is captured during selection
 
-  // Calculate swap rate based on your data or logic
-  swapConfiguration.swapRate = calculateSwapRate(oldDevice, oldConfig, newDevice, newConfig);
+  // Calculate swap rate using the selected quality along with the other parameters
+  swapConfiguration.swapRate = calculateSwapRate(oldDevice, oldConfig, newDevice, newConfig, selectedQuality);
   console.log("Calculated Swap Rate:", swapConfiguration.swapRate);
 
   // Round down the swap rate to the nearest 1000
   swapConfiguration.swapRate = Math.floor(swapConfiguration.swapRate / 1000) * 1000;
-  
-  const deviceQuality = data.find(
-    (row) => row[4] === newDevice && row[5] === newConfig
-  )[2];
 
-  console.log("Device Quality:", deviceQuality);
+  // Ensure we retrieve the correct price using both configuration and quality
+  const deviceData = data.find(
+    (row) => row[4] === newDevice && row[5] === newConfig && row[2] === selectedQuality
+  );
 
-  swapConfiguration.deviceQuality = deviceQuality;
+  if (deviceData) {
+    console.log("Device Quality:", selectedQuality);
+    
+    // Format swap rate
+    const formattedSwapRate = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "NGN",
+      currencyDisplay: "code",
+      currencySign: "accounting",
+      minimumFractionDigits: 0,
+    }).format(swapConfiguration.swapRate).replace("NGN", "₦");
 
-  const formattedSwapRate = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "NGN",
-    currencyDisplay: "code",
-    currencySign: "accounting",
-    minimumFractionDigits: 0,
-  }).format(swapConfiguration.swapRate).replace("NGN", "₦");  
+    const swapRateOutputDiv = document.getElementById("swapRateOutput");
+    swapRateOutputDiv.classList.remove("hidden");
 
-  const swapRateOutputDiv = document.getElementById("swapRateOutput");
-  swapRateOutputDiv.classList.remove("hidden");
-
-  if (swapConfiguration.swapRate > 0) {
-    // Upgrade message
-    swapRateOutputDiv.innerHTML = `
-      <h4 class="htradein">…and we’re done!💃🏻💪🏾</h2>
-      <p class="par5output">We can confirm that for <strong>${formattedSwapRate}</strong> we can <strong>Upgrade</strong> your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong> 🥳</p>
-      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
-    `;
-  } else {
-    // Downgrade message
-    swapRateOutputDiv.innerHTML = `
-      <h4 class="htradein">…and we’re done!💃🏻💪🏾</h2>
-      <p class="par5output">If you choose to <strong>Downgrade</strong> from your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${swapConfiguration.deviceQuality}</strong> <strong>${newConfig} ${newDevice}</strong>, you’d be getting about <strong>${formattedSwapRate}</strong> as CashBack! 🤩</p>
-      <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
-    `;
-  }
+    if (swapConfiguration.swapRate > 0) {
+      // Display upgrade message
+      swapRateOutputDiv.innerHTML = `
+        <h4 class="htradein">…and we’re done!💃🏻💪🏾</h4>
+        <p class="par5output">We can confirm that for <strong>${formattedSwapRate}</strong> we can <strong>Upgrade</strong> your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${selectedQuality}</strong> <strong>${newConfig} ${newDevice}</strong> 🥳</p>
+        <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
+      `;
+    } else {
+      // Display downgrade message
+      swapRateOutputDiv.innerHTML = `
+        <h4 class="htradein">…and we’re done!💃🏻💪🏾</h4>
+        <p class="par5output">If you choose to <strong>Downgrade</strong> from your Nigerian Used <strong>${oldDevice} ${oldConfig}</strong> to a <strong>${selectedQuality}</strong> <strong>${newConfig} ${newDevice}</strong>, you’d be getting about <strong>${formattedSwapRate}</strong> as CashBack! 🤩</p>
+        <p class="par4">Once again, we’d like to remind you that the Swap Rate only applies if your <strong>${oldDevice}</strong> is in Perfect Condition✨. If there are any issues we need to know about, Please inform our Sales Team👩‍💼👨‍💼 at the end of this Process.</p>
+      `;
+    }
 }
+
 function calculateSwapRate() {
   console.log("calculateSwapRate called");
   // Use global variables instead of passed parameters
