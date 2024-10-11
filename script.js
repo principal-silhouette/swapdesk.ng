@@ -515,7 +515,6 @@ function handleSwapCategoryClick(event) {
    // Show the "Continue" button
     document.getElementById("continueToPhase5Button").style.display = "block";
   }
-}
 
 function populateSwapDeviceNames() {
   console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
