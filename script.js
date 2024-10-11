@@ -563,6 +563,15 @@ function handleSwapDeviceNameClick(event) {
 
     console.log(`Device Qualities: ${JSON.stringify(deviceQualities)}`);
 
+     // Select the container for device quality
+    const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
+
+    // Ensure that swapDeviceQualityContainer is defined
+    if (!swapDeviceQualityContainer) {
+      console.error("swapDeviceQualityContainer element not found in the DOM");
+      return;
+    }
+    
     // Clear the existing buttons for device quality
     swapDeviceQualityContainer.innerHTML = "";
 
