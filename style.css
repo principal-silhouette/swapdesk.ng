@@ -637,36 +637,47 @@ h6 {
   padding-bottom: 0; /* No padding at the bottom */
 }
 
-/* Adjust media queries as previously defined... */
-/* Small phones */
+/* Adjust media queries as previously defined... */* Small phones */
 @media screen and (max-width: 400px) {
   .hwelcome, .hwelcome-blue {
-    font-size: 1.9em;
-     padding: 15px; /* Padding only at the top */
-  padding-bottom: 0; /* No padding at the bottom */  }
+    font-size: 1.7em;
+    padding-top: 20px; /* Maintain top padding */
+    padding-left: 15px; /* Increase side padding */
+    padding-right: 15px; /* Increase side padding */
+    padding-bottom: 0; /* No padding at the bottom */
+  }
 }
 
 /* Large phones */
 @media screen and (min-width: 400px) and (max-width: 660px) {
   .hwelcome, .hwelcome-blue {
-    font-size: 2.2em;
-     padding: 15px; /* Padding only at the top */
-  padding-bottom: 0; /* No padding at the bottom */  }
+    font-size: 2em;
+    padding-top: 20px; /* Maintain top padding */
+    padding-left: 15px; /* Increase side padding */
+    padding-right: 15px; /* Increase side padding */
+    padding-bottom: 0; /* No padding at the bottom */
+  }
 }
 
 /* Tablets */
 @media screen and (min-width: 660px) and (max-width: 1024px) {
   .hwelcome, .hwelcome-blue {
     font-size: 2.6em;
-  padding: 20px; /* Padding only at the top */
-  padding-bottom: 0; /* No padding at the bottom */  }
+    padding-top: 20px; /* Maintain top padding */
+    padding-left: 20px; /* Adjust side padding */
+    padding-right: 20px; /* Adjust side padding */
+    padding-bottom: 0; /* No padding at the bottom */
+  }
 }
 
 /* Desktops */
 @media screen and (min-width: 1024px) {
   .hwelcome, .hwelcome-blue {
     font-size: 3em; /* Larger size for desktop */
-    padding: 30px; /* More padding for a spacious look */
+    padding-top: 30px; /* More padding for top */
+    padding-left: 30px; /* More padding for side */
+    padding-right: 30px; /* More padding for side */
+    padding-bottom: 0; /* No padding at the bottom */
   }
 }
 
