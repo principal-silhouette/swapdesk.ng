@@ -512,8 +512,9 @@ function handleSwapCategoryClick(event) {
   event.target.classList.remove("hidden"); // Keep the selected button visible
   event.target.classList.add("selected-button"); // Add the selected-button class
 
-  // Show the continue button
-  continueToPhase5()
+   // Show the "Continue" button
+    document.getElementById("continueToPhase5Button").style.display = "block";
+  }
 }
 
 function populateSwapDeviceNames() {
