@@ -310,104 +310,165 @@ function clearAndCheckAnotherDevice() {
   };
 }
 
-function populateDeviceNames(deviceCategory) {
-  console.log(`Populating device names for category: ${deviceCategory}`);
-  // Populate device names based on the selected category and eligibility
-  const deviceNameContainer = document.getElementById("deviceNameContainer");
-  deviceNameContainer.innerHTML = "";
+function populateSwapDeviceNames() {
+  console.log(`Populating swap device names for category: ${swapConfiguration.deviceCategory}`);
+  const swapDeviceNameContainer = document.getElementById("swapDeviceNameContainer");
+  swapDeviceNameContainer.innerHTML = "";
 
-  const deviceNames = data
-    .filter((device) => device[1] === deviceCategory && device[3] === 'Yes')
-    .map((device) => device[4]);
-
-  // Remove duplicates
-  const uniqueDeviceNames = [...new Set(deviceNames)];
-
-  console.log(`Unique device names: ${JSON.stringify(uniqueDeviceNames)}`);
-
-  uniqueDeviceNames.forEach((deviceName) => {
-    const button = document.createElement("button");
-    button.dataset.deviceName = deviceName;
-    button.textContent = deviceName;
-    button.addEventListener("click", handleDeviceNameClick);
-    deviceNameContainer.appendChild(button);
-    console.log(`Appended button for device name: ${deviceName}`);
-  });
-}
-
-function handleDeviceNameClick(event) {
-  const deviceName = event.target.dataset.deviceName;
-  console.log(`Device Name Selected: ${deviceName}`);
-
-  tradeInConfiguration.deviceName = deviceName;
-
-  // Get the unique configurations based on the selected device name and eligibility
-  const configurations = Array.from(
-    new Set(data.filter(row => row[4] === deviceName && row[3] === 'Yes').map(row => row[5]))
+  const deviceData = data.filter(
+    (device) => device[0] === swapConfiguration.deviceType && device[1] === swapConfiguration.deviceCategory
   );
 
-  console.log(`Configurations: ${JSON.stringify(configurations)}`);
+  const uniqueDeviceData = [...new Map(deviceData.map(item => [item[4], item])).values()];
 
-  // Clear existing configurations
-  deviceConfigurationContainer.innerHTML = "";
+  console.log(`Unique swap device data: ${JSON.stringify(uniqueDeviceData)}`);
 
-  // Create and append configuration buttons
-  configurations.forEach(configuration => {
+  uniqueDeviceData.forEach((device) => {
     const button = document.createElement("button");
-    button.dataset.deviceConfiguration = configuration;
-    button.textContent = configuration;
-    button.addEventListener("click", handleConfigurationClick);
-    deviceConfigurationContainer.appendChild(button);
+    button.dataset.deviceName = device[4];
+
+    const deviceName = document.createElement("div");
+    deviceName.textContent = device[4]; // Display the device name
+    button.appendChild(deviceName);
+
+    swapDeviceNameContainer.appendChild(button);
+    console.log(`Appended button for device name: ${device[4]}`);
   });
 
-  // Hide other device name buttons
-  const deviceNameButtons = event.target.parentElement.querySelectorAll("button");
-  deviceNameButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
-  });
-
-  event.target.classList.remove("hidden"); // Keep the selected button visible
-  event.target.classList.add("selected-button"); // Add the selected-button class
-
-  deviceConfigurationContainer.classList.remove("hidden");
+  // Attach event listener to handle device name selection
+  swapDeviceNameContainer.addEventListener("click", handleSwapDeviceNameClick);
 }
 
-function handleConfigurationClick(event) {
-  const deviceConfiguration = event.target.dataset.deviceConfiguration;
-  console.log(`Device Configuration Selected: ${deviceConfiguration}`);
+// New function to handle Device Name selection and display Quality options
+function handleSwapDeviceNameClick(event) {
+  const button = event.target.closest("button");
+  if (button) {
+    const swapDeviceName = button.dataset.deviceName;
+    console.log(`Device Name Selected: ${swapDeviceName}`);
 
-  tradeInConfiguration.configuration = deviceConfiguration;
+    swapConfiguration.deviceName = swapDeviceName; // Store selected device name
 
-  // Show loading animation with trade-in loading text
-  const subHeaderText = "Please be patient while we verify your Trade In Value 🔄💰";
-  const tradeInLoadingText = [
-    "🔍 Analyzing Device Information...",
-    "📈 Checking Market Trends...",
-    "📱 Comparing Device Models...",
-    "✅ Validating Device Condition...",
-    "💰 Calculating Trade-In Value...",
-    "🔒 Finalizing Trade-In Value...",
-  ];
-  showLoadingAnimation(subHeaderText, tradeInLoadingText);
-  setTimeout(() => {
-    hideLoadingAnimation();
-    displayTradeInOutput(tradeInConfiguration.deviceName, tradeInConfiguration.configuration);
-  }, 5000);
+    // Get unique device quality options for the selected device
+    const deviceQualities = Array.from(
+      new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[2]))
+    );
 
-  // Hide other configuration buttons
-  const configurationButtons = event.target.parentElement.querySelectorAll("button");
-  configurationButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
-  });
+    console.log(`Available Qualities: ${JSON.stringify(deviceQualities)}`);
 
-  event.target.classList.remove("hidden"); // Keep the selected button visible
-  event.target.classList.add("selected-button"); // Add the selected-button class
+    const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
+    swapDeviceQualityContainer.innerHTML = ""; // Clear any existing quality options
 
-  // Show the "Continue" button
-  document.getElementById("continueButton").style.display = "block";
+    // Loop through each device quality and create a button with starting price
+    deviceQualities.forEach((quality) => {
+      const price = Math.min(...data.filter(row => row[4] === swapDeviceName && row[2] === quality).map(row => row[6]));
+
+      const button = document.createElement("button");
+      button.dataset.deviceQuality = quality;
+
+      const qualityElement = document.createElement("div");
+      qualityElement.textContent = quality;
+      button.appendChild(qualityElement);
+
+      const startingPrice = document.createElement("div");
+      startingPrice.style.fontSize = "smaller";
+      startingPrice.style.paddingTop = "5px";
+      startingPrice.style.color = "grey";
+      startingPrice.textContent = `Starting at ₦ ${price}`;
+      button.appendChild(startingPrice);
+
+      button.addEventListener("click", handleSwapDeviceQualityClick); // Attach event listener for quality selection
+      swapDeviceQualityContainer.appendChild(button);
+    });
+
+    swapDeviceQualityContainer.classList.remove("hidden"); // Make quality options visible
+  }
 }
+
+// Rename and update existing handleSwapDeviceNameClick to handle quality selection
+function handleSwapDeviceQualityClick(event) {
+  const button = event.target.closest("button");
+  if (button) {
+    const swapDeviceQuality = button.dataset.deviceQuality;
+    console.log(`Device Quality Selected: ${swapDeviceQuality}`);
+
+    swapConfiguration.deviceQuality = swapDeviceQuality; // Set global variable for quality
+
+    // Filter configurations based on both device name and quality
+    const configurations = Array.from(
+      new Set(data.filter(row => row[4] === swapConfiguration.deviceName && row[2] === swapDeviceQuality).map(row => row[5]))
+    );
+
+    console.log(`Configurations: ${JSON.stringify(configurations)}`);
+
+    const swapDeviceConfigurationContainer = document.getElementById("swapDeviceConfigurationContainer");
+    swapDeviceConfigurationContainer.innerHTML = "";
+
+    configurations.forEach(configuration => {
+      const price = data.find(row => row[4] === swapConfiguration.deviceName && row[5] === configuration && row[2] === swapDeviceQuality)[6];
+
+      const button = document.createElement("button");
+      button.dataset.swapDeviceConfiguration = configuration;
+
+      const configElement = document.createElement("div");
+      configElement.textContent = configuration; // Display the configuration name
+      button.appendChild(configElement);
+
+      const retailPrice = document.createElement("div");
+      retailPrice.style.fontSize = "smaller";
+      retailPrice.style.paddingTop = "5px";
+      retailPrice.style.color = "grey";
+      retailPrice.textContent = `${price}`; // Display the retail price
+      button.appendChild(retailPrice);
+
+      button.addEventListener("click", handleSwapConfigurationClick);
+      swapDeviceConfigurationContainer.appendChild(button);
+    });
+
+    swapDeviceConfigurationContainer.classList.remove("hidden"); // Show configurations
+  }
+}
+
+// Configuration click handler with loading animation and swap rate calculation
+function handleSwapConfigurationClick(event) {
+  if (event.target.tagName.toLowerCase() === "button" || event.target.tagName.toLowerCase() === "div") {
+    const swapDeviceConfiguration = event.target.closest("button").dataset.swapDeviceConfiguration;
+    swapConfiguration.configuration = swapDeviceConfiguration; // Set the configuration globally
+
+    // Get the retail price from the button
+    const retailPrice = event.target.closest("button").querySelector("div:last-child").textContent;
+    swapConfiguration.retailPrice = parseFloat(retailPrice.replace(/[^0-9.-]+/g, ""));
+
+    // Show loading animation with swap loading text
+    const subHeaderText = "Please Be Patient While We Calculate the Swap Rate 🔄💰";
+    const swapLoadingText = [
+      "🔍 Analyzing Device Information...",
+      "💸 Calculating Swap Value...",
+      "🔄 Evaluating Swap Options...",
+      "📱 Comparing Device Models...",
+      "🔗 Verifying Device Compatibility...",
+      "🔒 Finalizing Swap Rate...",
+    ];
+    showLoadingAnimationSwap(subHeaderText, swapLoadingText);
+    setTimeout(() => {
+      hideLoadingAnimation();
+      displaySwapRateOutput();
+    }, 6000);
+
+    // Hide other configuration buttons
+    const swapConfigurationButtons = event.target.parentElement.querySelectorAll("button");
+    swapConfigurationButtons.forEach(button => {
+      button.classList.add("hidden");
+      button.classList.remove("selected-button");
+    });
+
+    event.target.closest("button").classList.remove("hidden"); // Keep the selected button visible
+    event.target.closest("button").classList.add("selected-button");
+
+    // Show the "Continue" button
+    document.getElementById("continueToPhase6Button").style.display = "block";
+  }
+}
+
 function displayTradeInOutput(deviceName, deviceConfiguration) {
   // Get the trade-in value based on the selected device name and configuration
   const tradeInValueRow = data.find(
