@@ -143,29 +143,23 @@
         </div>
             
 
-      <!-- Phase 6: Device Condition Questions -->
-      <div id="phase6" class="step" style="display:none;">
-        <div id="step0" class="condition-question">
-        <h3>Is your device in good working condition?</h3>
-        <p class="par2"><strong>You can say "Yes" if..</strong></p>
-        <ul>
-            <li>- Bluetooth, Mobile data &amp; WiFi function normally.</li>
-            <li>- The <strong>Cameras</strong> work and all lenses are intact.</li>
-            <li>- The <strong>Battery Health </strong>for iPhones is over 80%.</li>
-            <li>- The Body is free of <strong>Dents</strong> and <strong>Scratches</strong>.</li>
-            <li>- The Screen and Back Glass are <strong>Not Broken.</strong></li>
-            <li>- The device is not <strong>Locked</strong> to any Network.</li>
-            <li>- The device does not use a <strong>Chip.</strong></li>
-            <li>- <strong>Face ID</strong> or <strong>Touch ID</strong> function normally.</li>
-        </ul>        
-        <div class="buttons-container">
-            <button id="step0Yes" onclick="onConditionSelected('Yes', event)">Yes</button>
-            <button id="step0No" onclick="onConditionSelected('No', event)">No</button>
-            <button class="go-back-button" onclick="goBackFromPhase6()" style="display:block;">Go Back</button> 
-            <button class="transition-button" id="goToPhase7Button" onclick="goToPhase4()" style="display:none;">Proceed to Swap</button>
-        </div>
-        </div>
-    </div>
+<div id="phase6">
+  <h2>Is your device in good condition?</h2>
+  
+  <!-- Yes/No Buttons for Device Condition -->
+  <button class="condition-button" onclick="onConditionSelected('Yes', event)">Yes</button>
+  <button class="condition-button" onclick="onConditionSelected('No', event)">No</button>
+
+  <!-- Container for displaying condition-specific questions when "No" is selected -->
+  <div id="conditionQuestions" class="hidden">
+    <!-- The questions will be inserted here dynamically via JavaScript -->
+  </div>
+
+  <!-- Go to Phase 7 button (initially hidden, shown when conditions are answered) -->
+  <button id="goToPhase7Button" class="transition-button hidden" onclick="goToPhase7()">
+    Proceed to Next Step
+  </button>
+</div>
     
             <!-- Phase 4: Select Swap Device Type & Category -->
         <div id="phase4" class="step" style="display:none;">

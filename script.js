@@ -29,7 +29,17 @@ swapConfiguration = {
   swapRate: 0
 };
 
-// Declare global variables at the beginning of your script
+let currentQuestionIndex = 0;
+const conditionQuestions = [
+  { question: "Does the device have any body defects?", deductionType: "bodyCondition", multiplier: 0.1 },
+  { question: "Is the screen or True Tone damaged?", deductionType: "screenCondition", multiplier: 0.15 },
+  { question: "Is the battery health below acceptable level?", deductionType: "batteryHealth", multiplier: 0.1 },
+  { question: "Are there issues with network or biometrics?", deductionType: "networkBiometrics", multiplier: 0.05 },
+  { question: "Does the earpiece or speaker have problems?", deductionType: "earpieceSpeaker", multiplier: 0.05 },
+  { question: "Is the camera malfunctioning?", deductionType: "camera", multiplier: 0.1 },
+  { question: "Does the charging port, mic, or speaker have issues?", deductionType: "chargingMicSpeaker", multiplier: 0.05 }
+];
+
 let swapData = {};
 
 
@@ -736,6 +746,145 @@ function showStep(stepNumber) {
     }
   });
 }
+
+
+// Handle condition selection
+function onConditionSelected(condition, event) {
+  isPerfectCondition = condition === "Yes";
+  
+  if (condition === "No") {
+    // Display condition questions
+    document.getElementById('conditionQuestions').style.display = 'block';
+    // Hide phase 6 transition button
+    document.getElementById('goToPhase7Button').style.display = 'none';
+    showNextConditionQuestion();
+  } else {
+    // Hide condition questions
+    document.getElementById('conditionQuestions').style.display = 'none';
+    // Show phase 6 transition button for perfect condition
+    document.getElementById('goToPhase7Button').style.display = 'inline-block';
+  }
+  
+  // Hide condition selection buttons
+  const conditionButtons = event.target.parentElement.querySelectorAll("button");
+  conditionButtons.forEach(button => {
+    button.classList.add("hidden");
+  });
+
+  // Highlight selected button
+  event.target.classList.remove("hidden");
+  event.target.classList.add("selected-button");
+}
+
+// Show next condition question
+function showNextConditionQuestion() {
+  const questionContainer = document.getElementById('questionSteps');
+  
+  // Clear previous question
+  questionContainer.innerHTML = '';
+  
+  if (currentQuestionIndex < conditionQuestions.length) {
+    const currentQuestion = conditionQuestions[currentQuestionIndex];
+    
+    // Create question element
+    const questionElement = document.createElement('div');
+    questionElement.innerHTML = `
+      <p>${currentQuestion.question}</p>
+      <button onclick="handleConditionResponse('Yes', '${currentQuestion.deductionType}', ${currentQuestion.multiplier})">Yes</button>
+      <button onclick="handleConditionResponse('No', '${currentQuestion.deductionType}', ${currentQuestion.multiplier})">No</button>
+    `;
+    
+    // Append question element to the container
+    questionContainer.appendChild(questionElement);
+  } else {
+    // All questions are done, show proceed button
+    document.getElementById('goToPhase7Button').style.display = 'inline-block';
+  }
+}
+
+// Handle user response to each question
+function handleConditionResponse(response, deductionType, deductionMultiplier) {
+  if (response === 'Yes') {
+    applyDeduction(deductionType, deductionMultiplier);
+  }
+  
+  // Move to the next question
+  currentQuestionIndex++;
+  showNextConditionQuestion();
+}
+
+// Update trade-in value
+function applyDeduction(deductionType, deductionMultiplier) {
+  const deductionAmount = tradeInConfiguration.tradeInValue * deductionMultiplier;
+  tradeInConfiguration.tradeInValue -= deductionAmount;
+
+  // Track the applied deduction
+  tradeInConfiguration[`${deductionType}Deduction`] = deductionAmount;
+  
+  updateTradeInValue();
+}
+
+function showConditionQuestions() {
+  const questionsContainer = document.getElementById('conditionQuestions');
+  questionsContainer.innerHTML = ""; // Clear previous questions
+
+  const issues = [
+    { name: "Battery Health", deductionType: "batteryHealth", question: "Is your battery health below 80%?" },
+    { name: "Body Defects", deductionType: "bodyCondition", question: "Does your device have visible dents or scratches?" },
+    { name: "Screen & True Tone", deductionType: "screenCondition", question: "Is the screen cracked, or is True Tone malfunctioning?" },
+    { name: "Network & Biometrics", deductionType: "networkBiometrics", question: "Is the device network locked or biometrics not working?" },
+    { name: "Earpiece & Speaker", deductionType: "earpieceSpeaker", question: "Is there an issue with the earpiece or speaker?" },
+    { name: "Camera", deductionType: "camera", question: "Are there problems with the camera?" },
+    { name: "Charging, Mic & Speaker", deductionType: "chargingMicSpeaker", question: "Is the microphone or charging port faulty?" }
+  ];
+
+  issues.forEach(issue => {
+    const questionElement = createQuestionElement(issue);
+    questionsContainer.appendChild(questionElement);
+  });
+
+  questionsContainer.style.display = 'block'; // Show questions container
+}
+
+function createQuestionElement(issue) {
+  const questionDiv = document.createElement('div');
+  questionDiv.classList.add('question');
+
+  const label = document.createElement('label');
+  label.textContent = issue.question;
+
+  const yesButton = createOptionButton('Yes', issue.deductionType, 1);
+  const noButton = createOptionButton('No', issue.deductionType, 0);
+  const bothButton = createOptionButton('Both', issue.deductionType, 2); // Both = apply deduction twice
+
+  questionDiv.appendChild(label);
+  questionDiv.appendChild(yesButton);
+  questionDiv.appendChild(noButton);
+  questionDiv.appendChild(bothButton);
+
+  return questionDiv;
+}
+
+function createOptionButton(label, deductionType, multiplier) {
+  const button = document.createElement('button');
+  button.textContent = label;
+  button.onclick = () => handleConditionResponse(deductionType, multiplier);
+  return button;
+}
+
+function handleConditionResponse(deductionType, multiplier) {
+  if (multiplier > 0) {
+    const deductionMultiplier = (multiplier === 2) ? 2 : 1; // Apply deduction twice if "Both" is selected
+    applyDeduction(deductionType, deductionMultiplier);
+  }
+  updateTradeInValue();
+}
+
+function showGoToPhase7Button() {
+  const goToPhase7Button = document.getElementById('goToPhase7Button');
+  goToPhase7Button.style.display = 'inline-block';
+}
+
 function applyDeduction(deductionType, deductionMultiplier) {
   const deductionAmount = tradeInConfiguration.tradeInValue * deductionMultiplier;
   tradeInConfiguration.tradeInValue -= deductionAmount;
@@ -865,30 +1014,8 @@ function viewSwapBreakdown() {
 
     document.getElementById("downloadJpeg").classList.remove("hidden");
 }
-function onConditionSelected(condition, event) {
-  isPerfectCondition = condition === "Yes"; // Store the condition in the global variable
-  console.log('Selected condition:', isPerfectCondition ? 'Yes' : 'No');
 
-  // Hide other condition buttons
-  const conditionButtons = event.target.parentElement.querySelectorAll("button");
-  conditionButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
-  });
 
-  // Add the selected-button class to the selected button
-  event.target.classList.remove("hidden");
-  event.target.classList.add("selected-button");
-
-  // Show the goToPhase7 button
-  const phase6Element = document.getElementById("phase6");
-  const goToPhase7Button = phase6Element.querySelector(".transition-button");
-  if (goToPhase7Button) {
-    goToPhase7Button.style.display = "inline-block";
-  } else {
-    console.error("goToPhase7 button not found");
-  }
-}
 function onLocationButtonClick(location, event) {
   selectedLocation = location; // Store the location in the global variable
 
