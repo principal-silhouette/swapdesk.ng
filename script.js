@@ -430,7 +430,7 @@ function displayTradeInOutput(deviceName, deviceConfiguration) {
 
   const tradeInOutputDiv = document.getElementById("tradeInOutput");
   tradeInOutputDiv.innerHTML = `
-    <h4 class="htradein">Congratulations!🥳🎉</h4>
+    <h4 class="htradein">Congratulations! 🥳🎉</h4>
     <p class="par5output">You can Get Up to <strong>${value}</strong> when you Trade In📲 your <strong>${deviceConfiguration}, ${deviceName}</strong>. You can either Trade In  for <strong>Cash</strong> 💵 or <strong>Swap</strong> 🔄 to another Device.</p>
     <p class="par4">Remember that this <strong>Value</strong> only applies if your <strong>${deviceName}</strong> is in <strong>Perfect Condition</strong>✨. If there are any issues, you can inform our Sales Team 👩‍💼👨‍💼 after you've gotten an Estimate for the Swap.</p>
   `;
