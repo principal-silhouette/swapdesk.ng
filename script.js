@@ -466,7 +466,13 @@ function handleSwapDeviceTypeClick(event) {
   swapConfiguration.deviceType = targetType;
 
  // Get the unique categories based on the selected device type, excluding "Samsung"
- const categories = Array.from(new Set(data.filter(row => row[0] === targetType && row[1] !== "Samsung").map(row => row[1])));
+ const categories = Array.from(
+  new Set(
+    data
+      .filter(row => row[0] === targetType && row[1] !== "Samsung" && row[6] !== "--")
+      .map(row => row[1])
+  )
+);
 
   const swapDeviceCategory = document.getElementById("swapDeviceCategory");
   swapDeviceCategory.innerHTML = "";
