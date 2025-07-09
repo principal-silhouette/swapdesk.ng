@@ -684,14 +684,14 @@ h6 {
 /* Small phones */
 @media screen and (max-width: 400px) {
   .hwelcome, .hwelcome-blue, .htradein, .hwelcome-green, h3 {
-font-size: 1.7em;
+font-size: 1.3em;
   }
 }
 
 /* Large phones */
 @media screen and (min-width: 400px) and (max-width: 660px) {
   .hwelcome, .hwelcome-blue, .htradein, .hwelcome-green, h3 {
-    font-size: 2em;
+    font-size: 1.7em;
       }
     }
 
