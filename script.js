@@ -151,9 +151,26 @@ function displayTradeInTable() {
 
   if (tradeInConfiguration.deviceType && tradeInConfiguration.deviceCategory) {
     console.log(tradeInConfiguration.deviceType, tradeInConfiguration.deviceCategory);
-    const tradeInData = data
-      .filter(row => row[1] === tradeInConfiguration.deviceCategory && row[0] === tradeInConfiguration.deviceType && row[3] === "Yes")
-      .map(row => ({ deviceName: row[4], condition: row[5], value: row[8] }));
+    let tradeInData = data
+      .filter(row => 
+        row[1] === tradeInConfiguration.deviceCategory &&
+        row[0] === tradeInConfiguration.deviceType &&
+        row[3] === "Yes"
+      )
+      .map(row => ({
+        deviceName: row[4],
+        condition: row[5],
+        value: row[8],
+        brand: row[0]  // assuming row[0] is the brand/device type
+      }));
+
+    // Sort non-Apple devices alphabetically by deviceName
+    if (tradeInConfiguration.deviceType.toLowerCase() !== 'apple') {
+      tradeInData.sort((a, b) => a.deviceName.localeCompare(b.deviceName));
+    } else {
+      // Reverse Apple list (latest first, assuming pre-sorted by recency/price)
+      tradeInData.reverse();
+    }
 
     console.log(tradeInData);
 
@@ -176,7 +193,7 @@ function displayTradeInTable() {
 
     let tbody = table.createTBody();
 
-    tradeInData.reverse().forEach(item => {
+    tradeInData.forEach(item => {
       let row = tbody.insertRow();
       let cell1 = row.insertCell(0);
       let cell2 = row.insertCell(1);
@@ -189,11 +206,11 @@ function displayTradeInTable() {
 
     tradeInTableContainer.appendChild(table);
     tradeInTableContainer.style.display = 'block';
-  
-    // Hide the GoBackButton and show the ResetTradeInTable button
+
+    // Show relevant buttons
     document.getElementById("ResetTradeInTable").style.display = "block";
     document.getElementById("checkForSwapButton").style.display = "block";
-
+  
   } else {
     console.log("Device type or category not selected");
   }
