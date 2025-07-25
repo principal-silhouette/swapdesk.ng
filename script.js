@@ -668,9 +668,8 @@ function handleSwapDeviceNameClick(event) {
   }
 }
 
-What about this function, do you understand what it does first off? 
 
-Rename and update existing handleSwapDeviceNameClick to handle quality selection
+//Rename and update existing handleSwapDeviceNameClick to handle quality selection
 function handleSwapDeviceQualityClick(event) {
   const button = event.target.closest("button");
   if (button) {
