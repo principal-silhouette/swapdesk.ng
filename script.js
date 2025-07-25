@@ -757,7 +757,7 @@ function handleSwapDeviceNameClick(event) {
       swapDeviceConfigurationContainer.classList.remove("hidden");
     }
   }
-}
+
 // Configuration click handler with loading animation and swap rate calculation
 function handleSwapConfigurationClick(event) {
   if (event.target.tagName.toLowerCase() === "button" || event.target.tagName.toLowerCase() === "div") {
