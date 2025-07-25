@@ -331,7 +331,7 @@ function clearAndCheckAnotherDevice() {
 
 function populateDeviceNames(deviceCategory) {
   console.log(`Populating device names for category: ${deviceCategory}`);
-  // Populate device names based on the selected category and eligibility
+  
   const deviceNameContainer = document.getElementById("deviceNameContainer");
   deviceNameContainer.innerHTML = "";
 
@@ -341,6 +341,11 @@ function populateDeviceNames(deviceCategory) {
 
   // Remove duplicates
   const uniqueDeviceNames = [...new Set(deviceNames)];
+
+  // Sort in natural numeric order
+  uniqueDeviceNames.sort((a, b) => 
+    a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+  );
 
   console.log(`Unique device names: ${JSON.stringify(uniqueDeviceNames)}`);
 
