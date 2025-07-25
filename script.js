@@ -166,7 +166,9 @@ function displayTradeInTable() {
 
     // Sort non-Apple devices alphabetically by deviceName
     if (tradeInConfiguration.deviceType.toLowerCase() !== 'apple') {
-      tradeInData.sort((a, b) => a.deviceName.localeCompare(b.deviceName));
+      tradeInData.sort((a, b) =>
+  a.deviceName.localeCompare(b.deviceName, undefined, { numeric: true, sensitivity: 'base' })
+);
     } else {
       // Reverse Apple list (latest first, assuming pre-sorted by recency/price)
       tradeInData.reverse();
