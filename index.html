@@ -1,236 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://apis.google.com/js/api.js" onload="this.onload=function(){}" onreadystatechange="if(this.readyState==='complete')this.onload()"></script>
-    <script src="script.js" defer></script>
-    <script src="./dom-to-image.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-    <title>@the.swapdesk Trade Ins</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Keep original script includes to avoid breaking current JS behavior -->
+  <script src="https://apis.google.com/js/api.js" onload="this.onload=function(){}" onreadystatechange="if(this.readyState==='complete')this.onload()"></script>
+  <script src="./dom-to-image.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+  <script src="script.js" defer></script>
+
+  <title>@the.swapdesk Trade Ins</title>
 </head>
 <body>
-    <div id="video-container">
-        <video id="backgroundVideo" autoplay muted playsinline>
-            <source src="./images/desktop-back.mp4" type="video/mp4">
-        </video>
-        <video id="mobileBackgroundVideo" autoplay muted playsinline>
-            <source src="./images/mobile-back.mp4" type="video/mp4">
-        </video>
-    </div>    
-    <div id="overlay">
-        <div id="popup">
-            <div class="header-container">
-                <p id="header-text">www.swapdesk.ng</p>
-            </div>
-            <div class="content-container">
+  <div id="video-container">
+    <video id="backgroundVideo" autoplay muted playsinline>
+      <source src="./images/desktop-back.mp4" type="video/mp4" />
+    </video>
+    <video id="mobileBackgroundVideo" autoplay muted playsinline>
+      <source src="./images/mobile-back.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <div id="overlay">
+    <div id="popup">
+      <div class="header-container">
+        <p id="header-text">www.swapdesk.ng</p>
+      </div>
+
+      <div class="content-container">
+        <!-- Hidden inputs preserved exactly (no JS changes required) -->
         <div id="app">
-            <input type="hidden" id="mValue">
-            <input type="hidden" id="selectedCategory">
-    
-        <!-- Phase 1 -->
-        <div id="phase1" style="display:block;">
+          <input type="hidden" id="mValue" />
+          <input type="hidden" id="selectedCategory" />
+
+          <!-- =========================
+               Phase 1 — Welcome (keeps original ID 'phase1')
+               ========================= -->
+          <div id="phase1" style="display:block;">
             <h4 class="hwelcome-blue">Upgrade</h4>
-         <p class="par5">
-          <strong><span>Ready to Swap? 🔄</span></strong><br>
-          Get up to <strong>80% Value</strong> for your 📲 iPhone ⌚️Watch 💻 MacBook or 🎧 AirPods when you <strong>Swap.</strong>
-        </p>
-            <div class="button-container">
-                <button class="selection-button-whatsapp" id="CheckPriceButton">Check for Prices</button>
-            </div>
-            <div class="button-container">
-                <button class="selection-button" id="tradeInButton">Check My Trade-In Value</button>
-            </div>
-            <div class="button-container">
-                <button class="selection-button-blue" id="swapButton" >Calculate My Swap Rate</button>
-            </div>
-        </div>
+            <p class="par5">
+              <strong><span>Ready to Swap? 🔄</span></strong><br />
+              Get up to <strong>80% Value</strong> for your 📲 iPhone ⌚️Watch 💻 MacBook or 🎧 AirPods when you
+              <strong>Swap.</strong>
+            </p>
 
+            <div class="button-container">
+              <!-- keep original IDs for compatibility -->
+              <button class="selection-button-whatsapp" id="CheckPriceButton">Check for Prices</button>
+            </div>
 
-         <!-- Phase 2 Prices Scenario -->
-         <div id="pricesPhase" class="step" style="display:none;">
-            <h4 class="hprices">🛒 Shop from</h4>
-            <h4 class="hwelcome-green">@upgrade.hub🥳</h4>
-            <p class="par2">Enjoy best in class Warranty 💪🏾 & Free Delivery 🚚 when you 🛒 Shop <strong>Premium USED 🇺🇸 & Brand New Devices.</strong></p>
-            <div id="deviceTypePrices" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
+            <div class="button-container">
+              <button class="selection-button" id="tradeInButton">Check My Trade-In Value</button>
             </div>
-            <div id="deviceCategoryPrices" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
+
+            <div class="button-container">
+              <button class="selection-button-blue" id="swapButton">Calculate My Swap Rate</button>
             </div>
-                <!-- Add prices table dynamically -->
-            <div id="pricesTableContainer"></div>
-            <div class="buttons-container">
+          </div>
+
+          <!-- =========================
+               Phase 2 — Shared Type & Category Selector
+               This is the new consolidated Phase 2 container. It contains the original price/tradein/swap elements
+               so the existing JS finds its expected IDs (deviceTypePrices, deviceCategoryPrices, deviceTypeTradeIn, etc.)
+               without change. New UI flows can be wired to these containers.
+               ========================= -->
+          <section id="phase2TypeCategory" class="hidden">
+            <h3 class="htradein">Choose Device Type & Category</h3>
+            <p class="par4">
+              Select a device type (e.g., iPhone) then a category (e.g., iPhone 15 Series). This selection is shared
+              across prices, trade-in and swap flows.
+            </p>
+
+            <!-- Original Price Flow containers kept exactly -->
+            <div id="pricesPhase" class="step hidden" style="margin-top: 10px;">
+              <h4 class="hprices">🛒 Shop from</h4>
+              <h4 class="hwelcome-green">@upgrade.hub🥳</h4>
+              <p class="par2">
+                Enjoy best in class Warranty 💪🏾 & Free Delivery 🚚 when you 🛒 Shop <strong>Premium USED 🇺🇸 &
+                  Brand New Devices.</strong>
+              </p>
+
+              <!-- deviceTypePrices and deviceCategoryPrices preserved for legacy JS -->
+              <div id="deviceTypePrices" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)"></div>
+              <div id="deviceCategoryPrices" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)"></div>
+
+              <div id="pricesTableContainer"></div>
+
+              <div class="buttons-container">
                 <button class="go-back-button" id="GoBackButton" onclick="goBackFromPhase2Prices()">Go Back</button>
                 <button class="go-back-button" id="ResetPricesInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Reset</button>
-        </div>
-    </div>
+              </div>
+            </div>
 
-        <!-- Phase 2 Trade-In Scenario -->
-        <div id="phase2TradeIn" class="step" style="display:none;">
-            <h3>Trade In Values 📲</h3>
-            <p><strong>Ready to Swap to something new?</strong></p>
-            <p class="par2">Let's find out the trade-in value of your device. First, select the type of device you want to trade in:</p>
-            <div id="deviceTypeTradeIn" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
-            </div>
-            <div id="deviceCategoryTradeIn" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
-            </div>
-            <div id="tradeInTableContainer"></div>
-            <div class="buttons-container">
-                <button class="go-back-button" id="GoBackButton" onclick="goBackFromPhase2TradeIn()">Go Back</button>
+            <!-- Original Trade-In Flow containers preserved -->
+            <div id="phase2TradeIn" class="step hidden" style="margin-top: 18px;">
+              <h3>Trade In Values 📲</h3>
+              <p><strong>Ready to Swap to something new?</strong></p>
+              <p class="par2">Let's find out the trade-in value of your device. First, select the type of device you want to trade in:</p>
+
+              <div id="deviceTypeTradeIn" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)"></div>
+              <div id="deviceCategoryTradeIn" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)"></div>
+
+              <div id="tradeInTableContainer"></div>
+
+              <div class="buttons-container">
+                <button class="go-back-button" id="GoBackButton_tradeIn" onclick="goBackFromPhase2TradeIn()">Go Back</button>
                 <button class="go-back-button" id="ResetTradeInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Reset</button>
                 <button class="transition-button" id="checkForSwapButton" onclick="continueToPhase3()" style="display:none;">Continue</button>
+              </div>
             </div>
-        </div>
 
-        
-        <!-- Phase 2 Swap Scenario -->
-        <div id="phase2Swap" class="step" style="display:none;">
-            <h3>Select your device to get started.</h3>
-            <h3 class="h33"></h4>
-            <h3 class="h33"></h4>
-            <p class="par2">First, What kind of device do you want to Swap? ⤵️</p>
-            <div id="deviceTypeSwap" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
-            </div>
-            <div id="deviceCategorySwap" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
-            </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase2Swap()">Go Back</button>
+            <!-- Original Swap Flow containers preserved -->
+            <div id="phase2Swap" class="step hidden" style="margin-top: 18px;">
+              <h3>Select your device to get started.</h3>
+              <p class="par2">First, What kind of device do you want to Swap? ⤵️</p>
+
+              <div id="deviceTypeSwap" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)"></div>
+              <div id="deviceCategorySwap" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)"></div>
+
+              <div class="buttons-container">
+                <button class="go-back-button" id="GoBackButton_swap" onclick="goBackFromPhase2Swap()">Go Back</button>
                 <button class="transition-button" id="continueButton" onclick="continueToPhase3()" style="display:none;">Confirm</button>
+              </div>
             </div>
-        </div>
-        
-        <!-- Phase 3: Original Device Info & Swap Rate -->
-        <div id="phase3" class="step" style="display:none;">
-            <h3>Which model do you have?</h3>
-            <p><strong>Here's how to find it ⤵️</strong></p>
-            <p class="par2">For Apple Devices, go to Settings > General > About. You should find the Model Name & Storage Capacity for your iPhone.</p>
-            <div id="deviceNameContainer" class="buttons-container">
-                <!-- Add device names dynamically -->
+
+            <!-- Back button for the consolidated Phase 2 -->
+            <div class="button-container" style="margin-top: 12px;">
+              <button id="phase2Back" class="go-back-button">Go Back</button>
             </div>
-            <div id="deviceConfigurationContainer" class="hidden buttons-container" onclick="handleConfigurationClick(event)">
-                <!-- Add configurations dynamically -->
-            </div>
-            <div id="loadingContainer" class="lcc" style="display: none;">
-                <h4 id="loadingHeader" class="hloading">Calculating...😊</h2>
-                <p id="loadingSubHeader" class="loading-subheader"></h3>
+          </section>
+
+          <!-- =========================
+               Phase 3 — Primary Device Selection
+               Original 'phase3' preserved for legacy JS; new wrapper keeps behavior the same but sits in reorganised flow.
+               ========================= -->
+          <section id="phase3DeviceSelection" class="hidden">
+            <!-- Put existing legacy phase3 inside so current functions (handleConfigurationClick, etc.) still work -->
+            <div id="phase3" class="step">
+              <h3>Which model do you have?</h3>
+              <p><strong>Here's how to find it ⤵️</strong></p>
+              <p class="par2">For Apple Devices, go to Settings > General > About. You should find the Model Name & Storage Capacity for your iPhone.</p>
+
+              <!-- deviceNameContainer and deviceConfigurationContainer preserved exactly -->
+              <div id="deviceNameContainer" class="buttons-container"></div>
+
+              <div id="deviceConfigurationContainer" class="hidden buttons-container" onclick="handleConfigurationClick(event)"></div>
+
+              <!-- loading container preserved -->
+              <div id="loadingContainer" class="lcc" style="display: none;">
+                <h4 id="loadingHeader" class="hloading">Calculating...😊</h4>
+                <p id="loadingSubHeader" class="loading-subheader"></p>
                 <div class="loading-bar-spinner">
                   <div class="loading-bar"></div>
                 </div>
                 <div id="loadingTextContainer"></div>
-              </div>  
-            <div id="tradeInOutput" style="display:none;">
+              </div>
+
+              <!-- tradeInOutput preserved -->
+              <div id="tradeInOutput" style="display:none;">
                 <h2>Trade-In Value</h2>
                 <div id="originalDeviceTradeInValue"></div>
-            </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase3()">Go Back</button>
-                <button class="transition-button" onclick="goToPhase6()" id="continueToPhase4Button" style="display:none;">Confirm</button>
-            </div>
-        </div>
-            
+              </div>
 
-      <!-- Phase 6: Device Condition Questions -->
-      <div id="phase6" class="step" style="display:none;">
-        <div id="step0" class="condition-question">
-        <h3>Is your device in good working condition?</h3>
-        <p class="par2"><strong>You can say "Yes" if..</strong></p>
-        <ul>
-            <li>- Bluetooth, Mobile data &amp; WiFi function normally.</li>
-            <li>- The <strong>Cameras</strong> work and all lenses are intact.</li>
-            <li>- The <strong>Battery Health </strong>for iPhones is over 80%.</li>
-            <li>- The Body is free of <strong>Dents</strong> and <strong>Scratches</strong>.</li>
-            <li>- The Screen and Back Glass are <strong>Not Broken.</strong></li>
-            <li>- The device is not <strong>Locked</strong> to any Network.</li>
-            <li>- The device does not use a <strong>Chip.</strong></li>
-            <li>- <strong>Face ID</strong> or <strong>Touch ID</strong> function normally.</li>
-        </ul>        
-        <div class="buttons-container">
-            <button id="step0Yes" onclick="onConditionSelected('Yes', event)">Yes</button>
-            <button id="step0No" onclick="onConditionSelected('No', event)">No</button>
-            <button class="go-back-button" onclick="goBackFromPhase6()" style="display:block;">Go Back</button> 
-            <button class="transition-button" id="goToPhase7Button" onclick="goToPhase4()" style="display:none;">Proceed </button>
-        </div>
-        </div>
-    </div>
-    
-            <!-- Phase 4: Select Swap Device Type & Category -->
-        <div id="phase4" class="step" style="display:none;">
+              <div class="buttons-container">
+                <button class="go-back-button" id="goBackFromPhase3Old" onclick="goBackFromPhase3()">Go Back</button>
+                <button class="transition-button" id="continueToPhase4Button" onclick="goToPhase6()" style="display:none;">Confirm</button>
+              </div>
+            </div>
+
+            <!-- Quick controls for new flow (Add Another Device / Proceed)
+                 Keep existing button IDs where similar functionality already exists -->
+            <div class="button-container" style="margin-top: 12px;">
+              <button id="btnAddAnotherDevice" class="transition-button">Add Another Device</button>
+              <button id="btnProceedToSwapSummary" class="start-button">Proceed to Swap</button>
+              <button id="btnBackToPhase2From3" class="go-back-button">Go Back</button>
+            </div>
+          </section>
+
+          <!-- =========================
+               Phase 3B — Secondary Device Selection
+               New section but uses same containers pattern to avoid heavy JS changes.
+               ========================= -->
+          <section id="phase3Secondary" class="hidden">
+            <h3 class="htradein">Add a Second Device</h3>
+            <p class="par4">Repeat the selection for the second device. After confirming the second device's value, you can proceed.</p>
+
+            <!-- secondary containers - new IDs but follow same structure as primary so integration is straightforward -->
+            <div id="secondaryDeviceNameContainer" class="buttons-container"></div>
+            <div id="secondaryDeviceConfigContainer" class="buttons-container"></div>
+
+            <div id="secondaryTradeInValueOutput" class="par5output hidden"></div>
+
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnBackToPhase3Primary" class="go-back-button">Go Back</button>
+              <button id="btnProceedToSummary" class="start-button">Proceed</button>
+            </div>
+          </section>
+
+          <!-- =========================
+               Phase 4 — Selected Trade-In Summary
+               This is the new summary view but it contains the old selectedDeviceList table ID for compatibility.
+               ========================= -->
+          <section id="phase4Summary" class="hidden">
+            <h3 class="htradein">Selected Trade-In Device(s)</h3>
+            <p class="par4">Review the device(s) you've added. You can reselect or proceed to swap comparison.</p>
+
+            <table id="selectedDeviceList" class="dd-table dp-table">
+              <thead class="hidden"><tr><th>Device</th><th>Value</th></tr></thead>
+              <tbody>
+                <!-- JS will insert rows for Device 1, Device 2 and total -->
+              </tbody>
+            </table>
+
+            <div class="button-container">
+              <button id="btnReselectDevices" class="selection-button-down">Reselect Devices</button>
+              <button id="btnProceedToSwapMode" class="transition-button">Choose Swap Mode</button>
+            </div>
+          </section>
+
+          <!-- =========================
+               Phase 4B — Swap Mode (Compare by Model | Compare by Storage)
+               We keep original swap mode flow (phase4) available; this new section offers the updated choices.
+               ========================= -->
+          <section id="phase4bSwapMode" class="hidden">
+            <h3 class="hswap">How would you like to check swap rates?</h3>
+
+            <div class="buttons-container">
+              <button id="btnCompareByModel" class="selection-button">
+                Compare By Model
+                <div class="par4">I know I want an iPhone 15 — show me all versions.</div>
+              </button>
+
+              <button id="btnCompareByStorage" class="selection-button">
+                Compare By Storage
+                <div class="par4">I want 256GB — which model gives me the best swap deal?</div>
+              </button>
+            </div>
+
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnBackToSummary" class="go-back-button">Go Back</button>
+            </div>
+          </section>
+
+          <!-- Keep original phase4 (swap device type selection) for legacy code -->
+          <div id="phase4" class="step hidden">
             <h3>Select your new device to proceed</h3>
             <p class="par2">Let us know what type of device you want.</p>
-            <div id="swapDeviceTypeContainer" class="buttons-container" onclick="handleSwapDeviceTypeClick(event)">
-            <!-- Add swap device types dynamically -->
+
+            <div id="swapDeviceTypeContainer" class="buttons-container" onclick="handleSwapDeviceTypeClick(event)"></div>
+            <div id="swapDeviceCategory" class="hidden buttons-container" onclick="handleSwapCategoryClick(event)"></div>
+
+            <div class="buttons-container" style="margin-top:12px;">
+              <button class="go-back-button" onclick="goBackFromPhase4()">Go Back</button>
+              <button class="transition-button" id="continueToPhase5Button" onclick="continueToPhase5()" style="display:none;">Confirm</button>
             </div>
-            <div id="swapDeviceCategory" class="hidden buttons-container" onclick="handleSwapCategoryClick(event)">
-            <!-- Add swap categories dynamically -->
+          </div>
+
+          <!-- Original Phase 5 preserved (swap device selection & rate output) -->
+          <div id="phase5" class="step hidden">
+            <h3>Select your new device to proceed</h3>
+            <p class="par2">Kindly select the specific device you want</p>
+
+            <div id="swapDeviceNameContainer" class="buttons-container"></div>
+            <div id="swapDeviceQualityContainer" class="hidden buttons-container"></div>
+            <div id="swapDeviceConfigurationContainer" class="hidden buttons-container"></div>
+
+            <div id="loadingContainerSwap" class="lcc" style="display: none;">
+              <h4 id="loadingHeaderSwap" class="hloading">Calculating...😊</h4>
+              <p id="loadingSubHeaderSwap" class="loading-subheader"></p>
+              <div class="loading-bar-spinner">
+                <div class="loading-bar"></div>
+              </div>
+              <div id="loadingTextContainerSwap"></div>
             </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase4()">Go Back</button>
-                <button class="transition-button" id="continueToPhase5Button" onclick="continueToPhase5()" style="display:none;">Confirm</button>
+
+            <div id="swapRateOutput" class="hidden"></div>
+
+            <div class="buttons-container" style="margin-top:12px;">
+              <button class="go-back-button" onclick="goBackFromPhase5()">Go Back</button>
+              <button class="transition-button" id="continueToPhase6Button" onclick="goToPhase7()" style="display:none;">Complete Trade-In</button>
             </div>
-        </div>
-  
-     <!-- Phase 5: Swap Device Info & Swap Rate Output -->
-<div id="phase5" class="step" style="display:none;">
-   <h3>Select your new device to proceed</h3>
-    <p class="par2">Kindly select the specific device you want'</p>
+          </div>
 
-    <!-- Container for Swap Device Names -->
-    <div id="swapDeviceNameContainer" class="buttons-container">
-        <!-- Add swap device names dynamically -->
-    </div>
+          <!-- =========================
+               Phase 5A (Compare By Model results)
+               New container — JS will populate using the same 2-column condensed format.
+               ========================= -->
+          <section id="phase5aCompareByModel" class="hidden">
+            <h3 class="hswap">Compare By Model — All Versions</h3>
+            <p class="par4">Select a device model to see every available SKU (condition/source, config, retail & swap rate).</p>
 
-    <!-- NEW: Container for Swap Device Quality -->
-    <div id="swapDeviceQualityContainer" class="hidden buttons-container">
-        <!-- Add swap device quality dynamically -->
-    </div>
+            <div id="compareModelControls" class="buttons-container">
+              <div id="compareModelTypeContainer"></div>
+              <div id="compareModelCategoryContainer"></div>
+              <div id="compareModelNameContainer"></div>
+            </div>
 
-    <!-- Container for Swap Device Configurations -->
-    <div id="swapDeviceConfigurationContainer" class="hidden buttons-container">
-        <!-- Add swap configurations dynamically -->
-    </div>
+            <table id="compareModelResults" class="dp-table dd-table hidden">
+              <thead class="hidden"><tr><th>Device & Details</th><th>Swap Rate</th></tr></thead>
+              <tbody></tbody>
+            </table>
 
-    <div id="loadingContainerSwap" class="lcc" style="display: none;">
-        <h4 id="loadingHeaderSwap" class="hloading">Calculating...😊</h4>
-        <p id="loadingSubHeaderSwap" class="loading-subheader"></p>
-        <div class="loading-bar-spinner">
-            <div class="loading-bar"></div>
-        </div>
-        <div id="loadingTextContainerSwap"></div>
-    </div>
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnBackToSwapModeFrom5a" class="go-back-button">Go Back</button>
+              <button id="btnProceedToIssuesFrom5a" class="start-button">Proceed</button>
+            </div>
+          </section>
 
-    <div id="swapRateOutput" class="hidden"> <!-- Updated style -->
-        <!-- Swap Rate Output will be added dynamically -->
-    </div>
+          <!-- =========================
+               Phase 5B (Compare By Storage) - new structure
+               ========================= -->
+          <section id="phase5bCompareByStorage" class="hidden">
+            <h3 class="hswap">Compare By Storage</h3>
+            <p class="par4">Pick up to three devices. We'll find common configurations (e.g., 256GB) across them — then show SKUs for that size so you can compare prices easily.</p>
 
-    <div class="buttons-container">
-        <button class="go-back-button" onclick="goBackFromPhase5()">Go Back</button>
-        <button class="transition-button" id="continueToPhase6Button" onclick="goToPhase7()" style="display:none;">Complete Trade-In</button>
-    </div>
-</div>
+            <div id="compareStorageDeviceSlots" class="lcc">
+              <div class="compare-slot">
+                <h4 class="h33">Device 1</h4>
+                <div id="storageDevice1TypeContainer" class="buttons-container"></div>
+                <div id="storageDevice1CategoryContainer" class="buttons-container"></div>
+                <div id="storageDevice1NameContainer" class="buttons-container"></div>
+              </div>
 
-    <div id="phase7" class="hidden">
-        <h3>You're almost there...📍</h3>
-        <p>To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
-        <p class="par2"><strong>Kindly select your city ⤵️</strong></p>
-        <div class="buttons-container" id="locationButtonsContainer">
-          <button id="locationPortHarcourt" onclick="onLocationButtonClick('Port Harcourt', event)">Port Harcourt</button>
-          <button id="locationYenagoa" onclick="onLocationButtonClick('Yenagoa', event)">Yenagoa</button>
-          <button id="locationAbuja" onclick="onLocationButtonClick('Abuja', event)">Abuja</button>
-          <button id="locationUyo" onclick="onLocationButtonClick('Uyo', event)">Uyo</button>
-          <button id="locationLagos" onclick="onLocationButtonClick('Lagos', event)">Lagos</button>
-          <button id="locationOtherCities" onclick="onLocationButtonClick('Other Cities', event)">Other Cities</button>
-        </div>
-        <div id="swapBreakdown"></div>
-        <div class="buttons-container">
-            <button id="downloadJpeg" class="hidden download-button" onclick="downloadSwapBreakdownImage()">Download</button>
-          </div>          
-    </div>
+              <div class="compare-slot">
+                <h4 class="h33">Device 2</h4>
+                <div id="storageDevice2TypeContainer" class="buttons-container"></div>
+                <div id="storageDevice2CategoryContainer" class="buttons-container"></div>
+                <div id="storageDevice2NameContainer" class="buttons-container"></div>
+              </div>
+
+              <div class="compare-slot">
+                <h4 class="h33">Device 3 (optional)</h4>
+                <div id="storageDevice3TypeContainer" class="buttons-container"></div>
+                <div id="storageDevice3CategoryContainer" class="buttons-container"></div>
+                <div id="storageDevice3NameContainer" class="buttons-container"></div>
+              </div>
+            </div>
+
+            <div id="commonConfigsContainer" class="buttons-container hidden"></div>
+
+            <table id="compareStorageResults" class="dp-table dd-table hidden">
+              <thead class="hidden"><tr><th>Device & Details</th><th>Swap Rate</th></tr></thead>
+              <tbody></tbody>
+            </table>
+
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnBackToSwapModeFrom5b" class="go-back-button">Go Back</button>
+              <button id="btnProceedToIssuesFrom5b" class="start-button">Proceed</button>
+            </div>
+          </section>
+
+          <!-- =========================
+               Phase 6 — Issues Phase (legacy phase6 preserved)
+               We'll keep the original 'phase6' container for compatibility; also include a new 'phase6Issues' wrapper
+               for the reorganised flow (JS can use either).
+               ========================= -->
+          <section id="phase6Issues" class="hidden">
+            <h3 class="hloading">Any issues with your device(s)?</h3>
+            <p class="par4">If there are faults (battery, body damage, network lock), we'll apply deductions. Answer for each device below.</p>
+            <div id="issuesContainer"></div>
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnBackToCompareFromIssues" class="go-back-button">Go Back</button>
+              <button id="btnProceedToFinalFromIssues" class="start-button">Proceed</button>
+            </div>
+          </section>
+
+          <!-- Original Phase 6 (legacy) preserved -->
+          <div id="phase6" class="step hidden">
+            <div id="step0" class="condition-question">
+              <h3>Is your device in good working condition?</h3>
+              <p class="par2"><strong>You can say "Yes" if..</strong></p>
+              <ul>
+                <li>- Bluetooth, Mobile data &amp; WiFi function normally.</li>
+                <li>- The <strong>Cameras</strong> work and all lenses are intact.</li>
+                <li>- The <strong>Battery Health </strong>for iPhones is over 80%.</li>
+                <li>- The Body is free of <strong>Dents</strong> and <strong>Scratches</strong>.</li>
+                <li>- The Screen and Back Glass are <strong>Not Broken.</strong></li>
+                <li>- The device is not <strong>Locked</strong> to any Network.</li>
+                <li>- The device does not use a <strong>Chip.</strong></li>
+                <li>- <strong>Face ID</strong> or <strong>Touch ID</strong> function normally.</li>
+              </ul>
+              <div class="buttons-container">
+                <button id="step0Yes" onclick="onConditionSelected('Yes', event)">Yes</button>
+                <button id="step0No" onclick="onConditionSelected('No', event)">No</button>
+                <button class="go-back-button" onclick="goBackFromPhase6()" style="display:block;">Go Back</button>
+                <button class="transition-button" id="goToPhase7Button" onclick="goToPhase4()" style="display:none;">Proceed </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- =========================
+               Final Results (Phase 7)
+               Keep the legacy phase7 and add a new final phase container (phase7Final) so JS can use either approach.
+               ========================= -->
+          <section id="phase7Final" class="hidden">
+            <h3 class="hswap">Final Swap Rates</h3>
+            <p class="par4">Review swap rates and savings. You can start over or proceed to contact us on WhatsApp.</p>
+
+            <table id="finalResultsTable" class="dp-table dd-table">
+              <thead class="hidden"><tr><th>Device & Details</th><th>Swap Rate</th></tr></thead>
+              <tbody></tbody>
+            </table>
+
+            <div class="button-container" style="margin-top:12px;">
+              <button id="btnStartOver" class="selection-button-down">Start Over</button>
+              <a id="btnProceedWhatsApp" class="instagram-button" href="#" target="_blank">Proceed to WhatsApp</a>
+            </div>
+          </section>
+
+          <!-- Original phase7 (city selection + download) preserved -->
+          <div id="phase7" class="hidden">
+            <h3>You're almost there...📍</h3>
+            <p>To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
+            <p class="par2"><strong>Kindly select your city ⤵️</strong></p>
+
+            <div class="buttons-container" id="locationButtonsContainer">
+              <button id="locationPortHarcourt" onclick="onLocationButtonClick('Port Harcourt', event)">Port Harcourt</button>
+              <button id="locationYenagoa" onclick="onLocationButtonClick('Yenagoa', event)">Yenagoa</button>
+              <button id="locationAbuja" onclick="onLocationButtonClick('Abuja', event)">Abuja</button>
+              <button id="locationUyo" onclick="onLocationButtonClick('Uyo', event)">Uyo</button>
+              <button id="locationLagos" onclick="onLocationButtonClick('Lagos', event)">Lagos</button>
+              <button id="locationOtherCities" onclick="onLocationButtonClick('Other Cities', event)">Other Cities</button>
+            </div>
+
+            <div id="swapBreakdown"></div>
+
+            <div class="buttons-container" style="margin-top:12px;">
+              <button id="downloadJpeg" class="hidden download-button" onclick="downloadSwapBreakdownImage()">Download</button>
+            </div>
+          </div>
+
+        </div> <!-- /#app -->
+      </div> <!-- /.content-container -->
+    </div> <!-- /#popup -->
+  </div> <!-- /#overlay -->
+
+  <!-- START: developer notes for easy JS integration -->
+  <!--
+    ID Mapping & Notes (keeps old IDs and new ones for compatibility):
+
+    - phase1                        (original)   : Welcome landing (kept)
+    - deviceTypePrices               (original)   : preserved inside new phase2TypeCategory
+    - deviceCategoryPrices           (original)   : preserved
+    - pricesTableContainer           (original)   : preserved
+    - deviceTypeTradeIn              (original)   : preserved
+    - deviceCategoryTradeIn          (original)   : preserved
+    - tradeInTableContainer          (original)   : preserved
+    - deviceTypeSwap                 (original)   : preserved
+    - deviceCategorySwap             (original)   : preserved
+    - phase2TypeCategory             (new)        : consolidated Type & Category wrapper (optional usage)
+    - phase3 (original)             (legacy)     : primary device selection (kept)
+    - phase3DeviceSelection          (new)        : wrapper for reorganised flow (keeps legacy inside)
+    - secondaryDeviceNameContainer   (new)        : secondary device selectors (new only)
+    - selectedDeviceList             (new)        : summary table ID (new; JS may use it)
+    - phase4 (original)             (legacy)     : swap device type selection (kept)
+    - phase5 (original)             (legacy)     : swap device selection (kept)
+    - phase5aCompareByModel         (new)        : Compare-by-Model results (new)
+    - phase5bCompareByStorage       (new)        : Compare-by-Storage flow (new)
+    - phase6 (original)             (legacy)     : condition questions (kept)
+    - phase6Issues                  (new)        : improved issues wrapper (new)
+    - phase7 (original)             (legacy)     : city selection + breakdown (kept)
+    - phase7Final                   (new)        : consolidated final results (new)
+
+    Minimal JS changes recommended to use new flow:
+    - Add an initial DOMContentLoaded hook to call loadData() (if not already present).
+    - Wire navigation buttons (Examples: btnProceedToSwapSummary -> show phase4Summary).
+    - Implement two small helper functions to populate compareModelResults & compareStorageResults using the existing 'data' array.
+    - Optional: map old navigation functions (goToPhase6, continueToPhase3, goToPhase7, etc.) to the new phase containers to preserve behavior.
+
+    The HTML above intentionally keeps all original IDs. That means your current script.js should not break.
+  -->
+  <!-- END: developer notes -->
+
 </body>
 </html>
-                
