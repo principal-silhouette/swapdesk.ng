@@ -339,13 +339,15 @@ function populateDeviceNames(deviceCategory) {
     .filter((device) => device[1] === deviceCategory && device[3] === 'Yes')
     .map((device) => device[4]);
 
-  // Remove duplicates
-  const uniqueDeviceNames = [...new Set(deviceNames)];
+  // Remove duplicates while preserving original order
+  const uniqueDeviceNames = deviceNames.filter((name, index) => deviceNames.indexOf(name) === index);
 
-  // Sort in natural numeric order
-  uniqueDeviceNames.sort((a, b) => 
-    a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
-  );
+  // Only sort if NOT Apple iPhones
+  if (deviceCategory !== "Apple iPhones") {
+    uniqueDeviceNames.sort((a, b) => 
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    );
+  }
 
   console.log(`Unique device names: ${JSON.stringify(uniqueDeviceNames)}`);
 
@@ -358,6 +360,7 @@ function populateDeviceNames(deviceCategory) {
     console.log(`Appended button for device name: ${deviceName}`);
   });
 }
+
 
 function handleDeviceNameClick(event) {
   const deviceName = event.target.dataset.deviceName;
