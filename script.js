@@ -363,9 +363,22 @@ function populateDeviceNames(deviceCategory) {
 
 
 function handleDeviceNameClick(event) {
-  const deviceName = event.target.dataset.deviceName;
-  console.log(`Device Name Selected: ${deviceName}`);
+  const button = event.target.closest("button");
+  if (!button) return;
 
+  const deviceName = button.dataset.deviceName;
+  const isSelected = button.classList.contains("selected-button");
+
+  if (isSelected) {
+    // Toggle OFF: deselect and reset
+    button.classList.remove("selected-button");
+    document.querySelectorAll("#deviceNameContainer button").forEach(btn => btn.classList.remove("hidden"));
+    tradeInConfiguration.deviceName = "";
+    deviceConfigurationContainer.classList.add("hidden");
+    return;
+  }
+
+  console.log(`Device Name Selected: ${deviceName}`);
   tradeInConfiguration.deviceName = deviceName;
 
   // Get the unique configurations based on the selected device name and eligibility
@@ -380,25 +393,28 @@ function handleDeviceNameClick(event) {
 
   // Create and append configuration buttons
   configurations.forEach(configuration => {
-    const button = document.createElement("button");
-    button.dataset.deviceConfiguration = configuration;
-    button.textContent = configuration;
-    button.addEventListener("click", handleConfigurationClick);
-    deviceConfigurationContainer.appendChild(button);
+    const configButton = document.createElement("button");
+    configButton.dataset.deviceConfiguration = configuration;
+    configButton.textContent = configuration;
+    configButton.addEventListener("click", handleConfigurationClick);
+    deviceConfigurationContainer.appendChild(configButton);
   });
 
   // Hide other device name buttons
-  const deviceNameButtons = event.target.parentElement.querySelectorAll("button");
-  deviceNameButtons.forEach(button => {
-    button.classList.add("hidden");
-    button.classList.remove("selected-button");
+  const deviceNameButtons = event.currentTarget.querySelectorAll("button");
+  deviceNameButtons.forEach(btn => {
+    btn.classList.add("hidden");
+    btn.classList.remove("selected-button");
   });
 
-  event.target.classList.remove("hidden"); // Keep the selected button visible
-  event.target.classList.add("selected-button"); // Add the selected-button class
+  // Show only the selected device button
+  button.classList.remove("hidden");
+  button.classList.add("selected-button");
 
+  // Show configuration options
   deviceConfigurationContainer.classList.remove("hidden");
 }
+
 
 function handleConfigurationClick(event) {
   const deviceConfiguration = event.target.dataset.deviceConfiguration;
@@ -597,80 +613,82 @@ function populateSwapDeviceNames() {
 // New function to handle Device Name selection and display Quality options
 function handleSwapDeviceNameClick(event) {
   const button = event.target.closest("button");
-  if (button) {
-    const swapDeviceName = button.dataset.deviceName;
+  if (!button) return;
 
-    console.log(`Device Name Selected: ${swapDeviceName}`);
+  const swapDeviceName = button.dataset.deviceName;
 
-    // Update swap configuration with the selected device name
-    swapConfiguration.deviceName = swapDeviceName;
+  const isSelected = button.classList.contains("selected-button");
 
-    // Filter the available device qualities based on the selected device name
-    const deviceQualities = Array.from(
-      new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[2]))
+  if (isSelected) {
+    // Toggle OFF: deselect and reset
+    button.classList.remove("selected-button");
+    document.querySelectorAll("#swapDeviceNameContainer button").forEach(btn => btn.classList.remove("hidden"));
+    swapConfiguration.deviceName = "";
+    document.getElementById("swapDeviceQualityContainer").classList.add("hidden");
+    return;
+  }
+
+  console.log(`Device Name Selected: ${swapDeviceName}`);
+
+  // Update swap configuration with the selected device name
+  swapConfiguration.deviceName = swapDeviceName;
+
+  // Filter the available device qualities based on the selected device name
+  const deviceQualities = Array.from(
+    new Set(data.filter(row => row[4] === swapDeviceName).map(row => row[2]))
+  );
+
+  console.log(`Device Qualities: ${JSON.stringify(deviceQualities)}`);
+
+  const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
+  if (!swapDeviceQualityContainer) {
+    console.error("swapDeviceQualityContainer element not found in the DOM");
+    return;
+  }
+
+  // Clear the existing buttons for device quality
+  swapDeviceQualityContainer.innerHTML = "";
+
+  // Create and append buttons for each device quality
+  deviceQualities.forEach(quality => {
+    const price = Math.min(
+      ...data
+        .filter(row => row[4] === swapDeviceName && row[2] === quality)
+        .map(row => Number(row[6].replace(/[₦,]/g, '')))
     );
 
-    console.log(`Device Qualities: ${JSON.stringify(deviceQualities)}`);
+    const qualityButton = document.createElement("button");
+    qualityButton.dataset.deviceQuality = quality;
 
-    // Select the container for device quality
-    const swapDeviceQualityContainer = document.getElementById("swapDeviceQualityContainer");
+    const qualityElement = document.createElement("div");
+    qualityElement.textContent = quality;
+    qualityButton.appendChild(qualityElement);
 
-    // Ensure that swapDeviceQualityContainer is defined
-    if (!swapDeviceQualityContainer) {
-      console.error("swapDeviceQualityContainer element not found in the DOM");
-      return;
-    }
+    const startingPrice = document.createElement("div");
+    startingPrice.style.fontSize = "smaller";
+    startingPrice.style.paddingTop = "5px";
+    startingPrice.style.color = "grey";
+    startingPrice.textContent = `Starting at ₦ ${price.toLocaleString()}`;
+    qualityButton.appendChild(startingPrice);
 
-    // Clear the existing buttons for device quality
-    swapDeviceQualityContainer.innerHTML = "";
+    qualityButton.addEventListener("click", handleSwapDeviceQualityClick);
+    swapDeviceQualityContainer.appendChild(qualityButton);
+  });
 
-    // Create and append buttons for each device quality
-    deviceQualities.forEach(quality => {
-      // Retrieve the price and format it correctly
-      const price = Math.min(
-        ...data
-          .filter(row => row[4] === swapDeviceName && row[2] === quality)
-          .map(row => Number(row[6].replace(/[₦,]/g, ''))) // Parse and clean up the price string
-      );
+  // Hide other device name buttons
+  const swapDeviceNameButtons = event.currentTarget.querySelectorAll("button");
+  swapDeviceNameButtons.forEach(div => {
+    div.classList.add("hidden");
+    div.classList.remove("selected-button");
+  });
 
-      // Create the button for the quality
-      const qualityButton = document.createElement("button");
-      qualityButton.dataset.deviceQuality = quality;
+  // Show only the selected device button
+  button.classList.remove("hidden");
+  button.classList.add("selected-button");
 
-      // Create a div for the quality name
-      const qualityElement = document.createElement("div");
-      qualityElement.textContent = quality;
-      qualityButton.appendChild(qualityElement);
-
-      // Create a div for the starting price
-      const startingPrice = document.createElement("div");
-      startingPrice.style.fontSize = "smaller";
-      startingPrice.style.paddingTop = "5px";
-      startingPrice.style.color = "grey";
-      startingPrice.textContent = `Starting at ₦ ${price.toLocaleString()}`; // Format price with commas
-      qualityButton.appendChild(startingPrice);
-
-      // Attach the event listener for the quality click
-      qualityButton.addEventListener("click", handleSwapDeviceQualityClick);
-      swapDeviceQualityContainer.appendChild(qualityButton);
-    });
-
-    // Hide other device name buttons
-    const swapDeviceNameButtons = event.currentTarget.querySelectorAll("button");
-    swapDeviceNameButtons.forEach(div => {
-      div.classList.add("hidden");
-      div.classList.remove("selected-button");
-    });
-
-    // Show only the selected device button
-    button.classList.remove("hidden");
-    button.classList.add("selected-button");
-
-    // Display the device quality buttons
-    swapDeviceQualityContainer.classList.remove("hidden");
-  }
+  // Display the device quality buttons
+  swapDeviceQualityContainer.classList.remove("hidden");
 }
-
 
 //Rename and update existing handleSwapDeviceNameClick to handle quality selection
 function handleSwapDeviceQualityClick(event) {
