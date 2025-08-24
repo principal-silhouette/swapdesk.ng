@@ -369,11 +369,18 @@ function handleDeviceNameClick(event) {
   const deviceName = button.dataset.deviceName;
   const isSelected = button.classList.contains("selected-button");
 
+  // Ensure container exists
+  if (typeof deviceConfigurationContainer === "undefined" || !deviceConfigurationContainer) {
+    console.error("deviceConfigurationContainer not found in the DOM");
+    return;
+  }
+
   if (isSelected) {
     // Toggle OFF: deselect and reset
     button.classList.remove("selected-button");
     document.querySelectorAll("#deviceNameContainer button").forEach(btn => btn.classList.remove("hidden"));
     tradeInConfiguration.deviceName = "";
+    deviceConfigurationContainer.innerHTML = "";  // clear stale configs
     deviceConfigurationContainer.classList.add("hidden");
     return;
   }
@@ -381,17 +388,14 @@ function handleDeviceNameClick(event) {
   console.log(`Device Name Selected: ${deviceName}`);
   tradeInConfiguration.deviceName = deviceName;
 
-  // Get the unique configurations based on the selected device name and eligibility
   const configurations = Array.from(
     new Set(data.filter(row => row[4] === deviceName && row[3] === 'Yes').map(row => row[5]))
   );
 
   console.log(`Configurations: ${JSON.stringify(configurations)}`);
 
-  // Clear existing configurations
   deviceConfigurationContainer.innerHTML = "";
 
-  // Create and append configuration buttons
   configurations.forEach(configuration => {
     const configButton = document.createElement("button");
     configButton.dataset.deviceConfiguration = configuration;
@@ -400,21 +404,18 @@ function handleDeviceNameClick(event) {
     deviceConfigurationContainer.appendChild(configButton);
   });
 
-  // Hide other device name buttons
-  const deviceNameButtons = event.currentTarget.querySelectorAll("button");
+  // ❗️Fix: get siblings from the container, not the button itself
+  const deviceNameButtons = document.querySelectorAll("#deviceNameContainer button");
   deviceNameButtons.forEach(btn => {
     btn.classList.add("hidden");
     btn.classList.remove("selected-button");
   });
 
-  // Show only the selected device button
   button.classList.remove("hidden");
   button.classList.add("selected-button");
 
-  // Show configuration options
   deviceConfigurationContainer.classList.remove("hidden");
 }
-
 
 function handleConfigurationClick(event) {
   const deviceConfiguration = event.target.dataset.deviceConfiguration;
