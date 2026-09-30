@@ -442,12 +442,12 @@ function good(el, app) {
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
   const th = app.catalog.settings.batteryThreshold || 85;
   const items = [
-    ['Bluetooth, mobile data and Wi-Fi', 'work normally'],
-    applies(d, 'camera') && ['Cameras', 'work, and every lens is intact'],
+    ['Bluetooth, data and Wi-Fi', 'work normally'],
+    applies(d, 'camera') && ['Cameras', 'work, lenses intact'],
     applies(d, 'battery') && ['Battery health', `is ${th}% or higher`],
     applies(d, 'body') && ['Body', 'has no dents or deep scratches'],
     applies(d, 'screen') && ['Screen and back glass', 'are not broken'],
-    applies(d, 'network') && d.type === 'Phones' && ['Network', 'is not locked, and no chip is used'],
+    applies(d, 'network') && d.type === 'Phones' && ['Network', 'is unlocked, no chip'],
     (applies(d, 'faceId') || applies(d, 'touchId')) && ['Face ID or Touch ID', 'works normally'],
   ].filter(Boolean);
   el.innerHTML = layout(html`

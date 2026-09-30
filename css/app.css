@@ -661,3 +661,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .picking .pick-progress { margin: 0 auto; }
 .result-block .congrats { font-size: clamp(1.6rem, min(6.6vw, 3.8vh), 2.1rem); }
 .result-block .par { font-size: 15.5px; line-height: 1.45; }
+/* Condition checklist: tight like the old site. */
+.checks { gap: 2px; font-size: 15px; line-height: 1.35; }
+.checks li { padding-left: 22px; }
