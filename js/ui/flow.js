@@ -412,7 +412,7 @@ function confirm(el, app) {
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
   const upTo = d.tradeInValue || 0;
-  const name = [d.storage, d.model].filter(Boolean).join(', ');
+  const name = [d.model, d.storage].filter(Boolean).join(' ');
   el.innerHTML = html`
     <div class="head-block">
       <h2 class="h-title">Your Device</h2>
@@ -709,7 +709,7 @@ function compare(el, app) {
     ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
   const ready = tv !== null && live.length;
   el.innerHTML = layout(raw(el.innerHTML), html`
-    <button class="btn green fill" type="button" data-act="help" ${ready ? '' : 'disabled'}>${raw(ICON.whatsapp)} Let’s Help You Decide</button>
+    ${ready ? html`<button class="btn green fill" type="button" data-act="help">${raw(ICON.whatsapp)} Let’s Help You Decide</button>` : ''}
     ${pills(backPill(), html`<button class="pill go" type="button" data-act="savequotes" ${ready ? '' : 'disabled'}>Save Quotes</button>`)}`).toString();
   wire(el, app, {
     val: () => app.go('value'),

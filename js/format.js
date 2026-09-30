@@ -5,7 +5,10 @@ export const naira = (n) => `₦${nf.format(Math.round(n || 0))}`;
 
 export const deviceName = (d) => [d.model, d.storage, d.condition === 'Deal' ? 'Deal' : d.condition].filter(Boolean).join(' · ');
 
-export const variantName = (d) => [d.storage, d.condition].filter(Boolean).join(' · ');
+// Non LLA is folded into its condition; only LLA devices are marked.
+const LLA = ['Foreign USED', 'Active Brand New'];
+export const conditionLabel = (c = '') => c.replace(/ \(Non LLA\)$/, '');
+export const variantName = (d) => [d.storage, conditionLabel(d.condition), LLA.includes(d.condition) ? 'LLA' : ''].filter(Boolean).join(' · ');
 
 export function updatedLabel(iso) {
   if (!iso) return '';

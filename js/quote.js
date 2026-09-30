@@ -85,14 +85,14 @@ export function termsText(c) {
 export function answersText(a) {
   if (!a) return '';
   const bits = [];
-  if (a.batteryLabel) bits.push(`battery ${a.batteryLabel}`);
-  else if (a.battery !== null && a.battery !== undefined && a.battery !== '') bits.push(`battery ${a.battery}%`);
+  if (a.batteryLabel) bits.push(`Battery ${a.batteryLabel}`);
+  else if (a.battery !== null && a.battery !== undefined && a.battery !== '') bits.push(`Battery ${a.battery}%`);
   const n = NEATNESS.find((x) => x.key === a.neatness);
-  if (n) bits.push(n.label.toLowerCase());
+  if (n) bits.push(n.label);
   const net = NETWORK.find((x) => x.key === a.network);
-  if (net) bits.push(net.label.toLowerCase());
+  if (net) bits.push(net.label);
   const f = (a.faults || []).map((k) => FAULTS.find((x) => x.key === k)?.label).filter(Boolean);
-  bits.push(f.length ? `issues: ${f.join(', ').toLowerCase()}` : 'no issues');
+  bits.push(f.length ? `Issues: ${f.join(', ')}` : 'No issues');
   return bits.join(' · ');
 }
 
