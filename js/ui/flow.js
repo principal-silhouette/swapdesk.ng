@@ -607,9 +607,11 @@ function value(el, app) {
   const r = currentValue(app);
   const s = app.s;
   el.innerHTML = html`
-    <h2 class="h-title">Your Trade-In Value</h2>
-    <p class="par"><strong>${d.model}</strong>${d.storage ? ` · ${d.storage}` : ''}</p>
-    <p class="big-num" data-value="${r.start}">${naira(r.start)}</p>
+    <div class="head-block">
+      <h2 class="h-title">Your Trade-In Value</h2>
+      <p class="par">Here’s what your device is worth after the condition check.</p>
+    </div>
+    ${devValue(d, r.value, r.start)}
     <p class="small">Estimated. Confirmed when we check your device in store, and slightly negotiable.</p>
     <div class="card"${s.answers.quick ? raw(' hidden') : ''}>
       <ul class="lines">
@@ -640,9 +642,9 @@ function choose(el, app) {
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">What would you like to do?</h2>
-      <p class="par">Your ${d.model}${d.storage ? ` ${d.storage}` : ''} is worth</p>
+      <p class="par">Swap it for something new, or trade it in for cash.</p>
     </div>
-    <p class="big-num choose-num">${naira(r.value)}</p>
+    ${devValue(d, r.value)}
     <div class="stack q-opts">
       <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
       <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}.</span></span>${raw(ICON.chevron)}</button>
@@ -685,8 +687,8 @@ function compare(el, app) {
 
   el.classList.add('wide');
   el.innerHTML = html`
-    <h2 class="h-title">Your Swap Rates</h2>
-    <p class="par">Compare what it costs to swap into up to ${max} devices.</p>
+    <div class="head-block"><h2 class="h-title">Your Swap Rates</h2>
+    <p class="par">Compare what it costs to swap into up to ${max} devices.</p></div>
     ${d ? html`<div class="mine">
         <div class="mine-top">
           <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${d.storage}</span></span>
@@ -788,6 +790,14 @@ function finish(el, app) {
     },
     save: () => app.go('saved'),
   });
+}
+
+/** One format for "your device and its value": name line sitting directly on the big figure. */
+function devValue(d, value, animateFrom) {
+  return html`<div class="dev-value">
+    <p class="dev-line"><strong>${d.model}</strong>${d.storage ? ` · ${d.storage}` : ''}</p>
+    <p class="big-num"${animateFrom !== undefined ? raw(` data-value="${animateFrom}"`) : ''}>${naira(animateFrom !== undefined ? animateFrom : value)}</p>
+  </div>`;
 }
 
 function chosenCard(app) {
