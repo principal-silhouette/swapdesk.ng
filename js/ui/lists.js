@@ -114,7 +114,7 @@ export function listScreen(el, app, view, params) {
       const versions = d.condition === 'Deal' ? [d] : all.filter((x) => x.model === d.model).sort(variantOrder);
       const inCmp = app.s.compare.includes(d.id);
       return html`<div class="row-more">
-        ${versions.length > 1 ? html`<p class="eyebrow left" style="margin:6px 0 2px">All versions</p>${versions.map((v) => html`
+        ${versions.length > 1 ? html`<p class="group-label" style="padding:0 4px;margin:8px 0 2px">All versions</p>${versions.map((v) => html`
           <div class="row"><span class="main"><span class="t">${variantName(v)}</span></span><span class="v">${fig(v)}</span></div>`)}` : ''}
         ${view === 'trade-in'
           ? html`<button class="btn blue" type="button" data-act="valueThis" data-id="${d.id}">Value This Device</button>`

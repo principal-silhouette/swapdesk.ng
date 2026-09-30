@@ -210,7 +210,7 @@ function picker(el, app, params) {
         const n = scoped.filter((x) => x.model === d.model);
         g.models.push({ model: d.model, n: n.length, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });
       }
-      options = groups.map((g) => html`<p class="eyebrow left">${g.series}</p>${g.models.map((m) => html`
+      options = groups.map((g) => html`<p class="group-label">${g.series}</p>${g.models.map((m) => html`
         <button class="opt${m.sel ? ' is-selected' : ''}" type="button" data-act="model" data-v="${m.model}">
           <span class="main">${m.model}<span class="sub">${m.n === 1 ? '1 version' : `${m.n} versions`}</span></span>${raw(ICON.chevron)}</button>`)}`);
     } else {
