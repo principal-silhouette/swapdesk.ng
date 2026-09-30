@@ -16,7 +16,7 @@ import { quoteScreen } from './quoteView.js';
 const KEY = 'swapdesk.state.v2';
 
 export const freshAnswers = () => ({
-  icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
+  origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
 });
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
 
@@ -53,8 +53,29 @@ export function ownDevice(app) {
   return app.catalog.byId.get(app.s.deviceId) || null;
 }
 
+const ORIGIN_LABEL = {
+  'Brand New': ['Brand new, still sealed', 'Never opened or activated.'],
+  'Active Brand New': ['Brand new, but activated', 'Opened and set up, barely used.'],
+  'Active Brand New (Non LLA)': ['Brand new, activated (non-LLA)', 'Opened and set up; not an LL/A model.'],
+  'Foreign USED': ['Used, bought abroad', 'UK or US used, imported.'],
+  'Foreign USED (Non LLA)': ['Used, bought abroad (non-LLA)', 'UK or US used; not an LL/A model.'],
+  'Nigerian USED': ['Used in Nigeria', 'Bought and used locally.'],
+};
+let CATALOG = null;
+/** Tradeable rows for the same model and storage (the conditions a customer's device could be). */
+export function siblings(device) {
+  if (!CATALOG || !device) return [device].filter(Boolean);
+  return listRows(CATALOG, 'trade-in').filter((x) => x.model === device.model && x.storage === device.storage).sort(variantOrder);
+}
+/** The row we assume until the customer tells us the condition. */
+function defaultRow(rows) {
+  return rows.find((x) => x.condition === 'Foreign USED') || rows[0];
+}
+
 function questionsFor(device) {
   const qs = [{ key: 'icloud' }];
+  const sib = siblings(device);
+  if (sib.length > 1) qs.unshift({ key: 'origin', options: sib });
   if (applies(device, 'battery')) qs.push({ key: 'battery' });
   if (applies(device, 'body')) qs.push({ key: 'neatness' });
   if (applies(device, 'network') && device.type === 'Phones') qs.push({ key: 'network' });
@@ -64,6 +85,7 @@ function questionsFor(device) {
 }
 function answered(q, a) {
   switch (q.key) {
+    case 'origin': return !!a.origin;
     case 'icloud': return a.icloudLocked === false;
     case 'battery': return a.batteryUnknown || (Number(a.battery) >= 1 && Number(a.battery) <= 100);
     case 'neatness': return !!a.neatness;
@@ -86,6 +108,7 @@ function currentValue(app) {
   return d ? valueDevice(d, engineAnswers(app.s.answers, d), app.catalog.settings) : null;
 }
 function allAnswered(app) {
+  CATALOG = app.catalog;
   const d = ownDevice(app);
   return d && questionsFor(d).every((q) => answered(q, app.s.answers));
 }
@@ -99,17 +122,14 @@ function home(el, app) {
   const max = app.catalog.settings['compare.maxDevices'] || 6;
   el.classList.add('home');
   el.innerHTML = layout(html`
-    <p class="kicker">Swap · Trade In · Upgrade</p>
     <h1 class="h-display">The fastest way<br>to <span class="blue">swap.</span></h1>
     <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
-`, html`
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
       <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
-    <p class="home-note">Value your device line by line, compare your swap balance for up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or waybill from anywhere.</p>
-`).toString();
+    <p class="home-note">Value your device line by line, compare your swap balance for up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or waybill from anywhere.</p>`, '').toString();
   wire(el, app, {
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
@@ -173,6 +193,17 @@ function picker(el, app, params) {
       <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
   };
 
+  CATALOG = app.catalog;
+  // Your own device: model, then storage size. Condition comes later, with the other questions.
+  const byStorage = (rows) => {
+    const seen = new Map();
+    for (const d of rows) { const k = `${d.model}|${d.storage}`; if (!seen.has(k)) seen.set(k, []); seen.get(k).push(d); }
+    return [...seen.values()].map((g) => ({ ...defaultRow(g), _max: Math.max(...g.map((x) => x.tradeInValue || 0)) }));
+  };
+  const storageOpt = (d, withModel) => html`<button class="opt ver" type="button" role="radio" aria-checked="${s.deviceId && ownDevice(app)?.model === d.model && ownDevice(app)?.storage === d.storage ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
+      <span class="main">${withModel ? d.model : (d.storage || 'Standard')}${withModel && d.storage ? html`<span class="sub">${d.storage}</span>` : ''}</span>
+      <span class="val"><small>Up to</small>${naira(d._max)}</span></button>`;
+
   function draw() {
     const lv = level();
     const q = st.search.trim();
@@ -187,19 +218,19 @@ function picker(el, app, params) {
       title = 'Add a device to compare.';
       help = { type: 'What would you like to swap into? ⤵️', brand: 'Which brand?', model: 'Which model would you like?', version: `Tick each storage and condition you want to compare. ${s.compare.length} of ${max} added.` }[lv];
     } else {
-      title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'Which storage and condition?' }[lv];
+      title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'What’s your storage size?' }[lv];
       help = {
         type: `First, what kind of device do you want to ${s.mode === 'swap' ? 'Swap' : 'Trade In'}? ⤵️`,
         brand: 'Pick the brand of your device.',
-        model: st.brand === 'Apple' ? 'For Apple devices, go to Settings › General › About to find the model name and storage.' : 'Find the model name in Settings › About phone.',
-        version: 'Storage is in Settings › General › About.',
+        model: raw(`<strong>Here’s how to find it ⤵️</strong><br>${st.brand === 'Apple' ? 'On your iPhone or iPad, go to Settings › General › About. You’ll see the Model Name and Storage Capacity.' : 'Go to Settings › About phone. You’ll see the model name and storage.'}`),
+        version: raw('<strong>Almost there ⤵️</strong><br>You’ll find it under Settings › General › About › Capacity.'),
       }[lv];
     }
 
     let options;
     if (q) {
       const found = devices.filter((d) => matches(d, q)).sort(byOrder).slice(0, 60);
-      options = found.length ? found.map((d) => version(d, true)) : html`<p class="empty">No devices match “${q}”.</p>`;
+      options = found.length ? (add ? found.map((d) => version(d, true)) : byStorage(found).map((d) => storageOpt(d, true))) : html`<p class="empty">No devices match “${q}”.</p>`;
     } else if (lv === 'type') {
       options = types.map((t) => html`<button class="opt" type="button" data-act="type" data-v="${t}"><span class="main">${TYPE_LABEL[t] || t}</span>${raw(ICON.chevron)}</button>`);
     } else if (lv === 'brand') {
@@ -218,7 +249,7 @@ function picker(el, app, params) {
         // Summarise what's on offer instead of a count: "256gb · 512gb" or "128gb · Brand New".
         const sizes = [...new Set(n.map((x) => x.storage).filter(Boolean))];
         const conds = [...new Set(n.map((x) => x.condition))];
-        const summary = n.length === 1 ? variantName(n[0]) : [sizes.join(' · '), conds.length === 1 ? conds[0] : `${conds.length} conditions`].filter(Boolean).join(' — ');
+        const summary = !add ? (sizes.join(' · ') || 'One size') : n.length === 1 ? variantName(n[0]) : [sizes.join(' · '), conds.length === 1 ? conds[0] : `${conds.length} conditions`].filter(Boolean).join(' — ');
         g.models.push({ model: d.model, n: n.length, summary, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });
       }
       options = groups.map((g) => html`<p class="group-label">${g.series}</p>${g.models.map((m) => html`
@@ -226,7 +257,7 @@ function picker(el, app, params) {
           <span class="main">${m.model}<span class="sub">${m.summary}</span></span>${raw(ICON.chevron)}</button>`)}`);
     } else {
       const vs = devices.filter((d) => d.model === st.model).sort(variantOrder);
-      options = vs.map((d) => version(d, false));
+      options = add ? vs.map((d) => version(d, false)) : byStorage(vs).map((d) => storageOpt(d, false));
     }
 
     el.innerHTML = html`
@@ -294,7 +325,8 @@ function picker(el, app, params) {
           draw();
           $(`[data-id="${CSS.escape(id)}"]`, el)?.focus({ preventScroll: true });
         } else {
-          if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; }
+          const cur = ownDevice(app); const nd = app.catalog.byId.get(id);
+          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; }
           const d = app.catalog.byId.get(id);
           Object.assign(st, { type: d.type, brand: d.brand, model: d.model, search: '' });
           app.save();
@@ -320,7 +352,7 @@ function loading(el, app) {
     <div class="load">
       <div class="load-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><circle class="arc" cx="32" cy="32" r="28" style="animation-duration:${ms}ms"/></svg></div>
       <h2 class="h-title">Calculating…</h2>
-      <p class="par"><strong>${d.model}</strong><br>${variantName(d)}</p>
+      <p class="par"><strong>${d.model}</strong><br>${d.storage}</p>
       <p class="load-step" role="status" aria-live="polite">Checking today’s prices</p>
     </div>`, '').toString();
   const steps = ['Checking today’s prices', 'Matching your model', 'Working out your value'];
@@ -336,16 +368,19 @@ function loading(el, app) {
 // ---------- "Congratulations" (the original result, kept) ----------
 
 function confirm(el, app) {
+  CATALOG = app.catalog;
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  const upTo = Math.max(...siblings(d).map((x) => x.tradeInValue || 0), d.tradeInValue || 0);
+  const name = [d.storage, d.model].filter(Boolean).join(', ');
   el.innerHTML = html`
-    <div class="stack">
+    <h2 class="h-title h-big">Congratulations! 🥳</h2>
+    <p class="lead big-lead">You can get up to <strong class="num">${naira(upTo)}</strong> when you Trade In your <strong>${name}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
+    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>
+    <div class="stack crumbs">
       <button class="opt crumb" type="button" data-act="change"><span class="main">${d.model}</span><span class="edit">Change</span></button>
-      <button class="opt crumb" type="button" data-act="change"><span class="main">${variantName(d)}</span><span class="edit">Change</span></button>
-    </div>
-    <h2 class="h-title">Congratulations! 🥳</h2>
-    <p class="lead">You can get up to <strong class="num">${naira(d.tradeInValue)}</strong> when you Trade In your <strong>${[d.storage, d.model].filter(Boolean).join(', ')}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
-    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
+      ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${d.storage}</span><span class="edit">Change</span></button>` : ''}
+    </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
@@ -358,6 +393,7 @@ function confirm(el, app) {
 function question(el, app, params) {
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  CATALOG = app.catalog;
   const s = app.s;
   const a = s.answers;
   const qs = questionsFor(d);
@@ -371,6 +407,14 @@ function question(el, app, params) {
   function body() {
     const apple = d.brand === 'Apple';
     switch (q.key) {
+      case 'origin':
+        return html`<h2 class="h-title">Is it new or used?</h2>
+          <p class="par">This sets the starting value for your ${d.model}${d.storage ? ` ${d.storage}` : ''}.</p>
+          <div class="stack q-opts" role="radiogroup">${q.options.map((o) => {
+            const [label, hint] = ORIGIN_LABEL[o.condition] || [o.condition, ''];
+            return html`<button class="opt ver" type="button" role="radio" aria-checked="${a.origin === o.id ? 'true' : 'false'}" data-act="origin" data-v="${o.id}">
+              <span class="main">${label}<span class="sub">${hint}</span></span><span class="val"><small>Up to</small>${naira(o.tradeInValue)}</span></button>`;
+          })}</div>`;
       case 'icloud':
         return html`<h2 class="h-title">${apple ? 'Is it signed out of iCloud?' : 'Is it signed out of your accounts?'}</h2>
           <p class="par">${apple ? 'Find My must be turned off so the next owner can set it up.' : 'Remove your Google and Samsung accounts so the next owner can set it up.'}</p>
@@ -449,6 +493,7 @@ function question(el, app, params) {
 
   draw();
   wire(el, app, {
+    origin: (b) => { s.deviceId = b.dataset.v; set((x) => { x.origin = b.dataset.v; }, true); },
     icloud: (b) => set((x) => { x.icloudLocked = b.dataset.v === 'yes'; }, b.dataset.v === 'no'),
     unsure: () => set((x) => { x.batteryUnknown = !x.batteryUnknown; if (x.batteryUnknown) x.battery = ''; }, true),
     neat: (b) => set((x) => { x.neatness = b.dataset.v; }, true),

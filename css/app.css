@@ -488,3 +488,51 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .load-ring .arc { stroke: var(--action); stroke-linecap: round; stroke-dasharray: 176; stroke-dashoffset: 176; animation: ringFill linear forwards; }
 @keyframes ringFill { to { stroke-dashoffset: 0; } }
 .load-step { font-size: 14px; color: var(--ink-3); margin: 6px 0 0; }
+
+/* Round 6: content sits in the middle of the pop-up (no dead gap above the buttons),
+   bigger headers and descriptions like the old SwapDesk, slimmer home buttons. */
+.screen-main { display: flex; flex-direction: column; justify-content: center; }
+.screen-main > * { flex: none; }
+.h-title { font-size: clamp(1.95rem, 7.4vw, 2.3rem); line-height: 1.1; margin: 10px 0 12px; }
+.h-title.h-big { font-size: clamp(2.3rem, 9vw, 2.75rem); margin-top: 18px; }
+.par { font-size: 17px; line-height: 1.45; margin: 0 0 16px; }
+.lead.big-lead { font-size: 19px; line-height: 1.45; }
+.lead.big-lead strong { font-weight: 700; }
+.lead.big-lead strong.num { font-weight: 800; color: var(--brand-deep); }
+.home .h-display { font-size: clamp(2.7rem, 12vw, 3.6rem); margin: 0 0 14px; }
+.home .lead { font-size: 16px; }
+.home .stack.tight { width: min(72%, 290px); gap: 16px; margin: 26px auto 0; }
+.home .stack.tight .btn { min-height: 60px; font-size: 17px; border-radius: 16px; }
+.home .screen-foot .home-note { width: min(84%, 320px); }
+.home .h-display { font-size: clamp(2.3rem, 9.6vw, 3.4rem); }
+.home .stack.tight { width: min(80%, 300px); }
+.home .stack.tight .btn { font-size: 16.5px; white-space: nowrap; padding-inline: 14px; }
+.h-title.h-big { font-size: clamp(2rem, 8vw, 2.6rem); }
+/* Round 7: no dead space. Spread each screen's blocks evenly down the pop-up
+   and scale the key content up so short screens feel full, not empty. */
+.screen-main { justify-content: space-evenly; gap: 6px; }
+.screen-main > .stack, .screen-main > .cities { margin-top: 6px; margin-bottom: 6px; }
+.lead.big-lead { font-size: clamp(19px, 2.6vh, 23px); }
+.h-title.h-big { font-size: clamp(2.2rem, 5.2vh, 2.9rem); }
+.cities { gap: 14px; }
+.cities .opt { min-height: clamp(58px, 8vh, 76px); font-size: 17px; }
+.city-text { font-size: 17px; line-height: 1.45; }
+.opt.crumb { min-height: clamp(58px, 7.5vh, 70px); font-size: 17px; }
+.lines { font-size: 16px; }
+.lines li { padding: 10px 0; }
+.home .screen-main { justify-content: space-evenly; }
+.home .stack.tight { margin: 0 auto; }
+.h-title.h-big { font-size: clamp(2rem, min(8.6vw, 5vh), 2.8rem); white-space: nowrap; }
+.cities .opt { font-size: 16px; padding: 10px 8px; white-space: nowrap; }
+/* Home: equal space between headline, intro and buttons (no margins, the column spaces them). */
+.home .screen-main { justify-content: center; gap: clamp(22px, 3.6vh, 36px); padding: 8px 0 12px; }
+.home .screen-main > * { margin: 0 !important; }
+.home .stack.tight { margin: 0 auto !important; }
+.home .home-note { margin-inline: auto !important; }
+@media (max-width: 600px) { .popup { height: 88%; } }
+.home .screen-main { gap: clamp(22px, 4.4vh, 46px); }
+.home .h-display { font-size: clamp(2.3rem, min(10.5vw, 6vh), 3.6rem); }
+.home .stack.tight { gap: clamp(14px, 2.2vh, 20px); }
+.home .stack.tight .btn { min-height: clamp(58px, 8vh, 74px); font-size: clamp(16.5px, 2.2vh, 19px); }
+.home .lead { font-size: clamp(15px, 2.2vh, 18px); }
+.home .home-note { font-size: clamp(12.5px, 1.7vh, 14px); }

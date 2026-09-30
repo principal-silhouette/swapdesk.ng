@@ -40,7 +40,7 @@ export const CITIES = [
     text: 'Complete your swap at our partner service centre in Computer Village. We’ll connect you and walk you through it.',
   },
   {
-    key: 'other', name: 'Somewhere else',
+    key: 'other', name: 'Other',
     text: 'Waybill your device to us in Port Harcourt. We check it, confirm the final value and send your new device back.',
   },
 ];
