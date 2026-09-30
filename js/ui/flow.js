@@ -68,14 +68,16 @@ export function siblings(device) {
   return listRows(CATALOG, 'trade-in').filter((x) => x.model === device.model && x.storage === device.storage).sort(variantOrder);
 }
 /** The row we assume until the customer tells us the condition. */
+// Every trade-in is a used device, so we value it on the used row for that model and storage.
+const USED_FIRST = ['Nigerian USED', 'Foreign USED', 'Foreign USED (Non LLA)', 'Active Brand New (Non LLA)', 'Active Brand New', 'Brand New'];
 function defaultRow(rows) {
-  return rows.find((x) => x.condition === 'Foreign USED') || rows[0];
+  for (const c of USED_FIRST) { const r = rows.find((x) => x.condition === c); if (r) return r; }
+  return rows[0];
 }
 
 function questionsFor(device) {
   const qs = [{ key: 'icloud' }];
-  const sib = siblings(device);
-  if (sib.length > 1) qs.unshift({ key: 'origin', options: sib });
+
   if (applies(device, 'battery')) qs.push({ key: 'battery' });
   if (applies(device, 'body')) qs.push({ key: 'neatness' });
   if (applies(device, 'network') && device.type === 'Phones') qs.push({ key: 'network' });
@@ -371,7 +373,7 @@ function confirm(el, app) {
   CATALOG = app.catalog;
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
-  const upTo = Math.max(...siblings(d).map((x) => x.tradeInValue || 0), d.tradeInValue || 0);
+  const upTo = d.tradeInValue || 0;
   const name = [d.storage, d.model].filter(Boolean).join(', ');
   el.innerHTML = html`
     <h2 class="h-title">Your Device</h2>
@@ -540,7 +542,7 @@ function value(el, app) {
   const s = app.s;
   el.innerHTML = html`
     <h2 class="h-title">Your Trade-In Value</h2>
-    <p class="par"><strong>${d.model}</strong> · ${variantName(d)}</p>
+    <p class="par"><strong>${d.model}</strong>${d.storage ? ` · ${d.storage}` : ''}</p>
     <p class="big-num" data-value="${r.start}">${naira(r.start)}</p>
     <p class="small">Estimated. Confirmed when we check your device in store, and slightly negotiable.</p>
     <div class="card">
@@ -597,7 +599,7 @@ function compare(el, app) {
     <p class="par">Compare what it costs to swap into up to ${max} devices.</p>
     ${d ? html`<div class="mine">
         <div class="mine-top">
-          <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${variantName(d)}</span></span>
+          <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${d.storage}</span></span>
           <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
         </div>
         ${r && r.accepted ? html`<p class="mine-cond">${answersText(engineAnswers(s.answers, d))}</p>
@@ -640,7 +642,7 @@ function quoteNow(app) {
   const list = s.cash ? [] : s.compare.map((id) => app.catalog.byId.get(id)).filter(Boolean)
     .sort(compareOrder(app.catalog.modelOrder))
     .map((x) => ({ device: x, terms: r?.accepted ? swapTerms(x, r.value) : { kind: 'unavailable', amount: 0 } }));
-  return buildQuote({ device: d, answers: d ? engineAnswers(s.answers, d) : null, result: r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
+  return buildQuote({ device: d ? { ...d, condition: '' } : d, answers: d ? engineAnswers(s.answers, d) : null, result: r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
 }
 async function ensureSaved(app, extra = {}) {
   const s = app.s;
