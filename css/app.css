@@ -683,3 +683,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .list-date { font-size: 12.5px; color: var(--ink-3); margin: 4px 0 0; }
 .choose .head-block .h-title { margin-bottom: 14px; }
 .choose .choose-num { margin: -8px 0 0; }
+/* Compare: each device carries its own Proceed to Swap. */
+.cmp .cmp-go { align-self: stretch; margin-top: 12px; height: 46px; min-width: 0; font-size: 16px; font-weight: 600; }
+.mine.chosen .val small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); text-align: right; }

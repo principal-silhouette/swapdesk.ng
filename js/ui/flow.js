@@ -678,6 +678,7 @@ function compare(el, app) {
       <span class="p">Price ${naira(x.price)}</span>
       <span class="k">${t ? termsLabel(t) : 'Price'}</span>
       <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span>
+      ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
     </article>`;
   };
@@ -704,13 +705,26 @@ function compare(el, app) {
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
     ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
-  el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${tv !== null && live.length ? '' : 'disabled'}>Continue</button>`)).toString();
+  const ready = tv !== null && live.length;
+  el.innerHTML = layout(raw(el.innerHTML), html`
+    <button class="btn green fill" type="button" data-act="help" ${ready ? '' : 'disabled'}>${raw(ICON.whatsapp)} Let’s Help You Decide</button>
+    ${pills(backPill(), html`<button class="pill go" type="button" data-act="savequotes" ${ready ? '' : 'disabled'}>Save Quotes</button>`)}`).toString();
   wire(el, app, {
     val: () => app.go('value'),
     edit: () => app.go('q', { i: 0 }),
     own: () => startFlow(app, 'swap'),
     add: () => { s.add = { ...freshPick(), type: d?.type || '' }; app.go('pick', { purpose: 'add' }); },
-    next: () => { s.cash = false; app.save(); app.go('finish'); },
+    pick: (b) => { s.chosen = b.dataset.id; s.cash = false; app.save(); app.go('finish'); },
+    savequotes: () => { s.chosen = ''; app.save(); app.go('saved'); },
+    help: async (b) => {
+      s.chosen = '';
+      b.disabled = true;
+      const label = b.innerHTML;
+      b.textContent = 'Preparing your quotes…';
+      const { q, link } = await ensureSaved(app);
+      location.href = whatsappURL(helpMessage(q, link));
+      setTimeout(() => { b.disabled = false; b.innerHTML = label; }, 1200);
+    },
     rm: (b) => {
       const id = b.dataset.id;
       const cardEl = b.closest('.cmp');
@@ -724,18 +738,19 @@ function compare(el, app) {
 
 // ---------- complete on WhatsApp ----------
 
-function quoteNow(app) {
+function quoteNow(app, { onlyChosen = false } = {}) {
   const s = app.s;
   const d = ownDevice(app);
   const r = currentValue(app);
-  const list = s.cash ? [] : s.compare.map((id) => app.catalog.byId.get(id)).filter(Boolean)
+  const ids = onlyChosen && s.chosen ? [s.chosen] : s.compare;
+  const list = s.cash ? [] : ids.map((id) => app.catalog.byId.get(id)).filter(Boolean)
     .sort(compareOrder(app.catalog.modelOrder))
     .map((x) => ({ device: x, terms: r?.accepted ? swapTerms(x, r.value) : { kind: 'unavailable', amount: 0 } }));
   return buildQuote({ device: d ? { ...d, condition: '' } : d, answers: d ? engineAnswers(s.answers, d) : null, result: r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
 }
-async function ensureSaved(app, extra = {}) {
+async function ensureSaved(app, extra = {}, opts = {}) {
   const s = app.s;
-  const q = quoteNow(app);
+  const q = quoteNow(app, opts);
   const sig = JSON.stringify({ ...q, created: 0, ...extra });
   if (s.saved && s.saved.sig === sig) return { q, ...s.saved };
   const r = await saveQuote(q, extra);
@@ -750,6 +765,7 @@ function finish(el, app) {
   const city = CITIES.find((c) => c.key === s.city);
   el.innerHTML = html`
     <h2 class="h-title">${s.cash ? 'Complete your Trade-In' : 'Complete your Swap'}</h2>
+    ${chosenCard(app)}
     <p class="par">Where are you located? 📍</p>
     <div class="cities" role="radiogroup">
       ${CITIES.map((c) => html`<button class="opt" type="button" role="radio" aria-checked="${c.key === s.city ? 'true' : 'false'}" data-act="city" data-v="${c.key}">${c.name}</button>`)}
@@ -758,13 +774,13 @@ function finish(el, app) {
     <p class="small">Our team sees every device in your quote from the link. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
   el.innerHTML = layout(raw(el.innerHTML), html`
     <button class="btn green fill" type="button" data-act="wa" ${city ? '' : 'disabled'}>${raw(ICON.whatsapp)} ${city ? 'Complete on WhatsApp' : 'Pick your city to continue'}</button>
-    ${pills(backPill(), html`<button class="pill" type="button" data-act="save">Save & Share</button>`)}`).toString();
+    ${pills(backPill())}`).toString();
   wire(el, app, {
     city: (b) => { s.city = b.dataset.v; app.save(); app.refresh(); $('[data-act="wa"]', el.isConnected ? el : document)?.focus?.({ preventScroll: true }); },
     wa: async (b) => {
       b.disabled = true;
       b.textContent = 'Preparing your quote…';
-      const { q, link } = await ensureSaved(app);
+      const { q, link } = await ensureSaved(app, {}, { onlyChosen: true });
       location.href = whatsappURL(whatsappMessage(q, link, city?.name));
       setTimeout(() => app.refresh(), 1200);
     },
@@ -772,44 +788,104 @@ function finish(el, app) {
   });
 }
 
+function chosenCard(app) {
+  const s = app.s;
+  const x = !s.cash && s.chosen && app.catalog.byId.get(s.chosen);
+  const r = currentValue(app);
+  if (!x || !r?.accepted) return '';
+  const t = swapTerms(x, r.value);
+  return html`<div class="mine chosen">
+    <div class="mine-top"><span class="main"><span class="eyebrow-s">Swapping into</span><b>${x.model}</b><span class="sub">${variantName(x)}</span></span>
+    <span class="val"><small>${termsLabel(t)}</small>${naira(t.kind === 'even' ? 0 : t.amount)}</span></div></div>`;
+}
+
+function helpMessage(q, link) {
+  const lines = ['Hi SwapDesk, please help me decide which device to swap into.', '', summaryText(q, ''), '', `My quotes: ${link}`];
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+
 function saved(el, app) {
   const s = app.s;
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
-  el.innerHTML = html`
-    <h2 class="h-title">Save & Share Quote</h2>
-    <p class="par">Get a link to this quote to come back to or send to someone. Your name and number are optional and help us follow up.</p>
-    <form class="left" novalidate>
-      <div class="form-field"><label for="qn">Name (optional)</label><input id="qn" name="name" autocomplete="name" maxlength="60"></div>
-      <div class="form-field"><label for="qp">Phone (optional)</label><input id="qp" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20"></div>
-      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button class="btn blue" type="submit">Save Quote</button>
-    </form>
-    <div data-result></div>`;
-  el.innerHTML = layout(raw(el.innerHTML), pills(backPill())).toString();
-  const form = $('form', el);
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = $('button[type="submit"]', form);
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-    const fd = new FormData(form);
-    const { q, link } = await ensureSaved(app, { name: fd.get('name').trim(), phone: fd.get('phone').trim(), website: fd.get('website') });
-    form.hidden = true;
-    $('[data-result]', el).innerHTML = html`
-      <p class="lead"><strong>Your quote is saved ✅</strong></p>
-      <div class="linkbox">${link}</div>
-      <div class="stack">
-        <button class="btn blue" type="button" data-act="share">${raw(ICON.share)} Share</button>
-        <button class="btn" type="button" data-act="copy">${raw(ICON.copy)} Copy Link</button>
-      </div>`.toString();
-    el.addEventListener('click', async (ev) => {
-      const k = ev.target.closest('[data-act]')?.dataset.act;
-      if (k === 'share') { const r = await share({ title: 'My SwapDesk quote', text: summaryText(q, ''), url: link }); if (r === 'copied') app.toast('Quote and link copied'); }
-      if (k === 'copy') { await copy(link); app.toast('Link copied'); }
-    });
+  el.classList.add('choose');
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">Save Your Quotes</h2>
+      <p class="par">Keep every swap rate you checked, or send them to someone on WhatsApp. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
+    </div>
+    <div class="stack q-opts">
+      <button class="opt" type="button" data-act="image"><span class="main">Download as Image<span class="sub">Save a picture of your quotes to your phone.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="walink"><span class="main">Share Link on WhatsApp<span class="sub">Send a link that opens these exact quotes.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="copy"><span class="main">Copy Link<span class="sub">Paste it anywhere to come back later.</span></span>${raw(ICON.chevron)}</button>
+    </div>`, pills(backPill())).toString();
+  wire(el, app, {
+    image: async (b) => {
+      b.disabled = true;
+      const { q, link } = await ensureSaved(app);
+      await saveQuoteImage(q, link, app).catch(() => app.toast('Couldn’t make the image. Try Share Link instead.'));
+      b.disabled = false;
+    },
+    walink: async () => {
+      const { q, link } = await ensureSaved(app);
+      location.href = `https://wa.me/?text=${encodeURIComponent(`My SwapDesk swap quotes\n\n${summaryText(q, '')}\n\n${link}`)}`;
+    },
+    copy: async () => { const { link } = await ensureSaved(app); await copy(link); app.toast('Link copied'); },
   });
-  wire(el, app, {});
 }
+
+/** Draw the quotes as a shareable picture (no libraries): white card, logo, value and each swap. */
+async function saveQuoteImage(q, link, app) {
+  const W = 1080;
+  const rows = q.compare.length;
+  const H = 520 + rows * 190 + 200;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const font = (w, px) => `${w} ${px}px -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif`;
+  g.fillStyle = '#eef6ff'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#ffffff'; roundRect(g, 40, 40, W - 80, H - 80, 36); g.fill();
+  const logo = await loadImg('assets/swapdesk-logo.png').catch(() => null);
+  if (logo) g.drawImage(logo, (W - 300) / 2, 80, 300, 300 * logo.height / logo.width);
+  g.textAlign = 'center';
+  g.fillStyle = '#6a6a70'; g.font = font(500, 30);
+  g.fillText(`Swap quote · ${new Date(q.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, W / 2, 210);
+  g.fillStyle = '#1d1d1f'; g.font = font(700, 40);
+  g.fillText(`${q.device.name}`, W / 2, 280);
+  g.fillStyle = '#18577b'; g.font = font(800, 96);
+  g.fillText(naira(q.value), W / 2, 385);
+  g.fillStyle = '#6a6a70'; g.font = font(400, 28);
+  g.fillText('Trade-in value · confirmed when we check the device', W / 2, 430);
+  let y = 500;
+  g.textAlign = 'left';
+  for (const cmp of q.compare) {
+    g.fillStyle = '#f3f8ff'; roundRect(g, 90, y, W - 180, 160, 24); g.fill();
+    const [model, ...rest] = cmp.name.split(' · ');
+    g.fillStyle = '#1d1d1f'; g.font = font(700, 38); g.fillText(model, 130, y + 56);
+    g.fillStyle = '#6a6a70'; g.font = font(400, 27); g.fillText(cmp.dealNote || rest.join(' · '), 130, y + 98);
+    g.fillText(`Price ${naira(cmp.price)}`, 130, y + 136);
+    g.textAlign = 'right';
+    g.fillStyle = cmp.kind === 'add' ? '#1d1d1f' : '#0a7d45'; g.font = font(600, 26);
+    g.fillText(termsLabel(cmp).toUpperCase(), W - 130, y + 52);
+    g.font = font(800, 46); g.fillText(naira(cmp.kind === 'even' ? 0 : cmp.amount), W - 130, y + 112);
+    g.textAlign = 'left';
+    y += 190;
+  }
+  g.textAlign = 'center';
+  g.fillStyle = '#007bff'; g.font = font(500, 28); const shown = link.replace(/^https?:\/\//, ''); g.fillText(shown.length > 48 ? 'WhatsApp 0703 785 3959 · swapdesk.ng' : shown, W / 2, y + 40);
+  g.fillStyle = '#6a6a70'; g.font = font(500, 26); g.fillText('swapdesk.ng · An Upgrade Brands product', W / 2, y + 90);
+  const blob = await new Promise((res) => c.toBlob(res, 'image/png'));
+  const file = new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
+  if (navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'My SwapDesk quotes' }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'swapdesk-quotes.png';
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  app.toast('Image saved');
+}
+function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
 
 export const SCREENS = {
   home,
