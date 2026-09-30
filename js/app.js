@@ -70,6 +70,7 @@ function show(screen, params, dir, inPlace = false) {
   if (ok === false) return;
   body.replaceChildren(el);
   current = el;
+  requestAnimationFrame(markOverflow);
   if (inPlace) { body.scrollTop = y; return; }
   body.scrollTop = 0;
   if (dir !== 0 && !reducedMotion() && el.animate) {
@@ -84,6 +85,11 @@ function show(screen, params, dir, inPlace = false) {
   const titles = { prices: 'Price List', 'trade-in': 'Trade-In Values', quote: 'Swap Quote' };
   document.title = titles[screen] ? `${titles[screen]} · SwapDesk` : '@the.swapdesk Trade Ins · Swap, Trade In, Upgrade';
 }
+
+// The pinned footer only needs its backing when content scrolls under it.
+function markOverflow() { body.classList.toggle('overflowing', body.scrollHeight > body.clientHeight + 1); }
+new ResizeObserver(markOverflow).observe(body);
+new MutationObserver(() => requestAnimationFrame(markOverflow)).observe(body, { childList: true, subtree: true });
 
 window.addEventListener('popstate', (e) => {
   const st = e.state;

@@ -23,7 +23,8 @@
   --action-hover: #0069d9;
   --selected: #c8e4ff;       /* original selected button */
   --hover: #e6f2ff;
-  --popup: rgba(228, 242, 255, 0.86);
+  --popup: rgba(226, 240, 255, 0.58);
+  --glass: rgba(232, 243, 255, 0.72);
   --green: #1a9e4b;          /* original "Check for Prices" outline, darkened for contrast */
   --warn: #9a5b00;
   --danger: #c4262e;
@@ -104,8 +105,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   translate: -50% -50%;
   display: flex; flex-direction: column;
   background: var(--popup);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(3px) saturate(140%);
+  backdrop-filter: blur(3px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 18px;
   box-shadow: var(--shadow);
   will-change: transform;
@@ -134,7 +136,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .screen-main { flex: 1 0 auto; padding-bottom: 12px; }
 .screen-foot {
   position: sticky; bottom: 0; z-index: 4; margin: 0 -24px; padding: 22px 24px calc(12px + env(safe-area-inset-bottom));
-  background: linear-gradient(rgba(231, 243, 255, 0), rgba(231, 243, 255, 0.97) 24px);
+  background: linear-gradient(rgba(232, 243, 255, 0), rgba(232, 243, 255, 0.55) 26px);
   display: grid; gap: 12px;
 }
 @media (min-width: 601px) { .screen-foot { padding-bottom: 16px; } }
@@ -261,7 +263,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .hp { position: absolute; left: -5000px; }
 
 /* ---------- lists ---------- */
-.list-top { position: sticky; top: -4px; z-index: 3; margin: 0 -24px; padding: 10px 24px 10px; background: rgba(232, 244, 255, 0.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); display: grid; gap: 10px; }
+.list-top { position: sticky; top: -4px; z-index: 3; margin: 0 -24px; padding: 10px 24px 10px; background: var(--glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); display: grid; gap: 10px; }
 .list-top .field input { min-height: 48px; }
 .list-top .chip { min-height: 36px; }
 .list-actions { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; margin: 2px 0 4px; }
@@ -269,7 +271,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .list-actions .ico { width: 18px; height: 18px; }
 .group { background: var(--white); border: 1px solid #d9e2ea; border-radius: 12px; overflow: hidden; text-align: left; }
 .series { margin: 18px 0 0; }
-.series-h { position: sticky; top: var(--list-top, 118px); z-index: 2; margin: 0 0 8px; padding: 8px 17px 6px; font: 700 1.1rem/1.2 var(--display); letter-spacing: -0.018em; color: var(--brand-deep); background: #e8f3ff; text-align: left; box-shadow: 0 6px 8px -6px rgba(232, 243, 255, 1); }
+.series-h { position: sticky; top: var(--list-top, 118px); z-index: 2; margin: 0 0 8px; padding: 8px 17px 6px; font: 700 1.1rem/1.2 var(--display); letter-spacing: -0.018em; color: var(--brand-deep); background: var(--glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); text-align: left; }
 .row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 16px; border: 0; background: transparent; text-align: left; position: relative; font-size: 16px; }
 .row + .row, .row + .row-more, .row-more + .row { border-top: 1px solid #e6ebf0; }
 .row:hover { background: #f4f9ff; }
@@ -403,3 +405,16 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .home-note { margin: 2px 4px 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); text-align: center; }
 @media (max-height: 700px) and (max-width: 600px) { .home-note { font-size: 13px; } }
 @media (max-height: 700px) and (max-width: 600px) { .home .lead { display: none; } }
+/* home, round 3 */
+.home .kicker { margin-top: 18px; }
+.home .h-display { margin: 18px 0 22px; }
+.home .lead { font-size: 15px; line-height: 1.45; }
+.home .stack.tight { gap: 14px; }
+.home .stack.tight .btn { min-height: 68px; font-size: 18px; border-radius: 12px; }
+.home-note { font-size: 12.5px; margin-top: 4px; }
+@media (max-height: 700px) and (max-width: 600px) {
+  .home .kicker { margin-top: 6px; }
+  .home .h-display { margin: 10px 0 12px; }
+  .home .stack.tight .btn { min-height: 60px; }
+}
+.popup-body:not(.overflowing) .screen-foot { background: none; }

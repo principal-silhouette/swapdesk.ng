@@ -109,7 +109,7 @@ function home(el, app) {
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
     <p class="home-note">Value your device line by line, compare your swap balance for up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or waybill from anywhere.</p>
-    <p class="foot-link"><button class="link" type="button" data-act="tradeList">See all Trade-In Values</button></p>`).toString();
+`).toString();
   wire(el, app, {
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
