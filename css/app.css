@@ -825,3 +825,4 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Condition checklist: smaller text */
 .screen-main > .checks { font-size: 13.5px !important; line-height: 1.35; gap: 3px; }
 .screen-main > .checks li { padding-left: 20px; }
+.screen-main > .checks { margin-bottom: 28px !important; }
