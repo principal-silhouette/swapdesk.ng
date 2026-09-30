@@ -832,3 +832,25 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .size.out .sa, .opt.out .val.sold, .row .v.out { background: none; color: #c0392b; font-weight: 700; font-size: 13.5px; padding: 0; }
 .opt.ver.out { opacity: 0.55; cursor: default; }
 .notice-only { margin: 12px auto 0; padding: 10px 14px; border-radius: 12px; background: #fff4e5; color: #8a4b00; font-size: 14px; line-height: 1.4; max-width: var(--box); }
+
+/* Swap Rates: compact cards, three lines each. */
+.mine.slim { padding: 10px 14px 4px; }
+.mine.slim .mine-top { align-items: baseline; }
+.mine.slim .mine-top .main { display: flex; align-items: baseline; flex-wrap: wrap; min-width: 0; }
+.mine.slim .mine-top b { display: inline; font-size: 16px; }
+.mine.slim .mine-top .sub { display: inline; font-size: 14px; }
+.mine.slim .mine-top .val { font-size: 19px; }
+.mine.slim .mine-cond { margin: 2px 0 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mine.slim .mine-how { margin-top: 4px; padding-top: 0; }
+.mine.slim .mine-how summary { min-height: 34px; padding: 4px 0; font-size: 14px; }
+.mine.slim .mine-how[open] .mine-cond { white-space: normal; }
+.cmp.slim { min-height: 0; padding: 10px 14px 12px; gap: 4px; }
+.cmp.slim .t { font-weight: 400; font-size: 15px; line-height: 1.3; padding-right: 30px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp.slim .t b { font-weight: 700; }
+.cmp.slim .t .s { font-size: 13.5px; }
+.cmp.slim .row2 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.cmp.slim .kn { white-space: nowrap; }
+.cmp.slim .k { margin: 0; padding: 0; font-size: 11px; display: inline; }
+.cmp.slim .n { font-size: 19px; display: inline; }
+.cmp.slim .cmp-go { margin-top: 6px; height: 38px; font-size: 15px; }
+.cmp.slim .x { top: -2px; right: -2px; }

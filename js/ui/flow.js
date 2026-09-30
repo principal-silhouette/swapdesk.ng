@@ -678,12 +678,10 @@ function compare(el, app) {
         <button class="x" type="button" aria-label="Remove" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button></article>`;
     }
     const t = tv === null ? null : swapTerms(x, tv);
-    return html`<article class="cmp ${t ? t.kind : ''}">
-      <span class="t">${x.model}${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}</span>
-      <span class="s">${x.condition === 'Deal' ? [x.storage, x.dealNote].filter(Boolean).join(' · ') : variantName(x)}</span>
-      <span class="p">Price ${naira(x.price)}</span>
-      <span class="k">${t ? termsLabel(t) : 'Price'}</span>
-      <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span>
+    // Three lines: what it is · price and what you add · proceed.
+    return html`<article class="cmp slim ${t ? t.kind : ''}">
+      <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''} <span class="s">· ${x.condition === 'Deal' ? [x.storage, x.dealNote].filter(Boolean).join(' · ') : variantName(x)}</span></span>
+      <span class="row2"><span class="p">Price ${naira(x.price)}</span><span class="kn"><span class="k">${t ? termsLabel(t) : 'Price'}</span> <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span></span></span>
       ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
     </article>`;
@@ -693,9 +691,9 @@ function compare(el, app) {
   el.innerHTML = html`
     <div class="head-block"><h2 class="h-title">Your Swap Rates</h2>
     <p class="par">Compare what it costs to swap into up to ${max} devices.</p></div>
-    ${d ? html`<div class="mine">
+    ${d ? html`<div class="mine slim">
         <div class="mine-top">
-          <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${d.storage}</span></span>
+          <span class="main"><b>${d.model}</b><span class="sub"> · ${d.storage}</span></span>
           <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
         </div>
         ${r && r.accepted ? html`<p class="mine-cond">${s.answers.quick ? 'Good working condition' : answersText(engineAnswers(s.answers, d))}</p>
@@ -713,7 +711,6 @@ function compare(el, app) {
     ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
   const ready = tv !== null && live.length;
   el.innerHTML = layout(raw(el.innerHTML), html`
-    ${ready ? html`<button class="btn green fill" type="button" data-act="help">${raw(ICON.whatsapp)} Let’s Help You Decide</button>` : ''}
     ${pills(backPill(), html`<button class="pill go" type="button" data-act="savequotes" ${ready ? '' : 'disabled'}>Save Quotes</button>`)}`).toString();
   wire(el, app, {
     val: () => app.go('value'),
@@ -851,59 +848,88 @@ function saved(el, app) {
 
 /** Draw the quotes as a shareable picture (no libraries): white card, logo, value and each swap. */
 async function saveQuoteImage(q, link, app) {
+  // A phone screen of the site: white background with the brand waves, the logo on top,
+  // and the quote on the light-blue pop-up.
   const W = 1080;
-  const rows = q.compare.length;
   const lines = q.lines || [];
+  const rows = q.compare.length;
   const bH = 70 + (lines.length + 1) * 52 + (lines.length ? 52 : 0);
-  const H = 520 + bH + 30 + rows * 190 + 200;
+  const content = 470 + bH + 36 + rows * 186 + 150;
+  const PT = 300; // pop-up top
+  const H = Math.max(1920, PT + content + 80);
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
   const font = (w, px) => `${w} ${px}px -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif`;
-  g.fillStyle = '#eef6ff'; g.fillRect(0, 0, W, H);
-  g.fillStyle = '#ffffff'; roundRect(g, 40, 40, W - 80, H - 80, 36); g.fill();
-  const logo = await loadImg('assets/swapdesk-logo.png').catch(() => null);
-  if (logo) g.drawImage(logo, (W - 300) / 2, 80, 300, 300 * logo.height / logo.width);
-  g.textAlign = 'center';
-  g.fillStyle = '#6a6a70'; g.font = font(500, 30);
-  g.fillText(`Swap quote · ${new Date(q.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, W / 2, 210);
-  g.fillStyle = '#1d1d1f'; g.font = font(700, 40);
-  g.fillText(`${q.device.name}`, W / 2, 280);
-  g.fillStyle = '#18577b'; g.font = font(800, 96);
-  g.fillText(naira(q.value), W / 2, 385);
-  g.fillStyle = '#6a6a70'; g.font = font(400, 28);
-  g.fillText('Trade-in value · confirmed when we check the device', W / 2, 430);
-  // How the trade-in value was reached: starting value, each deduction, final value.
-  let y = 480;
-  g.fillStyle = '#f7fafe'; roundRect(g, 90, y, W - 180, bH, 24); g.fill();
-  g.textAlign = 'left'; g.fillStyle = '#18577b'; g.font = font(700, 26);
-  g.fillText(lines.length ? 'HOW WE GOT YOUR VALUE' : 'GOOD WORKING CONDITION', 130, y + 50);
-  const row = (label, amt, bold, yy) => {
-    g.textAlign = 'left'; g.fillStyle = bold ? '#1d1d1f' : '#454545'; g.font = font(bold ? 700 : 400, 30); g.fillText(label, 130, yy);
-    g.textAlign = 'right'; g.fillStyle = bold ? '#18577b' : '#1d1d1f'; g.font = font(bold ? 800 : 500, 30); g.fillText(amt, W - 130, yy);
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+  const [logo, wa, wb] = await Promise.all(['assets/swapdesk-logo.png', 'assets/wave-a.svg', 'assets/wave-b.svg'].map((u) => loadImg(u).catch(() => null)));
+  const wave = (img, x, y, w, rot) => {
+    if (!img) return;
+    const h = w * (img.height / img.width || 1.1);
+    g.save(); g.globalAlpha = 0.55; g.translate(x + w / 2, y + h / 2); g.rotate(rot * Math.PI / 180); g.drawImage(img, -w / 2, -h / 2, w, h); g.restore();
   };
-  let ly = y + 102;
+  wave(wa, W - 560, -260, 1100, -18);
+  wave(wb, -720, H - 1150, 1250, 28);
+  if (logo) { const lw = 420; g.drawImage(logo, (W - lw) / 2, 110, lw, lw * logo.height / logo.width); }
+  // The pop-up.
+  const PX = 48, PW = W - PX * 2, PH = H - PT - 60;
+  g.save();
+  g.shadowColor = 'rgba(24, 87, 123, 0.16)'; g.shadowBlur = 60; g.shadowOffsetY = 18;
+  g.fillStyle = '#e6f1fd'; roundRect(g, PX, PT, PW, PH, 56); g.fill();
+  g.restore();
+  g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 3; roundRect(g, PX, PT, PW, PH, 56); g.stroke();
+  g.fillStyle = 'rgba(0,0,0,0.14)'; roundRect(g, W / 2 - 38, PT + 22, 76, 10, 5); g.fill();
+  const IX = PX + 56, IW = PW - 112; // inner column
+  let y = PT + 120;
+  g.textAlign = 'center';
+  g.fillStyle = '#1d1d1f'; g.font = font(800, 60);
+  g.fillText('Your Swap Quote', W / 2, y);
+  g.fillStyle = '#454545'; g.font = font(400, 30);
+  g.fillText(new Date(q.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, y + 52);
+  y += 150;
+  const [dm, ...ds] = q.device.name.split(' · ');
+  g.font = font(700, 38); const dmW = g.measureText(dm).width;
+  g.font = font(400, 38); const dsT = ds.length ? ` · ${ds.join(' · ')}` : ''; const dsW = g.measureText(dsT).width;
+  g.textAlign = 'left'; g.fillStyle = '#1d1d1f';
+  g.font = font(700, 38); g.fillText(dm, W / 2 - (dmW + dsW) / 2, y);
+  g.font = font(400, 38); g.fillText(dsT, W / 2 - (dmW + dsW) / 2 + dmW, y);
+  g.textAlign = 'center'; g.fillStyle = '#18577b'; g.font = font(800, 120);
+  g.fillText(naira(q.value), W / 2, y + 125);
+  g.fillStyle = '#454545'; g.font = font(400, 28);
+  g.fillText('Trade-in value · confirmed when we check the device', W / 2, y + 180);
+  y += 230;
+  // How the value was reached.
+  g.fillStyle = '#ffffff'; roundRect(g, IX, y, IW, bH, 28); g.fill();
+  g.textAlign = 'left'; g.fillStyle = '#18577b'; g.font = font(700, 26);
+  g.fillText(lines.length ? 'HOW WE GOT YOUR VALUE' : 'GOOD WORKING CONDITION', IX + 40, y + 52);
+  const row = (label, amt, bold, yy) => {
+    g.textAlign = 'left'; g.fillStyle = bold ? '#1d1d1f' : '#454545'; g.font = font(bold ? 700 : 400, 30); g.fillText(label, IX + 40, yy);
+    g.textAlign = 'right'; g.fillStyle = bold ? '#18577b' : '#1d1d1f'; g.font = font(bold ? 800 : 500, 30); g.fillText(amt, IX + IW - 40, yy);
+  };
+  let ly = y + 104;
   row('Starting value, good condition', naira(q.device.start), false, ly);
   for (const [label, amt] of lines) { ly += 52; row(label, amt === null ? 'Checked in store' : `− ${naira(amt)}`, false, ly); }
   if (lines.length) { ly += 52; row('Your trade-in value', naira(q.value), true, ly); }
-  y += bH + 30;
-  g.textAlign = 'left';
+  y += bH + 36;
+  // Each swap option, on the site's selected blue.
   for (const cmp of q.compare) {
-    g.fillStyle = '#f3f8ff'; roundRect(g, 90, y, W - 180, 160, 24); g.fill();
+    g.fillStyle = '#c8e4ff'; roundRect(g, IX, y, IW, 160, 28); g.fill();
     const [model, ...rest] = cmp.name.split(' · ');
-    g.fillStyle = '#1d1d1f'; g.font = font(700, 38); g.fillText(model, 130, y + 56);
-    g.fillStyle = '#6a6a70'; g.font = font(400, 27); g.fillText(cmp.dealNote || rest.join(' · '), 130, y + 98);
-    g.fillText(`Price ${naira(cmp.price)}`, 130, y + 136);
+    g.textAlign = 'left'; g.fillStyle = '#1d1d1f'; g.font = font(700, 36); g.fillText(model, IX + 40, y + 58);
+    g.fillStyle = '#454545'; g.font = font(400, 27); g.fillText(cmp.dealNote || rest.join(' · '), IX + 40, y + 100);
+    g.fillText(`Price ${naira(cmp.price)}`, IX + 40, y + 138);
     g.textAlign = 'right';
-    g.fillStyle = cmp.kind === 'add' ? '#1d1d1f' : '#0a7d45'; g.font = font(600, 26);
-    g.fillText(termsLabel(cmp).toUpperCase(), W - 130, y + 52);
-    g.font = font(800, 46); g.fillText(naira(cmp.kind === 'even' ? 0 : cmp.amount), W - 130, y + 112);
-    g.textAlign = 'left';
-    y += 190;
+    g.fillStyle = cmp.kind === 'add' ? '#18577b' : '#0a7d45'; g.font = font(700, 25);
+    g.fillText(termsLabel(cmp).toUpperCase(), IX + IW - 40, y + 56);
+    g.fillStyle = '#1d1d1f'; g.font = font(800, 48); g.fillText(naira(cmp.kind === 'even' ? 0 : cmp.amount), IX + IW - 40, y + 118);
+    y += 186;
   }
+  // Foot of the pop-up, like the site's.
   g.textAlign = 'center';
-  g.fillStyle = '#007bff'; g.font = font(500, 28); const shown = link.replace(/^https?:\/\//, ''); g.fillText(shown.length > 48 ? 'WhatsApp 0703 785 3959 · swapdesk.ng' : shown, W / 2, y + 40);
-  g.fillStyle = '#6a6a70'; g.font = font(500, 26); g.fillText('swapdesk.ng · An Upgrade Brands product', W / 2, y + 90);
+  const fy = PT + PH - 110;
+  g.fillStyle = '#007bff'; g.font = font(600, 30); g.fillText('WhatsApp 0703 785 3959', W / 2, Math.max(y + 40, fy));
+  g.font = font(400, 26); g.fillStyle = '#454545';
+  g.fillText('swapdesk.ng · An Upgrade Brands product', W / 2, Math.max(y + 90, fy + 50));
   const blob = await new Promise((res) => c.toBlob(res, 'image/png'));
   const file = new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
   if (navigator.canShare?.({ files: [file] })) {
