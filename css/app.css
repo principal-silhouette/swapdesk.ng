@@ -603,3 +603,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .row:hover { background: #f4f9ff; }
   .cmp .x:hover { background: #f1f4f7; color: var(--ink); }
 }
+
+.choose .screen-main { justify-content: center; gap: clamp(24px, 4vh, 40px); }
+.choose .q-opts { gap: 16px; margin: 0 auto; }
+.choose .q-opts .opt { min-height: clamp(88px, 12vh, 112px); padding: 22px 24px; }
+.choose .q-opts .opt .main { font-size: 19px; }
+.choose .par strong.num { color: var(--brand-deep); font-weight: 800; }

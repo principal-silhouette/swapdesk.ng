@@ -617,12 +617,33 @@ function value(el, app) {
     </div>
     ${s.answers.quick ? html`<p class="small">Based on your device being in good working condition.</p>` : ''}
     <p><button class="link" type="button" data-act="edit">${s.answers.quick ? 'Answer condition questions instead' : 'Edit answers'}</button></p>`;
-  el.innerHTML = layout(raw(el.innerHTML), html`
-    <button class="btn blue" type="button" data-act="swap">${s.mode === 'swap' ? 'Compare Swap Devices' : 'Calculate My Swap Rate'}</button>
-    ${pills(backPill(), html`<button class="pill" type="button" data-act="cash">Trade In for Cash</button>`)}`).toString();
+  el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="proceed">Proceed</button>`)).toString();
   requestAnimationFrame(() => animateNumber($('.big-num', el), r.value, naira));
   wire(el, app, {
     edit: () => { s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
+    proceed: () => app.go('choose'),
+  });
+}
+
+// ---------- what next: swap or cash ----------
+
+function choose(el, app) {
+  const d = ownDevice(app);
+  if (!d || !allAnswered(app)) { app.go('home', {}, { replace: true }); return false; }
+  const r = currentValue(app);
+  const s = app.s;
+  const max = Number(app.catalog.settings['compare.maxDevices']) || 6;
+  el.classList.add('choose');
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">What would you like to do?</h2>
+      <p class="par">Your ${d.model}${d.storage ? ` ${d.storage}` : ''} is worth <strong class="num">${naira(r.value)}</strong>.</p>
+    </div>
+    <div class="stack q-opts">
+      <button class="opt" type="button" data-act="swap"><span class="main">Swap to another device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}.</span></span>${raw(ICON.chevron)}</button>
+    </div>`, pills(backPill())).toString();
+  wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
     cash: () => { s.cash = true; app.save(); app.go('finish'); },
   });
@@ -789,6 +810,7 @@ function saved(el, app) {
 export const SCREENS = {
   home,
   pick: picker,
+  choose,
   loading,
   good,
   confirm,
