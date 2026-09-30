@@ -609,3 +609,27 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .choose .q-opts .opt { min-height: clamp(88px, 12vh, 112px); padding: 22px 24px; }
 .choose .q-opts .opt .main { font-size: 19px; }
 .choose .par strong.num { color: var(--brand-deep); font-weight: 800; }
+
+/* Choices made so far collapse into a one-line trail under search: Phones › Apple › iPhone Air */
+.trail { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 4px; width: var(--col); margin: 4px auto 2px; }
+.trail .chip { min-height: 34px; font-size: 14.5px; padding: 0 10px 0 14px; }
+.trail-sep { color: var(--ink-3); font-size: 18px; line-height: 1; padding: 0 2px; }
+.trail { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; scrollbar-width: none; width: auto; margin-inline: -24px; padding: 2px 24px; }
+.trail::-webkit-scrollbar { display: none; }
+.trail .chip { flex: none; font-size: 14px; padding: 0 8px 0 12px; }
+.trail:has(.chip:only-child), .trail { justify-content: safe center; }
+
+/* Home, round 9: headroom above the headline; the intro reads as one paragraph. */
+.home .screen-main { justify-content: center; padding-top: clamp(28px, 6vh, 64px); }
+.home .lead { font-size: clamp(15px, min(4.3vw, 2.3vh), 18px); line-height: 1.45; max-width: 31ch; margin-inline: auto !important; color: var(--ink-2); }
+.home .home-note { max-width: 36ch; }
+.home .lead { max-width: 35ch; }
+@media (max-height: 700px) and (max-width: 600px) { .home .screen-main { padding-top: 14px; gap: 20px; } .home .lead { display: none; } }
+.home .lead { max-width: none; font-size: clamp(15px, min(4.1vw, 2.2vh), 17px); }
+
+/* Picking screens: compact heading and one-line help, so the options are visible straight away. */
+.pick-head .h-title { font-size: clamp(1.5rem, 6vw, 1.75rem); margin: 6px 0 4px; }
+.pick-head .par { font-size: 14px; line-height: 1.35; color: var(--ink-3); margin: 0 0 4px; }
+.pick-search { padding-top: 6px; padding-bottom: 4px; }
+.picking .screen-main { justify-content: flex-start; gap: 0; }
+.picking .stack { margin-top: 10px; }

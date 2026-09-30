@@ -34,7 +34,7 @@ export const NETWORK = [
 
 // Fault keys match the Site Feed deduction columns.
 export const FAULTS = [
-  { key: 'screen', label: 'Faulty screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working.' },
+  { key: 'screen', label: 'Faulty screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working. Covers the repair and the value lost to a changed screen.' },
   { key: 'screenReplaced', label: 'Replaced screen', hint: 'Screen has been changed and is not the original (shows “Unknown Part” on iPhone).' },
   { key: 'trueTone', label: 'No True Tone', hint: 'True Tone is missing from Control Centre or Display settings, usually after a screen change.' },
   { key: 'backGlass', label: 'Back glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
@@ -65,7 +65,14 @@ export const floorTo = (n, step) => (step > 0 ? Math.floor(n / step) * step : Ma
 
 /** Amount for a deduction key on a device: a number, 'n/a', or null (not priced yet). */
 export function amountFor(device, key) {
-  if (key === 'screenReplaced' && device?.deductions?.screenReplaced === undefined) key = 'screen';
+  if (key === 'screenReplaced' && device?.deductions?.screenReplaced === undefined) {
+    // Price manager's rule: a replaced (non-original) screen loses 20% of the device's value.
+    // That's the No True Tone column on the Deductions tab; otherwise 20% of the device value.
+    const tt = device?.deductions?.trueTone;
+    if (typeof tt === 'number' && tt > 0) return tt;
+    const base = device?.price || device?.tradeInValue;
+    return base > 0 ? Math.ceil((base * 0.2) / 1000) * 1000 : null;
+  }
   const v = device?.deductions?.[key];
   if (v === 'n/a') return 'n/a';
   return typeof v === 'number' && v > 0 ? v : null;

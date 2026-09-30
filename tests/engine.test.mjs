@@ -105,9 +105,11 @@ test('search needs every word', () => {
   assert.ok(!matches(d, '16 pro max 512'));
 });
 
-test('replaced screen uses the screen amount, covers True Tone, and never stacks with a faulty screen', () => {
+test('replaced screen = 20% of device value (the True Tone figure), covers True Tone, never stacks with a faulty screen', () => {
   const r1 = valueDevice(phone, { ...good, faults: ['screenReplaced', 'trueTone'] }, settings);
-  assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['screenReplaced', 120000]]);
+  assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['screenReplaced', 112000]]); // 20% of ₦560,000
+  const r3 = valueDevice({ ...phone, deductions: { ...phone.deductions, trueTone: 70000 } }, { ...good, faults: ['screenReplaced'] }, settings);
+  assert.equal(r3.lines[0].amount, 70000);
   const r2 = valueDevice(phone, { ...good, faults: ['screen', 'screenReplaced'] }, settings);
   assert.deepEqual(r2.lines.map((l) => l.key), ['screen']);
 });

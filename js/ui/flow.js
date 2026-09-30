@@ -134,14 +134,14 @@ function home(el, app) {
   el.innerHTML = layout(html`
     <div class="home-intro">
       <h1 class="h-display">The fastest way<br>to <span class="blue">Swap.</span></h1>
-      <p class="lead"><span class="nw">Trade in the Phone, Watch, Speaker or AirPods</span><br><span class="nw">you’ve got for the one you love 💙</span><br><span class="lead-2">Get your swap balance in under a minute.</span></p>
+      <p class="lead">Trade in the Phone, Watch, Speaker or AirPods you’ve got for the one you love 💙 and get your swap balance in under a minute.</p>
     </div>
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
       <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
-    <p class="home-note">Value your device line by line, compare your swap balance for up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or waybill from anywhere.</p>`, '').toString();
+    <p class="home-note">Get an honest value in minutes, compare up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or send your device in from anywhere.</p>`, '').toString();
   wire(el, app, {
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
@@ -205,6 +205,7 @@ function picker(el, app, params) {
       <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
   };
 
+  el.classList.add('picking');
   CATALOG = app.catalog;
   // Your own device: model, then storage size. Condition comes later, with the other questions.
   const byStorage = (rows) => {
@@ -232,10 +233,10 @@ function picker(el, app, params) {
     } else {
       title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'What’s your storage size?' }[lv];
       help = {
-        type: `First, what kind of device do you want to ${s.mode === 'swap' ? 'Swap' : 'Trade In'}? ⤵️`,
+        type: `What kind of device do you want to ${s.mode === 'swap' ? 'Swap' : 'Trade In'}?`,
         brand: 'Pick the brand of your device.',
-        model: raw(`<strong>Here’s how to find it ⤵️</strong><br>${st.brand === 'Apple' ? 'On your iPhone or iPad, go to Settings › General › About. You’ll see the Model Name and Storage Capacity.' : 'Go to Settings › About phone. You’ll see the model name and storage.'}`),
-        version: raw('<strong>Almost there ⤵️</strong><br>You’ll find it under Settings › General › About › Capacity.'),
+        model: st.brand === 'Apple' ? 'Find it in Settings › General › About.' : 'Find it in Settings › About phone.',
+        version: 'Find it in Settings › General › About › Capacity.',
       }[lv];
     }
 
@@ -261,7 +262,7 @@ function picker(el, app, params) {
         // Summarise what's on offer instead of a count: "256gb · 512gb" or "128gb · Brand New".
         const sizes = [...new Set(n.map((x) => x.storage).filter(Boolean))];
         const conds = [...new Set(n.map((x) => x.condition))];
-        const summary = !add ? (sizes.join(' · ') || 'One size') : n.length === 1 ? variantName(n[0]) : [sizes.join(' · '), conds.length === 1 ? conds[0] : `${conds.length} conditions`].filter(Boolean).join(' — ');
+        const summary = sizes.join(' · ') || 'One size';
         g.models.push({ model: d.model, n: n.length, summary, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });
       }
       options = groups.map((g) => html`<p class="group-label">${g.series}</p>${g.models.map((m) => html`
@@ -288,8 +289,7 @@ function picker(el, app, params) {
       <div class="pick-search"><label class="field"><span class="visually-hidden">Search devices</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 13 pro max 256" value="${st.search}" autocomplete="off" enterkeyhint="search">
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label></div>
-      ${crumbs.length ? html`<div class="stack crumbs">${crumbs.map(([k, label]) => html`
-        <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div><p class="chip-hint">Tap a selected option to change it.</p>` : ''}
+      ${crumbs.length ? html`<nav class="trail" aria-label="Your choices">${crumbs.map(([k, label], n) => html`${n ? raw('<span class="trail-sep" aria-hidden="true">›</span>') : ''}<button class="chip" type="button" aria-pressed="true" data-act="crumb" data-v="${k}" aria-label="${label}, selected. Tap to change.">${label}<span class="chip-x" aria-hidden="true">×</span></button>`)}</nav>` : ''}
       <div class="stack">${options}</div>`;
     el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
     prevFrac = frac;
