@@ -764,13 +764,15 @@ function finish(el, app) {
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
   const city = CITIES.find((c) => c.key === s.city);
   el.innerHTML = html`
-    <h2 class="h-title">${s.cash ? 'Complete your Trade-In' : 'Complete your Swap'}</h2>
+    <div class="head-block">
+      <h2 class="h-title">${s.cash ? 'Complete your Trade-In' : 'Complete your Swap'}</h2>
+      <p class="par city-sub">${city ? city.text : 'Pick your city to see how your swap is completed.'}</p>
+    </div>
     ${chosenCard(app)}
     <p class="par">Where are you located? 📍</p>
     <div class="cities" role="radiogroup">
       ${CITIES.map((c) => html`<button class="opt" type="button" role="radio" aria-checked="${c.key === s.city ? 'true' : 'false'}" data-act="city" data-v="${c.key}">${c.name}</button>`)}
     </div>
-    ${city ? html`<p class="city-text">${city.text}</p>` : ''}
     <p class="small">Our team sees every device in your quote from the link. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
   el.innerHTML = layout(raw(el.innerHTML), html`
     <button class="btn green fill" type="button" data-act="wa" ${city ? '' : 'disabled'}>${raw(ICON.whatsapp)} ${city ? 'Complete on WhatsApp' : 'Pick your city to continue'}</button>
@@ -837,7 +839,9 @@ function saved(el, app) {
 async function saveQuoteImage(q, link, app) {
   const W = 1080;
   const rows = q.compare.length;
-  const H = 520 + rows * 190 + 200;
+  const lines = q.lines || [];
+  const bH = 70 + (lines.length + 1) * 52 + (lines.length ? 52 : 0);
+  const H = 520 + bH + 30 + rows * 190 + 200;
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
@@ -855,7 +859,20 @@ async function saveQuoteImage(q, link, app) {
   g.fillText(naira(q.value), W / 2, 385);
   g.fillStyle = '#6a6a70'; g.font = font(400, 28);
   g.fillText('Trade-in value · confirmed when we check the device', W / 2, 430);
-  let y = 500;
+  // How the trade-in value was reached: starting value, each deduction, final value.
+  let y = 480;
+  g.fillStyle = '#f7fafe'; roundRect(g, 90, y, W - 180, bH, 24); g.fill();
+  g.textAlign = 'left'; g.fillStyle = '#18577b'; g.font = font(700, 26);
+  g.fillText(lines.length ? 'HOW WE GOT YOUR VALUE' : 'GOOD WORKING CONDITION', 130, y + 50);
+  const row = (label, amt, bold, yy) => {
+    g.textAlign = 'left'; g.fillStyle = bold ? '#1d1d1f' : '#454545'; g.font = font(bold ? 700 : 400, 30); g.fillText(label, 130, yy);
+    g.textAlign = 'right'; g.fillStyle = bold ? '#18577b' : '#1d1d1f'; g.font = font(bold ? 800 : 500, 30); g.fillText(amt, W - 130, yy);
+  };
+  let ly = y + 102;
+  row('Starting value, good condition', naira(q.device.start), false, ly);
+  for (const [label, amt] of lines) { ly += 52; row(label, amt === null ? 'Checked in store' : `− ${naira(amt)}`, false, ly); }
+  if (lines.length) { ly += 52; row('Your trade-in value', naira(q.value), true, ly); }
+  y += bH + 30;
   g.textAlign = 'left';
   for (const cmp of q.compare) {
     g.fillStyle = '#f3f8ff'; roundRect(g, 90, y, W - 180, 160, 24); g.fill();

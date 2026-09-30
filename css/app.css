@@ -686,3 +686,31 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Compare: each device carries its own Proceed to Swap. */
 .cmp .cmp-go { align-self: stretch; margin-top: 12px; height: 46px; min-width: 0; font-size: 16px; font-weight: 600; }
 .mine.chosen .val small { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); text-align: right; }
+/* Every page heading starts on the same line: content is top-aligned under a fixed top offset.
+   On short choice pages the options sit in the middle of the space below the heading. */
+.screen:not(.home) .screen-main { justify-content: flex-start !important; padding-top: 18px !important; }
+.screen:not(.home) .screen-main > :first-child,
+.screen:not(.home) .screen-main > .pick-progress + .pick-head-wrap,
+.screen:not(.home) .screen-main > .progress:first-child + * { margin-top: 0 !important; }
+.screen:not(.home) .screen-main .h-title { margin-top: 0 !important; }
+.screen:not(.home) .screen-main > .progress:first-child, .screen:not(.home) .screen-main > .pick-progress:first-child { margin-bottom: 18px !important; }
+.screen:not(.home) .screen-main > .eyebrow:first-child { margin: 0 0 6px !important; }
+.choose .screen-main > .head-block + * { margin-top: auto !important; }
+.choose .screen-main > :last-child { margin-bottom: auto !important; }
+.loading .screen-main { justify-content: flex-start !important; }
+/* Same heading line on every page: progress bars and the question counter sit in a fixed band above it. */
+.screen { position: relative; }
+.screen:not(.home) .screen-main { padding-top: 58px !important; }
+.screen:not(.home) .screen-main > .progress,
+.screen:not(.home) .screen-main > .pick-progress { position: absolute; top: 12px; left: 50%; translate: -50% 0; width: 240px; margin: 0 !important; }
+.screen:not(.home) .screen-main > .eyebrow:first-child { position: absolute; top: 24px; left: 0; right: 0; margin: 0 !important; }
+.list-head { padding: 0 !important; }
+.loading .screen-main > .load-bar { top: 12px; }
+/* Even vertical rhythm: heading → 8px → subtext → 18px → next block. */
+.head-block .h-title, .screen-main > .h-title { margin: 0 0 8px !important; }
+.head-block .par, .screen-main > .h-title + .par { margin: 0 0 18px !important; }
+.screen-main > .mine, .screen-main > .stack, .screen-main > .cmp-grid, .screen-main > .cities, .screen-main > .card { margin-top: 0 !important; margin-bottom: 18px !important; }
+.city-sub { min-height: 2.9em; }
+.wide.picking .list-head .h-title, .list-head .h-title { margin: 0 0 4px !important; }
+.list-head { margin-top: -4px; }
+.list-head { margin-top: -6px; }
