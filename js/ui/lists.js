@@ -20,10 +20,12 @@ export function dealRows(catalog) {
 }
 
 const uniq = (a) => [...new Set(a)];
+// LLA and Non LLA foreign-used phones are all sold as Foreign USED.
+const fam = (c) => (c === 'Foreign USED (Non LLA)' ? 'Foreign USED' : c);
 const plural = (n) => `${n} ${n === 1 ? 'device' : 'devices'}`;
 const shortDate = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`; };
 const applyFilters = (rows, f) => rows.filter((d) => (!f.type || d.type === f.type) && (!f.brand || d.brand === f.brand) &&
-  (!f.cond || d.condition === f.cond) && matches(d, f.search));
+  (!f.cond || d.condition === f.cond || fam(d.condition) === f.cond) && matches(d, f.search));
 
 function groupBySeries(rows, catalog) {
   const sorted = [...rows].sort((a, b) =>
@@ -154,7 +156,7 @@ export function listScreen(el, app, view, params) {
         <div class="sizes">${list.sort(byStorage).map((d) => {
           const inCmp = !trade && cmp.includes(d.id);
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${d.storage}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            <span class="st">${d.storage}${!trade && d.condition.includes('Non LLA') && d.condition.startsWith('Foreign') ? html` <small>Non LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
@@ -163,7 +165,7 @@ export function listScreen(el, app, view, params) {
       const key = `${model}|${c}`;
       const lo = minOf(list), hi = maxOf(list);
       return html`<button class="row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
-          <span class="main"><span class="t">${condName(c)}</span><span class="s">${list.sort(byStorage).map((d) => d.storage).join(' · ')}</span></span>
+          <span class="main"><span class="t">${condName(c)}</span><span class="s">${uniq(list.sort(byStorage).map((d) => d.storage)).join(' · ')}</span></span>
           <span class="v">${list.length > 1 && lo !== hi ? html`<small>from</small> ${naira(lo)}` : naira(lo)}</span>${raw(ICON.chevron)}</button>
         ${open === key ? sizes(list) : ''}`;
     };
@@ -176,14 +178,16 @@ export function listScreen(el, app, view, params) {
             <span class="v"><small>up to</small> ${naira(hi)}</span>${raw(ICON.chevron)}</button>
           ${open === key ? sizes(list) : ''}</div>`;
       }
-      const conds = uniq(list.map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
-      return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => d.condition === c)))}</div>`;
+      const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => conditionRank(a) - conditionRank(b));
+      return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => fam(d.condition) === c)))}</div>`;
     };
     const dealRow = (d) => html`<div class="row deal-row"><span class="main"><span class="t">${d.model}${raw('<span class="tag">One unit</span>')}</span>
         <span class="s">${[d.storage, d.dealNote].filter(Boolean).join(' · ')}</span></span><span class="v">${fig(d)}</span>
         <button class="size-add" type="button" data-act="addCmp" data-id="${d.id}">${app.s.compare.includes(d.id) ? '✓ Added' : 'Add'}</button></div>`;
     const out = [];
-    out.push(html`<div class="table-bar"><div class="list-actions">
+    const condsAll = uniq(applyFilters(all, { ...f, cond: '' }).map((d) => fam(d.condition))).sort((a, b) => conditionRank(a) - conditionRank(b));
+    const condName2 = (c) => ({ 'Foreign USED': '🇺🇸 Foreign USED', 'Nigerian USED': '🇳🇬 Nigerian USED' }[c] || c);
+    out.push(html`<div class="table-bar">${!trade && !f.cond && f.type && condsAll.length > 1 ? html`<div class="chips">${condsAll.map((c) => html`<button class="chip" type="button" aria-pressed="${f.cond === c ? 'true' : 'false'}" data-k="cond" data-v="${c}">${condName2(c)}</button>`)}</div>` : ''}<div class="list-actions">
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
       </div></div>`);
