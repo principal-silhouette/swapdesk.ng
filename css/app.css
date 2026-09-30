@@ -136,7 +136,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .screen-main { flex: 1 0 auto; padding-bottom: 12px; }
 .screen-foot {
   position: sticky; bottom: 0; z-index: 4; margin: 0 -24px; padding: 22px 24px calc(12px + env(safe-area-inset-bottom));
-  background: linear-gradient(rgba(232, 243, 255, 0), rgba(232, 243, 255, 0.55) 26px);
+  background: linear-gradient(rgba(232, 243, 255, 0), rgba(232, 243, 255, 0.94) 26px);
   display: grid; gap: 12px;
 }
 @media (min-width: 601px) { .screen-foot { padding-bottom: 16px; } }
@@ -418,3 +418,73 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .home .stack.tight .btn { min-height: 60px; }
 }
 .popup-body:not(.overflowing) .screen-foot { background: none; }
+
+/* Buttons, round 4: the old SwapDesk proportions (about 75–88% of the pop-up, generous padding,
+   clear gaps) with softer, bubble-like shapes. */
+:root { --col: min(88%, 344px); }
+.stack, .cities, .screen-main > .field, .battery-big, .info, .so-far, .screen-foot > .btn, .screen-main > .btn, .home-note, .chip-hint { width: var(--col); margin-inline: auto; }
+.stack { gap: 14px; margin-top: 18px; margin-bottom: 18px; }
+.opt, .btn {
+  border-radius: 18px; border: 1px solid #d3e0ec; background: var(--white);
+  box-shadow: 0 1px 2px rgba(31, 94, 159, 0.06), 0 4px 14px rgba(31, 94, 159, 0.07);
+}
+.opt { min-height: 64px; padding: 18px 22px; }
+.opt.crumb { min-height: 56px; border-color: #9fcaf5; box-shadow: none; }
+.btn { min-height: 60px; padding: 16px 22px; border-color: var(--action); }
+.btn.green { border-color: rgb(37, 211, 102); }
+.btn.blue, .btn.green.fill { box-shadow: 0 6px 18px rgba(0, 123, 255, 0.22); }
+.btn.green.fill { box-shadow: 0 6px 18px rgba(31, 174, 85, 0.22); }
+.home .stack.tight { gap: 16px; width: var(--col); }
+.home .stack.tight .btn { min-height: 66px; border-radius: 20px; }
+.cities { gap: 12px; }
+.cities .opt { border-radius: 16px; }
+/* Navigation pills keep the old sizes instead of stretching edge to edge. */
+.screen-foot .pills { justify-content: center; gap: 14px; }
+.screen-foot .pill { flex: 0 1 auto; min-width: 140px; max-width: 180px; height: 50px; padding: 0 22px; }
+.chip-hint { text-align: center; }
+.field { display: block; }
+.home .stack.tight { margin: 0 auto; }
+.opt.ver .val { text-align: right; line-height: 1.2; }
+.opt.ver .val small { display: block; font-size: 12px; font-weight: 500; color: var(--ink-3); }
+/* Round 5: search spans the column; buttons are narrower and taller than it. */
+:root { --btncol: min(80%, 316px); }
+.stack, .cities, .home .stack.tight, .screen-foot > .btn, .screen-main > .btn { width: var(--btncol); }
+.opt { min-height: 70px; padding: 20px 22px; }
+.opt.crumb { min-height: 60px; }
+.btn { min-height: 64px; }
+.home .stack.tight .btn { min-height: 70px; }
+.field input, .list-top .field input {
+  min-height: 50px; background: #eef5ff; border: 1px solid #cfe0f3; border-radius: 14px; box-shadow: none;
+}
+.field input::placeholder { color: #6d7f93; }
+.field .ico { color: #5b7fa6; }
+.field input:focus { background: #f5f9ff; }
+
+/* Round 5: search stays at the top (sticky); selected choices sit under it; buttons are narrower
+   and taller than the search bar; search has a mild blue tint. */
+:root { --btncol: min(80%, 316px); }
+.stack, .cities, .home .stack.tight, .screen-foot > .btn, .screen-main > .btn { width: var(--btncol); }
+.opt { min-height: 70px; padding: 20px 22px; }
+.opt.crumb { min-height: 60px; }
+.btn { min-height: 64px; }
+.home .stack.tight .btn { min-height: 70px; }
+.pick-search { position: sticky; top: -4px; z-index: 3; margin: 0 -24px; padding: 10px 24px 8px; background: linear-gradient(rgba(232, 243, 255, 0.96) 75%, rgba(232, 243, 255, 0)); }
+.pick-search .field { width: var(--col); margin: 0 auto; }
+.stack.crumbs { margin-top: 10px; margin-bottom: 6px; }
+.field input, .list-top .field input {
+  min-height: 50px; background: #eef5ff; border: 1px solid #cfe0f3; border-radius: 14px; box-shadow: none;
+}
+.field input::placeholder { color: #6d7f93; }
+.field .ico { color: #5b7fa6; }
+.field input:focus { background: #f5f9ff; }
+
+/* Brief loading moment after the device is chosen. */
+.loading .screen-main { display: flex; align-items: center; justify-content: center; }
+.loading .screen-foot { display: none; }
+.load { display: grid; justify-items: center; gap: 4px; padding-bottom: 40px; }
+.load-ring { width: 76px; height: 76px; margin-bottom: 10px; }
+.load-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.load-ring circle { fill: none; stroke: rgba(31, 94, 159, 0.14); stroke-width: 6; }
+.load-ring .arc { stroke: var(--action); stroke-linecap: round; stroke-dasharray: 176; stroke-dashoffset: 176; animation: ringFill linear forwards; }
+@keyframes ringFill { to { stroke-dashoffset: 0; } }
+.load-step { font-size: 14px; color: var(--ink-3); margin: 6px 0 0; }

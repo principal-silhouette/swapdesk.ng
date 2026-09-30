@@ -135,7 +135,7 @@ function startWith(app, id) {
   s.mode = 'trade';
   app.save();
   history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
-  app.go('confirm');
+  app.go('loading');
 }
 
 // ---------- device picker (their device, or devices to compare) ----------
@@ -163,11 +163,14 @@ function picker(el, app, params) {
   const figure = (d) => (add ? naira(d.price) : `Up to ${naira(d.tradeInValue)}`);
   const version = (d, withModel) => {
     const on = add ? s.compare.includes(d.id) : s.deviceId === d.id;
-    const sub = d.condition === 'Deal' ? [d.storage, d.dealNote].filter(Boolean).join(' · ') : variantName(d);
-    return html`<button class="opt" type="button" role="${add ? 'checkbox' : 'radio'}" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
-      <span class="main">${withModel ? d.model : sub}${d.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}
-        ${withModel ? html`<span class="sub">${sub}</span>` : ''}</span>
-      <span class="val">${figure(d)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
+    const deal = d.condition === 'Deal';
+    // Two short lines instead of one long one: what it is, then its condition and figure.
+    const title = withModel ? d.model : (d.storage || d.condition);
+    const sub = deal ? [withModel ? d.storage : '', d.dealNote].filter(Boolean).join(' · ')
+      : withModel ? variantName(d) : (d.storage ? d.condition : '');
+    return html`<button class="opt ver" type="button" role="${add ? 'checkbox' : 'radio'}" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
+      <span class="main">${title}${deal ? raw('<span class="tag">One unit</span>') : ''}${sub ? html`<span class="sub">${sub}</span>` : ''}</span>
+      <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
   };
 
   function draw() {
@@ -182,14 +185,14 @@ function picker(el, app, params) {
     let title; let help;
     if (add) {
       title = 'Add a device to compare.';
-      help = { type: 'What would you like to swap into? ⤵️', brand: 'Which brand?', model: 'Which model would you like?', version: `Tick every version you want to compare. ${s.compare.length} of ${max} added.` }[lv];
+      help = { type: 'What would you like to swap into? ⤵️', brand: 'Which brand?', model: 'Which model would you like?', version: `Tick each storage and condition you want to compare. ${s.compare.length} of ${max} added.` }[lv];
     } else {
-      title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'Which one is it?' }[lv];
+      title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'Which storage and condition?' }[lv];
       help = {
         type: `First, what kind of device do you want to ${s.mode === 'swap' ? 'Swap' : 'Trade In'}? ⤵️`,
         brand: 'Pick the brand of your device.',
         model: st.brand === 'Apple' ? 'For Apple devices, go to Settings › General › About to find the model name and storage.' : 'Find the model name in Settings › About phone.',
-        version: 'Pick the storage and condition.',
+        version: 'Storage is in Settings › General › About.',
       }[lv];
     }
 
@@ -212,11 +215,15 @@ function picker(el, app, params) {
         let g = groups[groups.length - 1];
         if (!g || g.series !== d.series) { g = { series: d.series, models: [] }; groups.push(g); }
         const n = scoped.filter((x) => x.model === d.model);
-        g.models.push({ model: d.model, n: n.length, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });
+        // Summarise what's on offer instead of a count: "256gb · 512gb" or "128gb · Brand New".
+        const sizes = [...new Set(n.map((x) => x.storage).filter(Boolean))];
+        const conds = [...new Set(n.map((x) => x.condition))];
+        const summary = n.length === 1 ? variantName(n[0]) : [sizes.join(' · '), conds.length === 1 ? conds[0] : `${conds.length} conditions`].filter(Boolean).join(' — ');
+        g.models.push({ model: d.model, n: n.length, summary, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });
       }
       options = groups.map((g) => html`<p class="group-label">${g.series}</p>${g.models.map((m) => html`
         <button class="opt${m.sel ? ' is-selected' : ''}" type="button" data-act="model" data-v="${m.model}">
-          <span class="main">${m.model}<span class="sub">${m.n === 1 ? '1 version' : `${m.n} versions`}</span></span>${raw(ICON.chevron)}</button>`)}`);
+          <span class="main">${m.model}<span class="sub">${m.summary}</span></span>${raw(ICON.chevron)}</button>`)}`);
     } else {
       const vs = devices.filter((d) => d.model === st.model).sort(variantOrder);
       options = vs.map((d) => version(d, false));
@@ -225,11 +232,11 @@ function picker(el, app, params) {
     el.innerHTML = html`
       <h2 class="h-title">${title}</h2>
       <p class="par">${help}</p>
-      ${crumbs.length ? html`<div class="stack">${crumbs.map(([k, label]) => html`
-        <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div><p class="chip-hint">Tap a selected option to change it.</p>` : ''}
-      <label class="field"><span class="visually-hidden">Search devices</span>${raw(ICON.search)}
+      <div class="pick-search"><label class="field"><span class="visually-hidden">Search devices</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 13 pro max 256" value="${st.search}" autocomplete="off" enterkeyhint="search">
-        <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label>
+        <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label></div>
+      ${crumbs.length ? html`<div class="stack crumbs">${crumbs.map(([k, label]) => html`
+        <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div><p class="chip-hint">Tap a selected option to change it.</p>` : ''}
       <div class="stack">${options}</div>`;
     el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
   }
@@ -291,7 +298,7 @@ function picker(el, app, params) {
           const d = app.catalog.byId.get(id);
           Object.assign(st, { type: d.type, brand: d.brand, model: d.model, search: '' });
           app.save();
-          app.go('confirm');
+          app.go('loading');
         }
         break;
       }
@@ -299,6 +306,31 @@ function picker(el, app, params) {
       default:
     }
   });
+}
+
+// ---------- brief loading moment before the result ----------
+
+function loading(el, app) {
+  const d = ownDevice(app);
+  if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ms = reduce ? 900 : 1900;
+  el.classList.add('loading');
+  el.innerHTML = layout(html`
+    <div class="load">
+      <div class="load-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><circle class="arc" cx="32" cy="32" r="28" style="animation-duration:${ms}ms"/></svg></div>
+      <h2 class="h-title">Calculating…</h2>
+      <p class="par"><strong>${d.model}</strong><br>${variantName(d)}</p>
+      <p class="load-step" role="status" aria-live="polite">Checking today’s prices</p>
+    </div>`, '').toString();
+  const steps = ['Checking today’s prices', 'Matching your model', 'Working out your value'];
+  const stepEl = $('.load-step', el);
+  let i = 0;
+  const tick = setInterval(() => { i = Math.min(i + 1, steps.length - 1); if (stepEl.isConnected) stepEl.textContent = steps[i]; }, ms / 3);
+  setTimeout(() => {
+    clearInterval(tick);
+    if (app.screen === 'loading') app.go('confirm', {}, { replace: true });
+  }, ms);
 }
 
 // ---------- "Congratulations" (the original result, kept) ----------
@@ -645,6 +677,7 @@ function saved(el, app) {
 export const SCREENS = {
   home,
   pick: picker,
+  loading,
   confirm,
   q: question,
   value,
