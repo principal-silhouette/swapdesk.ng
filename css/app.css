@@ -633,3 +633,31 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .pick-search { padding-top: 6px; padding-bottom: 4px; }
 .picking .screen-main { justify-content: flex-start; gap: 0; }
 .picking .stack { margin-top: 10px; }
+
+/* Tighter side margins everywhere. */
+.popup-body { padding-left: 14px; padding-right: 14px; }
+.screen-foot, .list-top, .pick-search { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+.chips { margin: 0 -14px; padding-inline: 14px; }
+:root { --col: min(100%, 400px); --btncol: min(92%, 380px); }
+.screen.wide { max-width: 620px; }
+/* The Menu / Trade-In Menu */
+.list-head { text-align: center; padding: 6px 0 2px; }
+.list-head .h-title { margin: 4px 0 2px; }
+.list-sub { margin: 0; font-size: 13px; color: var(--ink-3); }
+.list-top { gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+.list-top .trail { margin: 0; }
+.step-q { margin: 14px 0 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); text-align: center; }
+.table-bar { display: grid; gap: 6px; margin: 4px 0 0; }
+.table-bar .list-actions { justify-content: center; margin: 0; }
+/* Picking screens, round 3: keep the roomy spacing of the original; only the help text is smaller.
+   Short lists sit centred in the pop-up; long lists start under the search and scroll. */
+.picking .screen-main { justify-content: center; gap: 18px; padding-top: 16px; padding-bottom: 16px; }
+.picking .screen-main > * { margin-top: 0; margin-bottom: 0; }
+.pick-head .h-title { font-size: clamp(1.75rem, 6.6vw, 2.1rem); margin: 0 0 8px; }
+.pick-head .par { font-size: 14.5px; color: var(--ink-3); margin: 0; }
+.pick-search { padding-top: 8px; padding-bottom: 8px; }
+.picking .trail { margin: -4px auto 0; }
+.picking .stack { margin-top: 0; }
+.picking .pick-progress { margin: 0 auto; }
+.result-block .congrats { font-size: clamp(1.6rem, min(6.6vw, 3.8vh), 2.1rem); }
+.result-block .par { font-size: 15.5px; line-height: 1.45; }

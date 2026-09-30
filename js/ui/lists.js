@@ -6,8 +6,8 @@ import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
 
 const META = {
-  prices: { title: 'Price List', figure: 'price' },
-  'trade-in': { title: 'Trade-In Values', figure: 'tradeInValue' },
+  prices: { title: 'The Menu', sub: 'Premium USED 🇺🇸 & Brand New', figure: 'price' },
+  'trade-in': { title: 'Trade-In Menu', sub: 'Good working condition', figure: 'tradeInValue' },
 };
 const TYPE_LABEL = {};
 
@@ -20,6 +20,8 @@ export function dealRows(catalog) {
 }
 
 const uniq = (a) => [...new Set(a)];
+const plural = (n) => `${n} ${n === 1 ? 'device' : 'devices'}`;
+const shortDate = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`; };
 const applyFilters = (rows, f) => rows.filter((d) => (!f.type || d.type === f.type) && (!f.brand || d.brand === f.brand) &&
   (!f.cond || d.condition === f.cond) && matches(d, f.search));
 
@@ -66,21 +68,17 @@ export function listScreen(el, app, view, params) {
   const f = { type: params.type || '', brand: params.brand || '', cond: params.cond || '', search: params.search || '' };
   let open = '';
 
-  el.classList.add('wide');
+  el.classList.add('wide', 'picking');
   el.innerHTML = html`
-    <h1 class="h-title">${meta.title}</h1>
-    <p class="small list-meta">${view === 'trade-in' ? 'Good condition, battery 85% or higher · ' : 'Premium USED 🇺🇸 and Brand New · '}${updatedLabel(catalog.updatedAt).replace('Updated ', 'updated ')}</p>
-    <div class="list-actions">
-      ${view === 'trade-in' ? html`<button class="link" type="button" data-act="value">Get an exact figure</button>` : ''}
-      <button class="link" type="button" data-act="share">${raw(ICON.share)} Share</button>
-      <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as Text</button>
+    <div class="list-head">
+      <h1 class="h-title">${meta.title}</h1>
+      <p class="list-sub">${meta.sub} · Updated ${shortDate(catalog.updatedAt)}</p>
     </div>
     <div class="list-top">
       <label class="field"><span class="visually-hidden">Search ${meta.title}</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 16 pro max 256" value="${f.search}" autocomplete="off" enterkeyhint="search">
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label>
-      <div class="chips" data-chips="type" role="group" aria-label="Filter"></div>
-      <p class="chip-hint">Tap a selected option again to clear it.</p>
+      <nav class="trail" data-chips="type" aria-label="Your choices"></nav>
     </div>
     <div data-list></div>`;
   el.innerHTML = `<div class="screen-main">${el.innerHTML}</div><div class="screen-foot"><div class="pills"><button class="pill" type="button" data-act="home">Go Back</button><button class="pill go" type="button" data-act="${view === 'prices' ? 'goCmp' : 'value'}">${view === 'prices' ? 'My Swap Rate' : 'Value My Device'}</button></div><p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p></div>`;
@@ -90,33 +88,41 @@ export function listScreen(el, app, view, params) {
 
   // Drill down one level at a time: type, then brand, then condition.
   // A chosen chip stays (tap it to clear); the other choices at that level step aside.
+  const X = '<span class="chip-x" aria-hidden="true">×</span>';
+  const brandsIn = (t) => uniq(all.filter((d) => d.type === t).map((d) => d.brand));
+  // The list only appears once a device type and brand are chosen (or something is searched).
+  const ready = () => f.cond === 'Deal' || !!f.search.trim() || (f.type && (f.brand || brandsIn(f.type).length <= 1));
+
   function drawChips() {
-    const X = '<span class="chip-x" aria-hidden="true">×</span>';
-    const picked = (label, k) => html`<button class="chip" type="button" aria-pressed="true" data-k="${k}" data-v="" aria-label="${label}, selected. Tap to clear.">${label}${raw(X)}</button>`;
-    const options = (vals, k, label = (v) => v) => vals.map((v) => html`<button class="chip" type="button" aria-pressed="false" data-k="${k}" data-v="${v}">${label(v)}</button>`);
     const parts = [];
-    const types = uniq(all.map((d) => d.type));
-    if (!f.type) parts.push(...options(types, 'type', (t) => TYPE_LABEL[t] || t));
-    else {
-      parts.push(picked(TYPE_LABEL[f.type] || f.type, 'type'));
-      const inType = all.filter((d) => d.type === f.type);
-      const brands = uniq(inType.map((d) => d.brand));
-      if (brands.length > 1 && !f.brand) parts.push(...options(brands, 'brand'));
-      else {
-        if (f.brand) parts.push(picked(f.brand, 'brand'));
-        const conds = uniq(inType.filter((d) => !f.brand || d.brand === f.brand).map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
-        if (f.cond) parts.push(picked(f.cond, 'cond'));
-        else if (conds.length > 1) parts.push(...options(conds, 'cond'));
-      }
-    }
+    const picked = (label, k) => html`<button class="chip" type="button" aria-pressed="true" data-k="${k}" data-v="" aria-label="${label}, selected. Tap to change.">${label}${raw(X)}</button>`;
+    if (f.type) parts.push(picked(TYPE_LABEL[f.type] || f.type, 'type'));
+    if (f.brand) parts.push(picked(f.brand, 'brand'));
+    if (f.cond) parts.push(picked(f.cond === 'Deal' ? 'Deals' : f.cond, 'cond'));
     const row = $('[data-chips="type"]', el);
-    row.innerHTML = parts.join('');
-    row.scrollLeft = 0;
+    row.innerHTML = parts.map((p, n) => (n ? '<span class="trail-sep" aria-hidden="true">›</span>' : '') + p).join('');
+    row.hidden = !parts.length;
   }
 
-  const current = () => ({ rows: applyFilters(all, f), deals: f.cond ? [] : applyFilters(deals, { ...f, cond: '' }) });
+  const current = () => (f.cond === 'Deal'
+    ? { rows: [], deals }
+    : { rows: applyFilters(all, f), deals: f.cond ? [] : applyFilters(deals, { ...f, cond: '' }) });
 
   function drawList() {
+    if (!ready()) {
+      const opt = (k, v, label, sub) => html`<button class="opt" type="button" data-k="${k}" data-v="${v}"><span class="main">${label}${sub ? html`<span class="sub">${sub}</span>` : ''}</span>${raw(ICON.chevron)}</button>`;
+      let body;
+      if (!f.type) {
+        const types = uniq(all.map((d) => d.type));
+        body = html`<p class="step-q">Choose a device type</p><div class="stack">
+          ${deals.length ? opt('deals', '1', '🔥 Deals', `${deals.length} one-off ${deals.length === 1 ? 'unit' : 'units'}`) : ''}
+          ${types.map((t) => opt('type', t, TYPE_LABEL[t] || t, plural(all.filter((d) => d.type === t).length)))}</div>`;
+      } else {
+        body = html`<p class="step-q">Choose a brand</p><div class="stack">${brandsIn(f.type).map((b) => opt('brand', b, b, plural(all.filter((d) => d.type === f.type && d.brand === b).length)))}</div>`;
+      }
+      listEl.innerHTML = body.toString();
+      return;
+    }
     const { rows, deals: ds } = current();
     const fig = (d) => naira(d[meta.figure]);
     // Each row is one exact version, so the expanded panel is only about that version.
@@ -140,6 +146,13 @@ export function listScreen(el, app, view, params) {
         <span class="v">${fig(d)}</span>${raw(ICON.chevron)}</button>
       ${open === d.id ? more(d) : ''}`;
     const out = [];
+    const conds = uniq(applyFilters(all, { ...f, cond: '' }).map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
+    out.push(html`<div class="table-bar">
+      ${!f.cond && conds.length > 1 && f.type ? html`<div class="chips">${conds.map((c) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${c}</button>`)}</div>` : ''}
+      <div class="list-actions">
+        <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
+        <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
+      </div></div>`);
     if (ds.length) out.push(html`<section class="series"><h2 class="series-h">🔥 Deals</h2><div class="group">${ds.map((d) => row(d, true))}</div></section>`);
     for (const g of groupBySeries(rows, catalog)) {
       out.push(html`<section class="series"><h2 class="series-h">${g.series}</h2><div class="group">${g.rows.map((d) => row(d, false))}</div></section>`);
@@ -173,9 +186,10 @@ export function listScreen(el, app, view, params) {
     t = setTimeout(sync, 300);
   });
   el.addEventListener('click', async (e) => {
-    const c = e.target.closest('.chip');
-    if (c) {
+    const c = e.target.closest('.chip, .opt[data-k]');
+    if (c && c.dataset.k) {
       const k = c.dataset.k;
+      if (k === 'deals') { f.cond = 'Deal'; f.search = ''; open = ''; drawChips(); drawList(); sync(); setTop(); return; }
       f[k] = c.getAttribute('aria-pressed') === 'true' ? '' : c.dataset.v;
       if (k === 'brand' && !f.brand) f.cond = '';
       if (k === 'type') { f.brand = ''; f.cond = ''; }
