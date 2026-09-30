@@ -74,22 +74,20 @@ export class VelocityTracker {
 const running = new WeakMap();
 export function animateNumber(el, to, format) {
   const prev = running.get(el);
-  let from = Number(el.dataset.value || to);
-  let velocity = 0;
-  if (prev && !prev.anim.done) {
-    const s = prev.anim.stop();
-    from = s.value; velocity = s.velocity;
-  }
+  if (prev) cancelAnimationFrame(prev);
+  const from = Number(el.dataset.value || to);
   el.dataset.value = String(to);
-  if (reducedMotion() || from === to) {
-    el.textContent = format(to);
-    return;
-  }
-  const anim = spring({
-    from, to, velocity, response: 0.45, damping: 1, precision: 0.5,
-    onUpdate: (x) => { el.textContent = format(Math.round(x)); },
-  });
-  running.set(el, { anim });
+  if (reducedMotion() || from === to) { el.textContent = format(to); return; }
+  // Time-based ease-out so the figure always lands exactly on the final value.
+  const t0 = performance.now();
+  const dur = 650;
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / dur);
+    const k = 1 - (1 - t) ** 3;
+    el.textContent = format(t < 1 ? Math.round((from + (to - from) * k) / 1000) * 1000 : to);
+    if (t < 1) running.set(el, requestAnimationFrame(step)); else running.delete(el);
+  };
+  running.set(el, requestAnimationFrame(step));
 }
 
 /** Press feedback on pointer-down for any element marked .press (CSS handles :active too). */

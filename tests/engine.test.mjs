@@ -104,3 +104,10 @@ test('search needs every word', () => {
   assert.ok(matches(d, '16 pro max 256'));
   assert.ok(!matches(d, '16 pro max 512'));
 });
+
+test('replaced screen uses the screen amount, covers True Tone, and never stacks with a faulty screen', () => {
+  const r1 = valueDevice(phone, { ...good, faults: ['screenReplaced', 'trueTone'] }, settings);
+  assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['screenReplaced', 120000]]);
+  const r2 = valueDevice(phone, { ...good, faults: ['screen', 'screenReplaced'] }, settings);
+  assert.deepEqual(r2.lines.map((l) => l.key), ['screen']);
+});

@@ -39,7 +39,7 @@ export function encodeQuote(q) {
   const a = q.answers;
   const packed = [
     1, q.created, q.device ? [q.device.id, q.device.name, q.device.start] : 0,
-    a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', a.faults.join('.')] : 0,
+    a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', a.faults.join('.'), a.batteryLabel || ''] : 0,
     q.value, q.lines, q.compare.map((c) => [c.id, c.name, c.price, c.kind, c.amount, c.dealNote || '']), q.city || '',
   ];
   return b64u.enc(JSON.stringify(packed));
@@ -52,7 +52,7 @@ export function decodeQuote(s) {
   return {
     v: 1, created,
     device: dev ? { id: dev[0], name: dev[1], start: dev[2] } : null,
-    answers: a ? { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [] } : null,
+    answers: a ? { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}) } : null,
     value, lines,
     compare: compare.map(([id, name, price, kind, amount, dealNote]) => ({ id, name, price, kind, amount, dealNote })),
     city,
@@ -85,7 +85,8 @@ export function termsText(c) {
 export function answersText(a) {
   if (!a) return '';
   const bits = [];
-  if (a.battery !== null && a.battery !== undefined && a.battery !== '') bits.push(`battery ${a.battery}%`);
+  if (a.batteryLabel) bits.push(`battery ${a.batteryLabel}`);
+  else if (a.battery !== null && a.battery !== undefined && a.battery !== '') bits.push(`battery ${a.battery}%`);
   const n = NEATNESS.find((x) => x.key === a.neatness);
   if (n) bits.push(n.label.toLowerCase());
   const net = NETWORK.find((x) => x.key === a.network);

@@ -16,7 +16,7 @@ import { quoteScreen } from './quoteView.js';
 const KEY = 'swapdesk.state.v2';
 
 export const freshAnswers = () => ({
-  origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
+  batteryBand: '', origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
 });
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
 
@@ -53,6 +53,13 @@ export function ownDevice(app) {
   return app.catalog.byId.get(app.s.deviceId) || null;
 }
 
+// Battery health is picked as a range; each range is valued the same way inside the engine.
+export const BATTERY_BANDS = [
+  { key: '90', label: '90% and above', hint: 'Like new', value: 95 },
+  { key: '85', label: '85% – 89%', hint: 'No deduction', value: 87 },
+  { key: '80', label: '80% – 84%', hint: 'Battery deduction applies', value: 82 },
+  { key: '79', label: '79% or less', hint: 'Battery deduction applies', value: 75 },
+];
 const ORIGIN_LABEL = {
   'Brand New': ['Brand new, still sealed', 'Never opened or activated.'],
   'Active Brand New': ['Brand new, but activated', 'Opened and set up, barely used.'],
@@ -89,7 +96,7 @@ function answered(q, a) {
   switch (q.key) {
     case 'origin': return !!a.origin;
     case 'icloud': return a.icloudLocked === false;
-    case 'battery': return a.batteryUnknown || (Number(a.battery) >= 1 && Number(a.battery) <= 100);
+    case 'battery': return a.batteryUnknown || !!a.batteryBand;
     case 'neatness': return !!a.neatness;
     case 'network': return !!a.network;
     case 'faults': return a.faultsDone || a.faults.length > 0;
@@ -99,7 +106,8 @@ function answered(q, a) {
 export function engineAnswers(a, device) {
   return {
     icloudLocked: a.icloudLocked === true,
-    battery: a.batteryUnknown || a.battery === '' ? null : Number(a.battery),
+    battery: a.batteryUnknown || !a.batteryBand ? null : BATTERY_BANDS.find((b) => b.key === a.batteryBand).value,
+    batteryLabel: a.batteryBand ? BATTERY_BANDS.find((b) => b.key === a.batteryBand).label : '',
     neatness: a.neatness,
     network: device.type === 'Phones' ? a.network : 'factory',
     faults: a.faults,
@@ -496,33 +504,19 @@ function question(el, app, params) {
             ${opt(a.icloudLocked === true, 'data-act="icloud" data-v="yes"', apple ? 'No, It is iCloud Locked' : 'No, It is Account Locked')}</div>
           ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>` : ''}`;
       case 'battery':
-      {
-        const pct = Math.max(0, Math.min(100, Number(a.battery) || 0));
-        const cut = amountFor(d, 'battery');
-        const th = app.catalog.settings.batteryThreshold || 85;
-        return html`<h2 class="h-title">What’s the battery health?</h2>
-          <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and read <b>Maximum Capacity</b>.') : 'Enter it if your phone shows battery health. If it doesn’t, choose Not sure.'}</p>
-          <div class="battery-big">
-            <span class="cell" aria-hidden="true"><i data-cell style="width:${pct}%" class="${pct && pct < th ? 'low' : ''}"></i></span>
-            <label><span class="visually-hidden">Battery health percent</span>
-              <input type="number" inputmode="numeric" min="1" max="100" placeholder="—" data-battery value="${a.batteryUnknown ? '' : a.battery}"><span class="pct">%</span></label>
-          </div>
-          <div class="stack q-opts">
-            <button class="opt" type="button" aria-pressed="${a.batteryUnknown ? 'true' : 'false'}" data-act="unsure">
-              <span class="main">Not sure<span class="sub">We’ll check it in store.</span></span><span class="tick" aria-hidden="true"></span></button>
-          </div>
-          <div class="info">
-            <p><b>${th}% and above:</b> no deduction.</p>
-            <p><b>Below ${th}%:</b> ${typeof cut === 'number' ? html`${naira(cut)} comes off your value, the cost of a new battery.` : 'the cost of a new battery comes off your value, confirmed in store.'}</p>
+        return html`<div class="head-block"><h2 class="h-title">What’s the battery health?</h2>
+          <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and check <b>Maximum Capacity</b>.') : 'Pick the range that matches your device. If it doesn’t show battery health, choose Not sure.'}</p></div>
+          <div class="stack q-opts" role="radiogroup">
+            ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key, `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
+            ${opt(a.batteryUnknown, 'data-act="unsure"', 'Not sure', 'We’ll check it in store.')}
           </div>`;
-      }
       case 'neatness':
         return html`<h2 class="h-title">How does it look?</h2>
           <p class="par">Check the screen, back and frame in good light.</p>
           <div class="stack q-opts" role="radiogroup">${NEATNESS.map((n, k) => opt(a.neatness === n.key, `data-act="neat" data-v="${n.key}"`, n.label, n.hint, neatnessIllo(k)))}</div>`;
       case 'network':
         return html`<h2 class="h-title">Is it network locked?</h2>
-          <p class="par">How does it work with SIM cards?</p>
+          <p class="par">How does it take a SIM, and is it locked to a network?</p>
           <div class="stack q-opts" role="radiogroup">${NETWORK.map((n) => opt(a.network === n.key, `data-act="net" data-v="${n.key}"`, n.label, n.hint))}</div>`;
       case 'faults':
         return html`<h2 class="h-title">Anything not working?</h2>
@@ -542,11 +536,10 @@ function question(el, app, params) {
     const done = qs.filter((x) => answered(x, a)).length;
     const last = i === qs.length - 1;
     el.innerHTML = html`
-      <p class="eyebrow">Question ${i + 1} of ${qs.length} · ${d.model}</p>
+      <p class="eyebrow">Question ${i + 1} of ${qs.length} · ${d.model}${r.accepted ? html` · <span class="so-far-inline">so far <b data-live>${naira(r.value)}</b></span>` : ''}</p>
       <div class="progress" aria-hidden="true"><i style="transform:scaleX(${done / qs.length})"></i></div>
       ${body()}`;
     el.innerHTML = layout(raw(el.innerHTML), html`
-      ${r.accepted ? html`<p class="so-far">Trade-in value so far <b data-live>${naira(r.value)}</b></p>` : ''}
       ${pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${answered(q, a) ? '' : 'disabled'}>${last ? 'See My Value' : 'Next'}</button>`)}`).toString();
   }
   function next() {
@@ -568,7 +561,8 @@ function question(el, app, params) {
   wire(el, app, {
     origin: (b) => { s.deviceId = b.dataset.v; set((x) => { x.origin = b.dataset.v; }, true); },
     icloud: (b) => set((x) => { x.icloudLocked = b.dataset.v === 'yes'; }, b.dataset.v === 'no'),
-    unsure: () => set((x) => { x.batteryUnknown = !x.batteryUnknown; if (x.batteryUnknown) x.battery = ''; }, true),
+    unsure: () => set((x) => { x.batteryUnknown = true; x.batteryBand = ''; x.battery = ''; }, true),
+    band: (b) => set((x) => { x.batteryBand = b.dataset.v; x.batteryUnknown = false; }, true),
     neat: (b) => set((x) => { x.neatness = b.dataset.v; }, true),
     net: (b) => set((x) => { x.network = b.dataset.v; }, true),
     fault: (b) => set((x) => {
@@ -599,7 +593,6 @@ function question(el, app, params) {
     }
   });
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-battery]')) next(); });
-  if (q.key === 'battery') queueMicrotask(() => { if (!a.battery && !a.batteryUnknown) $('[data-battery]', el)?.focus({ preventScroll: true }); });
 }
 
 // ---------- trade-in value ----------

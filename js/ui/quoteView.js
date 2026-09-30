@@ -62,7 +62,7 @@ function render(el, app, p, q) {
     <p class="small">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
       <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
-      <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill go" type="button" data-act="today">Use Today’s Figures</button></div>
+      <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill go" type="button" data-act="today">Today’s Prices</button></div>
       <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p></div>`.toString();
 
   el.onclick = async (e) => {

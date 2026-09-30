@@ -26,14 +26,16 @@ export const NEATNESS = [
 ];
 
 export const NETWORK = [
-  { key: 'factory', label: 'Factory unlocked', hint: 'Works with any SIM, no chip.' },
-  { key: 'chip', label: 'Chip unlocked', hint: 'Uses an unlock chip or turbo SIM.' },
-  { key: 'locked', label: 'Network or eSIM locked', hint: 'Only works on one network, or eSIM only.' },
+  { key: 'factory', label: 'Physical SIM, unlocked', hint: 'Takes a SIM card from any network. No chip needed.' },
+  { key: 'esim', label: 'eSIM, unlocked', hint: 'eSIM only (no SIM tray), and works with any network’s eSIM.' },
+  { key: 'chip', label: 'Chip unlocked', hint: 'Network locked physical SIM. Works here with an unlock chip or turbo SIM.' },
+  { key: 'locked', label: 'eSIM locked', hint: 'eSIM only, tied to one foreign network. Can’t use a local eSIM.' },
 ];
 
 // Fault keys match the Site Feed deduction columns.
 export const FAULTS = [
-  { key: 'screen', label: 'Bad screen', hint: 'Cracked glass, lines, dead spots, burn-in, or a replaced (not original) screen.' },
+  { key: 'screen', label: 'Faulty screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working.' },
+  { key: 'screenReplaced', label: 'Replaced screen', hint: 'Screen has been changed and is not the original (shows “Unknown Part” on iPhone).' },
   { key: 'trueTone', label: 'No True Tone', hint: 'True Tone is missing from Control Centre or Display settings, usually after a screen change.' },
   { key: 'backGlass', label: 'Back glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
   { key: 'faceId', label: 'Face ID', hint: 'Face ID won’t set up, or doesn’t recognise your face.' },
@@ -63,6 +65,7 @@ export const floorTo = (n, step) => (step > 0 ? Math.floor(n / step) * step : Ma
 
 /** Amount for a deduction key on a device: a number, 'n/a', or null (not priced yet). */
 export function amountFor(device, key) {
+  if (key === 'screenReplaced' && device?.deductions?.screenReplaced === undefined) key = 'screen';
   const v = device?.deductions?.[key];
   if (v === 'n/a') return 'n/a';
   return typeof v === 'number' && v > 0 ? v : null;
@@ -111,7 +114,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
   const battery = Number(answers.battery);
   if (applies(device, 'battery') && Number.isFinite(battery) && answers.battery !== null && answers.battery !== '' &&
       battery < s(settings, 'batteryThreshold')) {
-    push('battery', `Battery health ${battery}%`, amountFor(device, 'battery'));
+    push('battery', answers.batteryLabel ? `Battery health ${answers.batteryLabel}` : `Battery health ${battery}%`, amountFor(device, 'battery'));
   }
 
   // Body
@@ -124,7 +127,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
   // Network
   if (applies(device, 'network')) {
     if (answers.network === 'chip') push('network', 'Chip unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
-    if (answers.network === 'locked') push('network', 'Network or eSIM locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
+    if (answers.network === 'locked') push('network', 'eSIM locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
   }
 
   // Faults
@@ -133,13 +136,14 @@ export function valueDevice(device, answers = {}, settings = {}) {
   for (const f of FAULTS) {
     if (!faults.has(f.key)) continue;
     if (f.key === 'trueTone') {
-      if (faults.has('screen')) continue; // a new screen fixes True Tone too
+      if (faults.has('screen') || faults.has('screenReplaced')) continue; // a new screen fixes True Tone too
       let tt = amountFor(device, 'trueTone');
       if (tt === 'n/a') continue;
       if (tt === null && typeof screen === 'number') tt = screen * s(settings, 'trueTone.shareOfScreen');
       push('trueTone', f.label, tt);
       continue;
     }
+    if (f.key === 'screenReplaced' && faults.has('screen')) continue; // one screen line: a faulty screen gets replaced anyway
     push(f.key, f.label, amountFor(device, f.key));
   }
 

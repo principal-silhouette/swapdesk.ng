@@ -189,7 +189,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   font-size: 16px; color: var(--ink);
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease-out;
 }
-.opt:hover { background: var(--hover); }
 .opt:active { transform: scale(0.985); transition-duration: 0.05s; }
 .opt.is-selected, .opt[aria-checked="true"], .opt[aria-pressed="true"] { background: var(--selected); font-weight: 600; border-color: #9fcaf5; }
 .opt .main { flex: 1; min-width: 0; }
@@ -210,14 +209,10 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   border: 1px solid var(--action); background: var(--white); color: var(--action);
   transition: background-color 0.15s ease, transform 0.12s ease-out, opacity 0.15s ease;
 }
-.btn:hover { background: var(--hover); }
 .btn:active { transform: scale(0.985); transition-duration: 0.05s; }
 .btn.blue { background: var(--action); color: #fff; border-color: var(--action); }
-.btn.blue:hover { background: var(--action-hover); }
 .btn.green { color: var(--green); border-color: rgb(37, 211, 102); }
-.btn.green:hover { background: #eafbf0; }
 .btn.green.fill { background: #1fae55; color: #fff; border-color: #1fae55; }
-.btn.green.fill:hover { background: #189447; }
 .btn:disabled, .pill:disabled { opacity: 0.45; cursor: default; transform: none; }
 .btn .ico { width: 22px; height: 22px; flex: none; }
 
@@ -227,12 +222,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   background: transparent; color: var(--action); border: 2px solid lightblue;
   transition: background-color 0.15s ease, transform 0.12s ease-out;
 }
-.pill:hover { background: rgba(255, 255, 255, 0.6); }
 .pill.go { background: var(--action); color: #fff; border-color: var(--action); }
-.pill.go:hover { background: var(--action-hover); }
 .pill:active { transform: scale(0.97); }
 .link { background: none; border: 0; padding: 10px 6px; min-height: 44px; color: var(--action); font-size: 15px; font-weight: 500; }
-.link:hover { text-decoration: underline; }
 
 .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; margin: 0 -24px; padding-inline: 24px; }
 .chips::-webkit-scrollbar { display: none; }
@@ -274,7 +266,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .series-h { position: sticky; top: var(--list-top, 118px); z-index: 2; margin: 0 0 8px; padding: 8px 17px 6px; font: 700 1.1rem/1.2 var(--display); letter-spacing: -0.018em; color: var(--brand-deep); background: var(--glass); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); text-align: left; }
 .row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 16px; border: 0; background: transparent; text-align: left; position: relative; font-size: 16px; }
 .row + .row, .row + .row-more, .row-more + .row { border-top: 1px solid #e6ebf0; }
-.row:hover { background: #f4f9ff; }
 .row[aria-expanded="true"] { background: var(--selected); }
 .row .main { flex: 1; min-width: 0; }
 .row .t { display: block; font-weight: 500; }
@@ -345,7 +336,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .cmp.receive .k, .cmp.even .k { color: #0a7d45; }
 .cmp .n { font: 700 1.85rem/1.05 var(--display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--ink); }
 .cmp .x { position: absolute; top: 2px; right: 2px; width: 44px; height: 44px; border: 0; background: none; color: #999; display: grid; place-items: center; border-radius: 50%; }
-.cmp .x:hover { background: #f1f4f7; color: var(--ink); }
 .cmp .x svg { width: 18px; height: 18px; }
 .cmp.gone { opacity: 0.6; }
 .cities { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
@@ -598,3 +588,18 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .checks { list-style: none; margin: 4px auto 0; padding: 0; width: var(--col); text-align: left; font-size: 15.5px; line-height: 1.4; display: grid; gap: 8px; }
 .checks li { position: relative; padding-left: 26px; }
 .checks li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--action); font-weight: 700; }
+.so-far-inline b { color: var(--brand-deep); font-weight: 800; }
+
+/* Hover tints only on devices with a real pointer (phones keep :hover after a tap). */
+@media (hover: hover) and (pointer: fine) {
+  .opt:hover { background: var(--hover); }
+  .btn:hover { background: var(--hover); }
+  .btn.blue:hover { background: var(--action-hover); }
+  .btn.green:hover { background: #eafbf0; }
+  .btn.green.fill:hover { background: #189447; }
+  .pill:hover { background: rgba(255, 255, 255, 0.6); }
+  .pill.go:hover { background: var(--action-hover); }
+  .link:hover { text-decoration: underline; }
+  .row:hover { background: #f4f9ff; }
+  .cmp .x:hover { background: #f1f4f7; color: var(--ink); }
+}
