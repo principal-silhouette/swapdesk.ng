@@ -1,236 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-NG">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://apis.google.com/js/api.js" onload="this.onload=function(){}" onreadystatechange="if(this.readyState==='complete')this.onload()"></script>
-    <script src="script.js" defer></script>
-    <script src="./dom-to-image.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
-    <title>@the.swapdesk Trade Ins</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SwapDesk · Trade in and swap your phone</title>
+  <meta name="description" content="Find out what your phone, iPad, Apple Watch or AirPods are worth, compare swaps into up to six devices, and complete your swap with SwapDesk. An Upgrade Brands product.">
+  <meta name="author" content="Upgrade Brands">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="canonical" href="https://swapdesk.ng/">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SwapDesk · An Upgrade Brands product">
+  <meta property="og:title" content="SwapDesk · Trade in and swap your phone">
+  <meta property="og:description" content="Value your device, compare swaps and see today’s Price List and Trade-In Values. An Upgrade Brands product.">
+  <meta property="og:url" content="https://swapdesk.ng/">
+  <meta property="og:image" content="https://swapdesk.ng/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="data/catalog-snapshot.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/app.js"></script>
 </head>
 <body>
-    <div id="video-container">
-        <video id="backgroundVideo" autoplay muted playsinline>
-            <source src="./images/desktop-back.mp4" type="video/mp4">
-        </video>
-        <video id="mobileBackgroundVideo" autoplay muted playsinline>
-            <source src="./images/mobile-back.mp4" type="video/mp4">
-        </video>
-    </div>    
-    <div id="overlay">
-        <div id="popup">
-            <div class="header-container">
-                <p id="header-text">www.swapdesk.ng</p>
-            </div>
-            <div class="content-container">
-        <div id="app">
-            <input type="hidden" id="mValue">
-            <input type="hidden" id="selectedCategory">
-    
-        <!-- Phase 1 -->
-        <div id="phase1" style="display:block;">
-            <h4 class="hwelcome-blue">Upgrade</h4>
-         <p class="par5">
-          <strong><span>Ready to Swap? 🔄</span></strong><br>
-          Get up to <strong>80% Value</strong> for your 📲 iPhone ⌚️Watch 💻 MacBook or 🎧 AirPods when you <strong>Swap.</strong>
-        </p>
-            <div class="button-container">
-                <button class="selection-button-whatsapp" id="CheckPriceButton">Check for Prices</button>
-            </div>
-            <div class="button-container">
-                <button class="selection-button" id="tradeInButton">Check My Trade-In Value</button>
-            </div>
-            <div class="button-container">
-                <button class="selection-button-blue" id="swapButton" >Calculate My Swap Rate</button>
-            </div>
-        </div>
+  <a class="skip" href="#main">Skip to content</a>
 
-
-         <!-- Phase 2 Prices Scenario -->
-         <div id="pricesPhase" class="step" style="display:none;">
-            <h4 class="hprices">🛒 Shop from</h4>
-            <h4 class="hwelcome-green">@upgrade.hub🥳</h4>
-            <p class="par2">Enjoy best in class Warranty 💪🏾 & Free Delivery 🚚 when you 🛒 Shop <strong>Premium USED 🇺🇸 & Brand New Devices.</strong></p>
-            <div id="deviceTypePrices" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
-            </div>
-            <div id="deviceCategoryPrices" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
-            </div>
-                <!-- Add prices table dynamically -->
-            <div id="pricesTableContainer"></div>
-            <div class="buttons-container">
-                <button class="go-back-button" id="GoBackButton" onclick="goBackFromPhase2Prices()">Go Back</button>
-                <button class="go-back-button" id="ResetPricesInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Reset</button>
-        </div>
+  <header class="bar" id="bar">
+    <div class="bar-row wrap">
+      <a class="brand" href="./" data-nav="swap" aria-label="SwapDesk home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 12.5h11.5l-3-3M23 19.5H11.5l3 3" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>SwapDesk</span>
+      </a>
+      <nav class="seg" aria-label="Sections">
+        <a href="./" data-nav="swap">Swap</a>
+        <a href="./?view=prices" data-nav="prices">Price List</a>
+        <a href="./?view=trade-in" data-nav="trade-in">Trade-In Values</a>
+      </nav>
     </div>
+    <div class="bar-extra wrap" id="bar-extra"></div>
+  </header>
 
-        <!-- Phase 2 Trade-In Scenario -->
-        <div id="phase2TradeIn" class="step" style="display:none;">
-            <h3>Trade In Values 📲</h3>
-            <p><strong>Ready to Swap to something new?</strong></p>
-            <p class="par2">Let's find out the trade-in value of your device. First, select the type of device you want to trade in:</p>
-            <div id="deviceTypeTradeIn" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
-            </div>
-            <div id="deviceCategoryTradeIn" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
-            </div>
-            <div id="tradeInTableContainer"></div>
-            <div class="buttons-container">
-                <button class="go-back-button" id="GoBackButton" onclick="goBackFromPhase2TradeIn()">Go Back</button>
-                <button class="go-back-button" id="ResetTradeInTable" onclick="clearAndCheckAnotherDevice()" style="display:none;">Reset</button>
-                <button class="transition-button" id="checkForSwapButton" onclick="continueToPhase3()" style="display:none;">Continue</button>
-            </div>
-        </div>
-
-        
-        <!-- Phase 2 Swap Scenario -->
-        <div id="phase2Swap" class="step" style="display:none;">
-            <h3>Select your device to get started.</h3>
-            <h3 class="h33"></h4>
-            <h3 class="h33"></h4>
-            <p class="par2">First, What kind of device do you want to Swap? ⤵️</p>
-            <div id="deviceTypeSwap" class="buttons-container" onclick="handleButtonClick(event); handleDeviceTypeClick(event)">
-                <!-- Add device types dynamically -->
-            </div>
-            <div id="deviceCategorySwap" class="hidden buttons-container" onclick="handleButtonClick(event); handleCategoryClick(event)">
-                <!-- Add categories dynamically -->
-            </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase2Swap()">Go Back</button>
-                <button class="transition-button" id="continueButton" onclick="continueToPhase3()" style="display:none;">Confirm</button>
-            </div>
-        </div>
-        
-        <!-- Phase 3: Original Device Info & Swap Rate -->
-        <div id="phase3" class="step" style="display:none;">
-            <h3>Which model do you have?</h3>
-            <p><strong>Here's how to find it ⤵️</strong></p>
-            <p class="par2">For Apple Devices, go to Settings > General > About. You should find the Model Name & Storage Capacity for your iPhone.</p>
-            <div id="deviceNameContainer" class="buttons-container">
-                <!-- Add device names dynamically -->
-            </div>
-            <div id="deviceConfigurationContainer" class="hidden buttons-container" onclick="handleConfigurationClick(event)">
-                <!-- Add configurations dynamically -->
-            </div>
-            <div id="loadingContainer" class="lcc" style="display: none;">
-                <h4 id="loadingHeader" class="hloading">Calculating...😊</h2>
-                <p id="loadingSubHeader" class="loading-subheader"></h3>
-                <div class="loading-bar-spinner">
-                  <div class="loading-bar"></div>
-                </div>
-                <div id="loadingTextContainer"></div>
-              </div>  
-            <div id="tradeInOutput" style="display:none;">
-                <h2>Trade-In Value</h2>
-                <div id="originalDeviceTradeInValue"></div>
-            </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase3()">Go Back</button>
-                <button class="transition-button" onclick="goToPhase6()" id="continueToPhase4Button" style="display:none;">Confirm</button>
-            </div>
-        </div>
-            
-
-      <!-- Phase 6: Device Condition Questions -->
-      <div id="phase6" class="step" style="display:none;">
-        <div id="step0" class="condition-question">
-        <h3>Is your device in good working condition?</h3>
-        <p class="par2"><strong>You can say "Yes" if..</strong></p>
-        <ul>
-            <li>- Bluetooth, Mobile data &amp; WiFi function normally.</li>
-            <li>- The <strong>Cameras</strong> work and all lenses are intact.</li>
-            <li>- The <strong>Battery Health </strong>for iPhones is over 80%.</li>
-            <li>- The Body is free of <strong>Dents</strong> and <strong>Scratches</strong>.</li>
-            <li>- The Screen and Back Glass are <strong>Not Broken.</strong></li>
-            <li>- The device is not <strong>Locked</strong> to any Network.</li>
-            <li>- The device does not use a <strong>Chip.</strong></li>
-            <li>- <strong>Face ID</strong> or <strong>Touch ID</strong> function normally.</li>
-        </ul>        
-        <div class="buttons-container">
-            <button id="step0Yes" onclick="onConditionSelected('Yes', event)">Yes</button>
-            <button id="step0No" onclick="onConditionSelected('No', event)">No</button>
-            <button class="go-back-button" onclick="goBackFromPhase6()" style="display:block;">Go Back</button> 
-            <button class="transition-button" id="goToPhase7Button" onclick="goToPhase4()" style="display:none;">Proceed </button>
-        </div>
-        </div>
+  <main id="main" tabindex="-1">
+    <div class="boot wrap" aria-busy="true">
+      <div class="skeleton" style="width:60%"></div>
+      <div class="skeleton" style="width:40%"></div>
+      <div class="skeleton tall"></div>
     </div>
-    
-            <!-- Phase 4: Select Swap Device Type & Category -->
-        <div id="phase4" class="step" style="display:none;">
-            <h3>Select your new device to proceed</h3>
-            <p class="par2">Let us know what type of device you want.</p>
-            <div id="swapDeviceTypeContainer" class="buttons-container" onclick="handleSwapDeviceTypeClick(event)">
-            <!-- Add swap device types dynamically -->
-            </div>
-            <div id="swapDeviceCategory" class="hidden buttons-container" onclick="handleSwapCategoryClick(event)">
-            <!-- Add swap categories dynamically -->
-            </div>
-            <div class="buttons-container">
-                <button class="go-back-button" onclick="goBackFromPhase4()">Go Back</button>
-                <button class="transition-button" id="continueToPhase5Button" onclick="continueToPhase5()" style="display:none;">Confirm</button>
-            </div>
-        </div>
-  
-     <!-- Phase 5: Swap Device Info & Swap Rate Output -->
-<div id="phase5" class="step" style="display:none;">
-   <h3>Select your new device to proceed</h3>
-    <p class="par2">Kindly select the specific device you want'</p>
+  </main>
 
-    <!-- Container for Swap Device Names -->
-    <div id="swapDeviceNameContainer" class="buttons-container">
-        <!-- Add swap device names dynamically -->
-    </div>
+  <footer class="foot wrap">
+    <p class="foot-brand"><strong>SwapDesk</strong> · An Upgrade Brands product</p>
+    <p class="foot-links">
+      <a href="https://wa.me/2347037853959" rel="noopener">WhatsApp 0703 785 3959</a>
+      <a href="https://instagram.com/the.swapdesk" rel="noopener">Instagram @the.swapdesk</a>
+    </p>
+    <p class="foot-note">Trade-in values are estimates and are confirmed when we check your device in store.</p>
+  </footer>
 
-    <!-- NEW: Container for Swap Device Quality -->
-    <div id="swapDeviceQualityContainer" class="hidden buttons-container">
-        <!-- Add swap device quality dynamically -->
-    </div>
-
-    <!-- Container for Swap Device Configurations -->
-    <div id="swapDeviceConfigurationContainer" class="hidden buttons-container">
-        <!-- Add swap configurations dynamically -->
-    </div>
-
-    <div id="loadingContainerSwap" class="lcc" style="display: none;">
-        <h4 id="loadingHeaderSwap" class="hloading">Calculating...😊</h4>
-        <p id="loadingSubHeaderSwap" class="loading-subheader"></p>
-        <div class="loading-bar-spinner">
-            <div class="loading-bar"></div>
-        </div>
-        <div id="loadingTextContainerSwap"></div>
-    </div>
-
-    <div id="swapRateOutput" class="hidden"> <!-- Updated style -->
-        <!-- Swap Rate Output will be added dynamically -->
-    </div>
-
-    <div class="buttons-container">
-        <button class="go-back-button" onclick="goBackFromPhase5()">Go Back</button>
-        <button class="transition-button" id="continueToPhase6Button" onclick="goToPhase7()" style="display:none;">Complete Trade-In</button>
-    </div>
-</div>
-
-    <div id="phase7" class="hidden">
-        <h3>You're almost there...📍</h3>
-        <p>To find out how to complete your Swap, just let us know which city you're in. We're so excited to see you! 😊</p>
-        <p class="par2"><strong>Kindly select your city ⤵️</strong></p>
-        <div class="buttons-container" id="locationButtonsContainer">
-          <button id="locationPortHarcourt" onclick="onLocationButtonClick('Port Harcourt', event)">Port Harcourt</button>
-          <button id="locationYenagoa" onclick="onLocationButtonClick('Yenagoa', event)">Yenagoa</button>
-          <button id="locationAbuja" onclick="onLocationButtonClick('Abuja', event)">Abuja</button>
-          <button id="locationUyo" onclick="onLocationButtonClick('Uyo', event)">Uyo</button>
-          <button id="locationLagos" onclick="onLocationButtonClick('Lagos', event)">Lagos</button>
-          <button id="locationOtherCities" onclick="onLocationButtonClick('Other Cities', event)">Other Cities</button>
-        </div>
-        <div id="swapBreakdown"></div>
-        <div class="buttons-container">
-            <button id="downloadJpeg" class="hidden download-button" onclick="downloadSwapBreakdownImage()">Download</button>
-          </div>          
-    </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="wrap">SwapDesk needs JavaScript to show prices. Message us on WhatsApp on 0703 785 3959.</p></noscript>
 </body>
 </html>
-                
