@@ -730,3 +730,18 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .screen-main > .mine, .screen-main > .card, .screen-main > .cmp-grid, .screen-main > .btn.add { width: var(--btncol) !important; max-width: 100%; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box; }
 /* Pinned search/trail on the lists: solid enough that rows scrolling under it don't show through. */
 .list-top, .pick-search, .series-h { background: rgba(236, 244, 255, 0.97) !important; }
+
+/* Home on laptops and tablets: the headline stays on two lines and everything fits without scrolling. */
+.home .h-display { white-space: nowrap; }
+@media (min-width: 601px) {
+  .home .h-display { font-size: clamp(2.3rem, min(5.4vh, 3.2rem), 3.2rem); }
+  .home .screen-main { gap: clamp(14px, 3.2vh, 34px); padding-bottom: 4px; }
+  .home .stack.tight { gap: clamp(10px, 1.6vh, 16px); }
+  .home .stack.tight .btn { min-height: clamp(50px, 6.6vh, 62px); }
+  .home .lead { font-size: clamp(15px, 2vh, 17px); }
+}
+@media (min-width: 601px) and (max-height: 700px) {
+  .home .screen-main { gap: 12px; }
+  .home .stack.tight .btn { min-height: 48px; }
+}
+@media (max-width: 360px) { .home .h-display { font-size: 10.2vw; } }

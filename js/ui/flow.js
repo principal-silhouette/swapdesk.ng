@@ -145,7 +145,7 @@ function home(el, app) {
   wire(el, app, {
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
-    trade: () => startFlow(app, 'trade'),
+    trade: () => app.go('trade-in'),
     swap: () => startFlow(app, 'swap'),
   });
 }
