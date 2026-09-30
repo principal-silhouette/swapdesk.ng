@@ -202,7 +202,7 @@ function picker(el, app, params) {
   };
   const storageOpt = (d, withModel) => html`<button class="opt ver" type="button" role="radio" aria-checked="${s.deviceId && ownDevice(app)?.model === d.model && ownDevice(app)?.storage === d.storage ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
       <span class="main">${withModel ? d.model : (d.storage || 'Standard')}${withModel && d.storage ? html`<span class="sub">${d.storage}</span>` : ''}</span>
-      <span class="val"><small>Up to</small>${naira(d._max)}</span></button>`;
+      ${raw(ICON.chevron)}</button>`;
 
   function draw() {
     const lv = level();
@@ -374,13 +374,14 @@ function confirm(el, app) {
   const upTo = Math.max(...siblings(d).map((x) => x.tradeInValue || 0), d.tradeInValue || 0);
   const name = [d.storage, d.model].filter(Boolean).join(', ');
   el.innerHTML = html`
-    <h2 class="h-title h-big">Congratulations! 🥳</h2>
-    <p class="lead big-lead">You can get up to <strong class="num">${naira(upTo)}</strong> when you Trade In your <strong>${name}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
-    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>
+    <h2 class="h-title">Your Device</h2>
     <div class="stack crumbs">
       <button class="opt crumb" type="button" data-act="change"><span class="main">${d.model}</span><span class="edit">Change</span></button>
       ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${d.storage}</span><span class="edit">Change</span></button>` : ''}
-    </div>`;
+    </div>
+    <p class="congrats">Congratulations! 🥳</p>
+    <p class="lead big-lead">You can get up to <strong class="num">${naira(upTo)}</strong> when you Trade In your <strong>${name}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
+    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
@@ -413,7 +414,7 @@ function question(el, app, params) {
           <div class="stack q-opts" role="radiogroup">${q.options.map((o) => {
             const [label, hint] = ORIGIN_LABEL[o.condition] || [o.condition, ''];
             return html`<button class="opt ver" type="button" role="radio" aria-checked="${a.origin === o.id ? 'true' : 'false'}" data-act="origin" data-v="${o.id}">
-              <span class="main">${label}<span class="sub">${hint}</span></span><span class="val"><small>Up to</small>${naira(o.tradeInValue)}</span></button>`;
+              <span class="main">${label}<span class="sub">${hint}</span></span><span class="tick" aria-hidden="true"></span></button>`;
           })}</div>`;
       case 'icloud':
         return html`<h2 class="h-title">${apple ? 'Is it signed out of iCloud?' : 'Is it signed out of your accounts?'}</h2>
