@@ -33,15 +33,15 @@ export const NETWORK = [
 
 // Fault keys match the Site Feed deduction columns.
 export const FAULTS = [
-  { key: 'screen', label: 'Bad screen', hint: 'Cracked, lines, spots or not original' },
-  { key: 'trueTone', label: 'No True Tone', hint: 'True Tone missing in Control Centre' },
-  { key: 'backGlass', label: 'Back glass', hint: 'Cracked or replaced back' },
-  { key: 'faceId', label: 'Face ID', hint: 'Face ID not working' },
-  { key: 'touchId', label: 'Touch ID / Fingerprint', hint: 'Fingerprint not working' },
-  { key: 'earpiece', label: 'Earpiece', hint: 'Can’t hear calls clearly' },
-  { key: 'loudspeaker', label: 'Loudspeaker', hint: 'Speaker quiet or crackling' },
-  { key: 'camera', label: 'Camera', hint: 'Any camera blurry or not working' },
-  { key: 'chargingPort', label: 'Charging port / mic', hint: 'Charging or mic problems' },
+  { key: 'screen', label: 'Bad screen', hint: 'Cracked glass, lines, dead spots, burn-in, or a replaced (not original) screen.' },
+  { key: 'trueTone', label: 'No True Tone', hint: 'True Tone is missing from Control Centre or Display settings, usually after a screen change.' },
+  { key: 'backGlass', label: 'Back glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
+  { key: 'faceId', label: 'Face ID', hint: 'Face ID won’t set up, or doesn’t recognise your face.' },
+  { key: 'touchId', label: 'Touch ID / Fingerprint', hint: 'The fingerprint sensor doesn’t register or unlock the device.' },
+  { key: 'earpiece', label: 'Earpiece', hint: 'Callers sound faint, muffled or crackly when the phone is at your ear.' },
+  { key: 'loudspeaker', label: 'Loudspeaker', hint: 'Music, ringtones or speakerphone are quiet, distorted or silent.' },
+  { key: 'camera', label: 'Camera', hint: 'Any camera is blurry, black, shaky or won’t focus.' },
+  { key: 'chargingPort', label: 'Charging port / mic', hint: 'Won’t charge, charges only at an angle, or callers can’t hear you.' },
 ];
 
 export const CONDITION_ORDER = [

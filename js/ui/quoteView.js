@@ -59,13 +59,11 @@ function render(el, app, p, q) {
           <span class="k">${label}</span>
           <span class="n">${q.device ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></article>`;
       })}</div>` : ''}
-    <div class="stack">
+    <p class="small">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
+  el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
       <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
-      <button class="btn" type="button" data-act="share">${raw(ICON.share)} Share Quote</button>
-      <button class="btn" type="button" data-act="today">Use Today’s Figures</button>
-    </div>
-    <p class="small">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
-    <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p>`.toString();
+      <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill go" type="button" data-act="today">Use Today’s Figures</button></div>
+      <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p></div>`.toString();
 
   el.onclick = async (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;

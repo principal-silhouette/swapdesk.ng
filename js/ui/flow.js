@@ -2,7 +2,7 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
 import { html, raw, naira, variantName, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
@@ -38,6 +38,8 @@ const TYPE_LABEL = {};
 const credit = () => html`<p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p>`;
 const pills = (...b) => html`<div class="pills">${b}</div>`;
 const backPill = (label = 'Go Back') => html`<button class="pill" type="button" data-back>${label}</button>`;
+/** Every screen: content that fills the pop-up, and navigation pinned to the bottom. */
+const layout = (main, foot) => html`<div class="screen-main">${main}</div><div class="screen-foot">${foot}${credit()}</div>`;
 
 function wire(el, app, handlers) {
   el.addEventListener('click', (e) => {
@@ -94,18 +96,23 @@ function targets(app) {
 // ---------- home ----------
 
 function home(el, app) {
-  el.innerHTML = html`
-    <h1 class="h-display">Swap, Trade-In,<br><span class="blue">Upgrade.</span></h1>
-    <p class="lead"><strong>Ready to Swap? 🔄</strong> We’re here for you. Get the best value for your 📱 iPhone, ⌚️ Watch, 📲 iPad or 🎧 AirPods when you Trade In.</p>
-    <p class="lead"><strong>Trade In the gadgets you have<br>for the one you love 💙</strong></p>
-    <div class="stack">
+  const max = app.catalog.settings['compare.maxDevices'] || 6;
+  el.classList.add('home');
+  el.innerHTML = layout(html`
+    <p class="kicker">Swap · Trade In · Upgrade</p>
+    <h1 class="h-display">The fastest way<br>to <span class="blue">swap.</span></h1>
+    <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
+    <ol class="steps">
+      <li><span class="n">1</span><span><b>Value your device</b>Battery, body and faults, priced line by line.</span></li>
+      <li><span class="n">2</span><span><b>Compare up to ${max} devices</b>Your swap balance for each, side by side.</span></li>
+      <li><span class="n">3</span><span><b>Swap in your city</b>PH, Abuja, Lagos, Uyo, Yenagoa, or waybill.</span></li>
+    </ol>`, html`
+    <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
       <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
-    <p class="small">New: compare up to ${app.catalog.settings['compare.maxDevices'] || 6} devices in one swap quote, and save it as a link.
-      <br><button class="link" type="button" data-act="tradeList">See all Trade-In Values</button></p>
-    ${credit()}`.toString();
+    <p class="foot-link"><button class="link" type="button" data-act="tradeList">See all Trade-In Values</button></p>`).toString();
   wire(el, app, {
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
@@ -222,13 +229,12 @@ function picker(el, app, params) {
       <h2 class="h-title">${title}</h2>
       <p class="par">${help}</p>
       ${crumbs.length ? html`<div class="stack">${crumbs.map(([k, label]) => html`
-        <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div>` : ''}
+        <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div><p class="chip-hint">Tap a selected option to change it.</p>` : ''}
       <label class="field"><span class="visually-hidden">Search devices</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 13 pro max 256" value="${st.search}" autocomplete="off" enterkeyhint="search">
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label>
-      <div class="stack">${options}</div>
-      ${pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')}
-      ${credit()}`.toString();
+      <div class="stack">${options}</div>`;
+    el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
   }
 
   draw();
@@ -310,9 +316,8 @@ function confirm(el, app) {
     </div>
     <h2 class="h-title">Congratulations! 🥳</h2>
     <p class="lead">You can get up to <strong class="num">${naira(d.tradeInValue)}</strong> when you Trade In your <strong>${[d.storage, d.model].filter(Boolean).join(', ')}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
-    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>
-    ${pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)}
-    ${credit()}`.toString();
+    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
+  el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
     ok: () => app.go('q', { i: 0 }),
@@ -340,30 +345,43 @@ function question(el, app, params) {
       case 'icloud':
         return html`<h2 class="h-title">${apple ? 'Is it signed out of iCloud?' : 'Is it signed out of your accounts?'}</h2>
           <p class="par">${apple ? 'Find My must be turned off so the next owner can set it up.' : 'Remove your Google and Samsung accounts so the next owner can set it up.'}</p>
-          <div class="stack" role="radiogroup">
+          <div class="stack q-opts" role="radiogroup">
             ${opt(a.icloudLocked === false, 'data-act="icloud" data-v="no"', 'Yes, it’s signed out')}
             ${opt(a.icloudLocked === true, 'data-act="icloud" data-v="yes"', 'No, it’s still locked')}</div>
           ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>` : ''}`;
       case 'battery':
+      {
+        const pct = Math.max(0, Math.min(100, Number(a.battery) || 0));
+        const cut = amountFor(d, 'battery');
+        const th = app.catalog.settings.batteryThreshold || 85;
         return html`<h2 class="h-title">What’s the battery health?</h2>
-          <p class="par">${apple ? 'Go to Settings › Battery › Battery Health & Charging.' : 'Enter it if your device shows it. If not, choose Not sure.'}</p>
-          <div class="battery">
+          <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and read <b>Maximum Capacity</b>.') : 'Enter it if your phone shows battery health. If it doesn’t, choose Not sure.'}</p>
+          <div class="battery-big">
+            <span class="cell" aria-hidden="true"><i data-cell style="width:${pct}%" class="${pct && pct < th ? 'low' : ''}"></i></span>
             <label><span class="visually-hidden">Battery health percent</span>
-              <input type="number" inputmode="numeric" min="1" max="100" placeholder="90" data-battery value="${a.batteryUnknown ? '' : a.battery}"></label>
-            <button class="opt center" type="button" aria-pressed="${a.batteryUnknown ? 'true' : 'false'}" data-act="unsure">Not sure</button>
+              <input type="number" inputmode="numeric" min="1" max="100" placeholder="—" data-battery value="${a.batteryUnknown ? '' : a.battery}"><span class="pct">%</span></label>
+          </div>
+          <div class="stack q-opts">
+            <button class="opt" type="button" aria-pressed="${a.batteryUnknown ? 'true' : 'false'}" data-act="unsure">
+              <span class="main">Not sure<span class="sub">We’ll check it in store.</span></span><span class="tick" aria-hidden="true"></span></button>
+          </div>
+          <div class="info">
+            <p><b>${th}% and above:</b> no deduction.</p>
+            <p><b>Below ${th}%:</b> ${typeof cut === 'number' ? html`${naira(cut)} comes off your value, the cost of a new battery.` : 'the cost of a new battery comes off your value, confirmed in store.'}</p>
           </div>`;
+      }
       case 'neatness':
         return html`<h2 class="h-title">How does it look?</h2>
           <p class="par">Check the screen, back and frame in good light.</p>
-          <div class="stack" role="radiogroup">${NEATNESS.map((n, k) => opt(a.neatness === n.key, `data-act="neat" data-v="${n.key}"`, n.label, n.hint, neatnessIllo(k)))}</div>`;
+          <div class="stack q-opts" role="radiogroup">${NEATNESS.map((n, k) => opt(a.neatness === n.key, `data-act="neat" data-v="${n.key}"`, n.label, n.hint, neatnessIllo(k)))}</div>`;
       case 'network':
         return html`<h2 class="h-title">Is it network locked?</h2>
           <p class="par">How does it work with SIM cards?</p>
-          <div class="stack" role="radiogroup">${NETWORK.map((n) => opt(a.network === n.key, `data-act="net" data-v="${n.key}"`, n.label, n.hint))}</div>`;
+          <div class="stack q-opts" role="radiogroup">${NETWORK.map((n) => opt(a.network === n.key, `data-act="net" data-v="${n.key}"`, n.label, n.hint))}</div>`;
       case 'faults':
         return html`<h2 class="h-title">Anything not working?</h2>
           <p class="par">Tick everything that applies.</p>
-          <div class="stack" role="group">
+          <div class="stack q-opts" role="group">
             ${q.faults.map((f) => html`<button class="opt" type="button" role="checkbox" aria-checked="${a.faults.includes(f.key) ? 'true' : 'false'}" data-act="fault" data-v="${f.key}">
               <span class="main">${f.label}<span class="sub">${f.hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`)}
             <button class="opt" type="button" role="checkbox" aria-checked="${a.faultsDone && !a.faults.length ? 'true' : 'false'}" data-act="allgood">
@@ -380,10 +398,10 @@ function question(el, app, params) {
     el.innerHTML = html`
       <p class="eyebrow">Question ${i + 1} of ${qs.length} · ${d.model}</p>
       <div class="progress" aria-hidden="true"><i style="transform:scaleX(${done / qs.length})"></i></div>
-      ${body()}
-      ${r.accepted ? html`<p class="so-far">Trade-in value so far: <b data-live>${naira(r.value)}</b></p>` : ''}
-      ${pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${answered(q, a) ? '' : 'disabled'}>${last ? 'See My Value' : 'Next'}</button>`)}
-      ${credit()}`.toString();
+      ${body()}`;
+    el.innerHTML = layout(raw(el.innerHTML), html`
+      ${r.accepted ? html`<p class="so-far">Trade-in value so far <b data-live>${naira(r.value)}</b></p>` : ''}
+      ${pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${answered(q, a) ? '' : 'disabled'}>${last ? 'See My Value' : 'Next'}</button>`)}`).toString();
   }
   function next() {
     if (!answered(q, a)) return;
@@ -426,6 +444,12 @@ function question(el, app, params) {
     const r = valueDevice(d, engineAnswers(a, d), app.catalog.settings);
     const live = $('[data-live]', el);
     if (live && r.accepted) live.textContent = naira(r.value);
+    const cell = $('[data-cell]', el);
+    if (cell) {
+      const pct = Math.max(0, Math.min(100, Number(a.battery) || 0));
+      cell.style.width = `${pct}%`;
+      cell.classList.toggle('low', pct > 0 && pct < (app.catalog.settings.batteryThreshold || 85));
+    }
   });
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('[data-battery]')) next(); });
   if (q.key === 'battery') queueMicrotask(() => { if (!a.battery && !a.batteryUnknown) $('[data-battery]', el)?.focus({ preventScroll: true }); });
@@ -451,13 +475,10 @@ function value(el, app) {
         ${r.lines.length ? html`<li class="total"><span>Your trade-in value</span><span>${naira(r.value)}</span></li>` : ''}
       </ul>
     </div>
-    <p><button class="link" type="button" data-act="edit">Edit answers</button></p>
-    <div class="stack">
-      <button class="btn blue" type="button" data-act="swap">${s.mode === 'swap' ? 'Compare Swap Devices' : 'Calculate My Swap Rate'}</button>
-      <button class="btn" type="button" data-act="cash">Trade In for Cash</button>
-    </div>
-    ${pills(backPill())}
-    ${credit()}`.toString();
+    <p><button class="link" type="button" data-act="edit">Edit answers</button></p>`;
+  el.innerHTML = layout(raw(el.innerHTML), html`
+    <button class="btn blue" type="button" data-act="swap">${s.mode === 'swap' ? 'Compare Swap Devices' : 'Calculate My Swap Rate'}</button>
+    ${pills(backPill(), html`<button class="pill" type="button" data-act="cash">Trade In for Cash</button>`)}`).toString();
   requestAnimationFrame(() => animateNumber($('.big-num', el), r.value, naira));
   wire(el, app, {
     edit: () => app.go('q', { i: 0 }),
@@ -499,19 +520,28 @@ function compare(el, app) {
   el.innerHTML = html`
     <h2 class="h-title">Your Swap Rates</h2>
     <p class="par">Compare what it costs to swap into up to ${max} devices.</p>
-    ${d ? html`<div class="stack"><button class="opt crumb" type="button" data-act="val">
-        <span class="main">Your ${d.model}<span class="sub">${variantName(d)}</span></span>
-        <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span></button></div>`
+    ${d ? html`<div class="mine">
+        <div class="mine-top">
+          <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${variantName(d)}</span></span>
+          <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
+        </div>
+        ${r && r.accepted ? html`<p class="mine-cond">${answersText(engineAnswers(s.answers, d))}</p>
+        <details class="mine-how"><summary>How we got ${naira(tv)}</summary>
+          <ul class="lines">
+            <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
+            ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
+            <li class="total"><span>Your trade-in value</span><span>${naira(tv)}</span></li>
+          </ul>
+          <button class="link" type="button" data-act="edit">Edit answers</button>
+        </details>` : ''}
+      </div>`
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
-    <div class="stack">
-      ${s.compare.length < max ? html`<button class="btn" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}
-      ${tv !== null && live.length ? html`<button class="btn blue" type="button" data-act="next">Continue</button>` : ''}
-    </div>
-    ${pills(backPill())}
-    ${credit()}`.toString();
+    ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
+  el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${tv !== null && live.length ? '' : 'disabled'}>Continue</button>`)).toString();
   wire(el, app, {
     val: () => app.go('value'),
+    edit: () => app.go('q', { i: 0 }),
     own: () => startFlow(app, 'swap'),
     add: () => { s.add = { ...freshPick(), type: d?.type || '' }; app.go('pick', { purpose: 'add' }); },
     next: () => { s.cash = false; app.save(); app.go('finish'); },
@@ -559,13 +589,10 @@ function finish(el, app) {
       ${CITIES.map((c) => html`<button class="opt" type="button" role="radio" aria-checked="${c.key === s.city ? 'true' : 'false'}" data-act="city" data-v="${c.key}">${c.name}</button>`)}
     </div>
     ${city ? html`<p class="city-text">${city.text}</p>` : ''}
-    <div class="stack">
-      <button class="btn green fill" type="button" data-act="wa" ${city ? '' : 'disabled'}>${raw(ICON.whatsapp)} Complete on WhatsApp</button>
-      <button class="btn" type="button" data-act="save">${raw(ICON.link)} Save & Share Quote</button>
-    </div>
-    <p class="small">Our team sees every device in your quote from the link. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
-    ${pills(backPill())}
-    ${credit()}`.toString();
+    <p class="small">Our team sees every device in your quote from the link. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
+  el.innerHTML = layout(raw(el.innerHTML), html`
+    <button class="btn green fill" type="button" data-act="wa" ${city ? '' : 'disabled'}>${raw(ICON.whatsapp)} ${city ? 'Complete on WhatsApp' : 'Pick your city to continue'}</button>
+    ${pills(backPill(), html`<button class="pill" type="button" data-act="save">Save & Share</button>`)}`).toString();
   wire(el, app, {
     city: (b) => { s.city = b.dataset.v; app.save(); app.refresh(); $('[data-act="wa"]', el.isConnected ? el : document)?.focus?.({ preventScroll: true }); },
     wa: async (b) => {
@@ -591,9 +618,8 @@ function saved(el, app) {
       <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="btn blue" type="submit">Save Quote</button>
     </form>
-    <div data-result></div>
-    ${pills(backPill())}
-    ${credit()}`.toString();
+    <div data-result></div>`;
+  el.innerHTML = layout(raw(el.innerHTML), pills(backPill())).toString();
   const form = $('form', el);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
