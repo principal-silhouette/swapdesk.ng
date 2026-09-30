@@ -576,3 +576,21 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .home .lead { font-size: clamp(14px, min(4.4vw, 2.4vh), 18px); }
 @media (max-height: 700px) and (max-width: 600px) { .home .lead { display: block; font-size: 14px; } .home .lead .lead-2 { display: none; } }
 .home .lead { font-size: clamp(13.5px, min(4.05vw, 2.4vh), 18px); }
+
+/* Device picking: progress bar and sliding headings. */
+.pick-progress { max-width: 240px; margin: 4px auto 6px; }
+.pick-progress i { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pick-head-wrap { position: relative; overflow: hidden; }
+.pick-head.leaving { position: absolute; inset: 0 0 auto 0; pointer-events: none; }
+.loading .screen-main { justify-content: flex-start; }
+.loading .load-bar { margin-top: 4px; }
+.pick-progress { width: 100%; max-width: 240px; flex: none; height: 5px; background: rgba(31, 94, 159, 0.14); }
+.pick-progress i { background: var(--action); }
+
+/* Header and its description always read as one block. */
+.head-block .h-title { margin-bottom: 8px; }
+.head-block .par { margin: 0; }
+.result-block .tiv { margin: 0 0 10px; }
+.result-block .congrats { margin: 0 0 8px; }
+.result-block .par { margin: 0; }
+.result-block .tiv { margin-bottom: 16px; } .result-block .congrats { margin-bottom: 10px; }

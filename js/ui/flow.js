@@ -264,9 +264,19 @@ function picker(el, app, params) {
       options = add ? vs.map((d) => version(d, false)) : byStorage(vs).map((d) => storageOpt(d, false));
     }
 
+    // Progress through picking your device: type → brand → model → storage (then Calculating).
+    const STEPS = ['type', 'brand', 'model', 'version'];
+    const frac = add ? 0 : (st.search ? STEPS.indexOf(lv) : STEPS.indexOf(lv)) / STEPS.length;
+    const fromFrac = prevFrac ?? frac;
+    const oldHead = $('.pick-head', el);
+    const oldKey = oldHead?.dataset.key;
+    const headKey = `${lv}|${title}`;
     el.innerHTML = html`
-      <h2 class="h-title">${title}</h2>
-      <p class="par">${help}</p>
+      ${add ? '' : html`<div class="progress pick-progress" aria-hidden="true"><i style="transform:scaleX(${fromFrac})"></i></div>`}
+      <div class="pick-head-wrap"><div class="pick-head" data-key="${headKey}">
+        <h2 class="h-title">${title}</h2>
+        <p class="par">${help}</p>
+      </div></div>
       <div class="pick-search"><label class="field"><span class="visually-hidden">Search devices</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 13 pro max 256" value="${st.search}" autocomplete="off" enterkeyhint="search">
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label></div>
@@ -274,8 +284,24 @@ function picker(el, app, params) {
         <button class="opt crumb" type="button" data-act="crumb" data-v="${k}"><span class="main">${label}</span><span class="edit">Change</span></button>`)}</div><p class="chip-hint">Tap a selected option to change it.</p>` : ''}
       <div class="stack">${options}</div>`;
     el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
+    prevFrac = frac;
+    app.s._pickFrac = frac;
+    const bar = $('.pick-progress i', el);
+    if (bar && fromFrac !== frac) requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = `scaleX(${frac})`; }));
+    // The heading slides out as the next one slides in.
+    const newHead = $('.pick-head', el);
+    if (oldHead && oldKey !== headKey && newHead && newHead.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const back = STEPS.indexOf(lv) < STEPS.indexOf((oldKey || '').split('|')[0]);
+      const dx = back ? -1 : 1;
+      oldHead.classList.add('leaving');
+      newHead.parentElement.appendChild(oldHead);
+      const ease = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+      oldHead.animate([{ transform: 'none', opacity: 1 }, { transform: `translateX(${-40 * dx}px)`, opacity: 0 }], { duration: 260, easing: ease }).onfinish = () => oldHead.remove();
+      newHead.animate([{ transform: `translateX(${40 * dx}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: ease });
+    }
   }
 
+  let prevFrac = null;
   draw();
   el.addEventListener('input', (e) => {
     if (!e.target.matches('[data-search]')) return;
@@ -351,20 +377,19 @@ function loading(el, app) {
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ms = reduce ? 900 : 1900;
+  const from = typeof app.s._pickFrac === 'number' ? app.s._pickFrac : 0.75;
   el.classList.add('loading');
+  // Everything else steps away; the progress bar carries the wait, then the result appears.
   el.innerHTML = layout(html`
-    <div class="load">
-      <div class="load-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><circle class="arc" cx="32" cy="32" r="28" style="animation-duration:${ms}ms"/></svg></div>
-      <h2 class="h-title">Calculating…</h2>
-      <p class="par"><strong>${d.model}</strong><br>${d.storage}</p>
-      <p class="load-step" role="status" aria-live="polite">Checking today’s prices</p>
-    </div>`, '').toString();
-  const steps = ['Checking today’s prices', 'Matching your model', 'Working out your value'];
-  const stepEl = $('.load-step', el);
-  let i = 0;
-  const tick = setInterval(() => { i = Math.min(i + 1, steps.length - 1); if (stepEl.isConnected) stepEl.textContent = steps[i]; }, ms / 3);
+    <div class="progress pick-progress load-bar" aria-hidden="true"><i style="transform:scaleX(${from})"></i></div>
+    <p class="visually-hidden" role="status">Calculating your trade-in value for ${d.model} ${d.storage}</p>`, '').toString();
+  const bar = $('.load-bar i', el);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    bar.style.transition = `transform ${ms - 200}ms cubic-bezier(0.45, 0.05, 0.25, 1)`;
+    bar.style.transform = 'scaleX(1)';
+  }));
   setTimeout(() => {
-    clearInterval(tick);
+    app.s._pickFrac = 0;
     if (app.screen === 'loading') app.go('confirm', {}, { replace: true });
   }, ms);
 }
@@ -378,18 +403,22 @@ function confirm(el, app) {
   const upTo = d.tradeInValue || 0;
   const name = [d.storage, d.model].filter(Boolean).join(', ');
   el.innerHTML = html`
-    <h2 class="h-title">Your Device</h2>
-    <p class="par">Here’s what we can offer for it.</p>
+    <div class="head-block">
+      <h2 class="h-title">Your Device</h2>
+      <p class="par">Here’s the standard Trade-In Value for the device you picked.</p>
+    </div>
     <div class="stack crumbs">
       <button class="opt crumb" type="button" data-act="change"><span class="main">${d.model}</span><span class="edit">Change</span></button>
       ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${d.storage}</span><span class="edit">Change</span></button>` : ''}
     </div>
+    <div class="result-block">
     <div class="tiv">
       <p class="tiv-label">Up to</p>
       <p class="big-num">${naira(upTo)}</p>
     </div>
     <p class="congrats">Congratulations! 🥳</p>
-    <p class="par">Trade In your <strong>${name}</strong> for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device. This is its value in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
+    <p class="par">Trade In your <strong>${name}</strong> for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device. This is its value in perfect condition ✨. Answer a few quick questions for your exact figure.</p>
+    </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
