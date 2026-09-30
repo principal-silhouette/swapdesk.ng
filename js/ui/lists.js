@@ -143,7 +143,7 @@ export function listScreen(el, app, view, params) {
     const { rows, deals: ds } = current();
     const fig = (d) => naira(d[meta.figure]);
     const trade = view === 'trade-in';
-    const COND = { 'Foreign USED': '🇺🇸 Foreign USED', 'Foreign USED (Non LLA)': '🇺🇸 Foreign USED (Non LLA)', 'Nigerian USED': '🇳🇬 Nigerian USED' };
+    const COND = {};
     const condName = (c) => COND[c] || c;
     const byStorage = (a, b) => storageRank(a.storage) - storageRank(b.storage) || variantOrder(a, b);
     const minOf = (list) => Math.min(...list.map((d) => d[meta.figure]));
@@ -156,7 +156,7 @@ export function listScreen(el, app, view, params) {
         <div class="sizes">${list.sort(byStorage).map((d) => {
           const inCmp = !trade && cmp.includes(d.id);
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${d.storage}${!trade && d.condition.includes('Non LLA') ? html` <small>Non LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            <span class="st">${d.storage}${!trade && ['Foreign USED', 'Active Brand New'].includes(d.condition) ? html` <small class="lla">LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
@@ -187,7 +187,7 @@ export function listScreen(el, app, view, params) {
     const out = [];
     // Shop filters: only these four.
     const here = new Set(applyFilters(all, { ...f, cond: '' }).map((d) => fam(d.condition)));
-    const FILTERS = [['Brand New', 'Brand New'], ['Active Brand New', 'Active Brand New'], ['Foreign USED', '🇺🇸 Foreign USED']].filter(([c]) => here.has(c));
+    const FILTERS = [['Brand New', 'Brand New'], ['Active Brand New', 'Active Brand New'], ['Foreign USED', 'Foreign USED']].filter(([c]) => here.has(c));
     out.push(html`<div class="table-bar">${!trade && !f.cond && f.type && FILTERS.length ? html`<div class="chips">${FILTERS.map(([c, label]) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${label}</button>`)}<button class="chip" type="button" aria-pressed="false" data-k="deals" data-v="Deal">🔥 Deals</button></div>` : ''}<div class="list-actions">
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
