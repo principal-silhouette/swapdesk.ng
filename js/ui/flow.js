@@ -463,7 +463,7 @@ function good(el, app) {
   wire(el, app, {
     yes: () => {
       Object.assign(app.s.answers, { icloudLocked: false, battery: '', batteryUnknown: true, neatness: 'spotless', network: 'factory', faults: [], faultsDone: true, quick: true });
-      app.s.saved = null; app.save(); app.go('value');
+      app.s.saved = null; app.save(); app.go('choose');
     },
     no: () => { app.s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
   });
