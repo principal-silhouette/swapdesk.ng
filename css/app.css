@@ -755,3 +755,40 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Condition chips wrap and centre instead of running off the edge. */
 .table-bar .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; overflow: visible; margin: 0; padding-inline: 0; }
 .table-bar .chips .chip { flex: none; }
+
+/* ===== One content column on every page =====
+   The pop-up keeps a real side margin, and everything inside it (headers, subtext, search, chips,
+   lists, cards, buttons) sits in the same centred column, so nothing runs to the pop-up's edges. */
+:root { --pad: 22px; --colmax: 440px; }
+@media (min-width: 601px) { :root { --pad: 32px; } }
+.popup-body { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
+.screen-foot, .list-top, .pick-search { margin-left: calc(-1 * var(--pad)) !important; margin-right: calc(-1 * var(--pad)) !important; padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
+.screen-main > :not(.list-top):not(.pick-search):not(.progress):not(.pick-progress):not(.eyebrow), [data-list] > *, .list-top > *, .pick-search > *, .screen-foot > * { max-width: var(--colmax); margin-left: auto !important; margin-right: auto !important; box-sizing: border-box; }
+.screen-main > .head-block, .screen-main > .list-head, [data-list] > *, .list-top > .field, .list-top > .trail, .pick-search > .field, .screen-main > .dev-value, .list-top .field, .pick-search .field { width: 100%; }
+.screen-foot > .pills { width: min(100%, var(--colmax)); }
+.table-bar .chips { margin-left: 0 !important; margin-right: 0 !important; }
+/* Small caps labels get the same space below as above. */
+.step-q { margin: 14px 0 12px !important; }
+
+/* Home: buttons, note and credit move up together as one unit; lead → first button gap is 20% tighter. */
+:root { --hg: clamp(26px, 5.4vh, 52px); }
+@media (min-width: 601px) { :root { --hg: clamp(14px, 3.2vh, 34px); } }
+@media (min-width: 601px) and (max-height: 700px) { :root { --hg: 12px; } }
+.home .screen-main { gap: var(--hg) !important; }
+.home .home-intro { transform: translateY(-12px); }
+.home .stack.tight, .home .home-note, .home .screen-foot .credit { transform: translateY(calc(-12px - 0.2 * var(--hg))); }
+
+/* One box width for every container (search, trail, options, list rows, cards), phone and laptop alike.
+   Header text can run a little wider; boxes never touch the pop-up's sides. */
+:root { --box: min(86%, 380px); }
+.screen-main [data-list], .screen-main > .table-bar { width: 100% !important; }
+.list-top .field, .pick-search .field, .screen-main > .field,
+.stack, .screen-main .stack, [data-list] .stack, [data-list] > .series, [data-list] > .table-bar,
+.screen-main > .mine, .screen-main > .card, .screen-main > .cmp-grid, .screen-main > .cities, .screen-main > .checks,
+.list-top .trail, .pick-search + .trail, .screen-main > .trail, .screen-main > .step-q {
+  width: var(--box) !important; max-width: var(--box) !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box;
+}
+.home .stack.tight { width: min(80%, 300px) !important; max-width: none !important; }
+.list-head, .head-block { width: min(94%, 440px) !important; }
+/* Search: the clear button only takes space once something is typed, so the full example fits. */
+.field input:placeholder-shown { padding-right: 12px !important; padding-left: 42px !important; }

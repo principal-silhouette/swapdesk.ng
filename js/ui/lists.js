@@ -54,7 +54,7 @@ export function listText(catalog, view, { rows, deals }, f) {
   }
   for (const g of groupBySeries(rows, catalog)) {
     out.push('', `*${g.series}*`);
-    g.rows.forEach((d) => out.push(`${d.model} ${variantName(d)}: ${naira(d[meta.figure])}`));
+    g.rows.forEach((d) => out.push(`${d.model} ${view === 'trade-in' ? d.storage : variantName(d)}: ${naira(d[meta.figure])}`));
   }
   out.push('', `swapdesk.ng · WhatsApp ${CONFIG.whatsappDisplay}`, 'An Upgrade Brands product');
   return out.join('\n');
@@ -106,9 +106,22 @@ export function listScreen(el, app, view, params) {
     row.scrollLeft = row.scrollWidth;
   }
 
-  const current = () => (f.cond === 'Deal'
-    ? { rows: [], deals }
-    : { rows: applyFilters(all, f), deals: f.cond ? [] : applyFilters(deals, { ...f, cond: '' }) });
+  // Trade-ins are all used devices: one row per model + storage, no condition shown or filtered.
+  const USED_FIRST = ['Nigerian USED', 'Foreign USED', 'Foreign USED (Non LLA)', 'Active Brand New (Non LLA)', 'Active Brand New', 'Brand New'];
+  const onePerVersion = (list) => {
+    const best = new Map();
+    for (const d of list) {
+      const k = `${d.model}|${d.storage}`; const cur = best.get(k);
+      const rank = (x) => { const i = USED_FIRST.indexOf(x.condition); return i < 0 ? 99 : i; };
+      if (!cur || rank(d) < rank(cur)) best.set(k, d);
+    }
+    return list.filter((d) => best.get(`${d.model}|${d.storage}`) === d);
+  };
+  const current = () => (view === 'trade-in'
+    ? { rows: onePerVersion(applyFilters(all, { ...f, cond: '' })), deals: [] }
+    : f.cond === 'Deal'
+      ? { rows: [], deals }
+      : { rows: applyFilters(all, f), deals: f.cond ? [] : applyFilters(deals, { ...f, cond: '' }) });
 
   function drawList() {
     if (!ready()) {
@@ -144,13 +157,13 @@ export function listScreen(el, app, view, params) {
     const row = (d, deal) => html`
       <button class="row" type="button" aria-expanded="${open === d.id ? 'true' : 'false'}" data-row="${d.id}">
         <span class="main"><span class="t">${d.model}${deal ? raw('<span class="tag">One unit</span>') : ''}</span>
-          <span class="s">${deal ? [d.storage, d.dealNote].filter(Boolean).join(' · ') : variantName(d)}</span></span>
+          <span class="s">${deal ? [d.storage, d.dealNote].filter(Boolean).join(' · ') : view === 'trade-in' ? d.storage : variantName(d)}</span></span>
         <span class="v">${fig(d)}</span>${raw(ICON.chevron)}</button>
       ${open === d.id ? more(d) : ''}`;
     const out = [];
     const conds = uniq(applyFilters(all, { ...f, cond: '' }).map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
     out.push(html`<div class="table-bar">
-      ${!f.cond && conds.length > 1 && f.type ? html`<div class="chips">${conds.map((c) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${c}</button>`)}</div>` : ''}
+      ${view !== 'trade-in' && !f.cond && conds.length > 1 && f.type ? html`<div class="chips">${conds.map((c) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${c}</button>`)}</div>` : ''}
       <div class="list-actions">
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
