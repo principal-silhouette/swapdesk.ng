@@ -792,3 +792,22 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .list-head, .head-block { width: min(94%, 440px) !important; }
 /* Search: the clear button only takes space once something is typed, so the full example fits. */
 .field input:placeholder-shown { padding-right: 12px !important; padding-left: 42px !important; }
+
+/* Lists: series → model card (bold name) → condition rows → storage sizes with prices. */
+.series > .group + .group { margin-top: 10px; }
+.model-h { margin: 0; padding: 12px 16px 4px; font-weight: 700; font-size: 17px; color: var(--ink); }
+.model-h + .row { border-top: 0; }
+.row .t { font-weight: 600; }
+.model-row .t { font-weight: 700; font-size: 17px; }
+.row .v small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-right: 2px; }
+.row-more .more-note { margin: 4px 0 8px; font-size: 13.5px; color: var(--ink-2); }
+.sizes { display: grid; gap: 8px; }
+.size { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px; border: 1px solid #cfe0f3; border-radius: 12px; background: #fff; font-size: 15.5px; text-align: left; }
+.size .st { flex: 1; font-weight: 600; }
+.size .sp { font-weight: 700; font-variant-numeric: tabular-nums; }
+.size .sa { min-width: 64px; text-align: center; padding: 6px 10px; border-radius: 999px; background: var(--action); color: #fff; font-size: 13.5px; font-weight: 600; }
+.size.in { background: var(--selected); border-color: #9fcaf5; }
+.size.in .sa { background: transparent; color: var(--brand-deep); }
+.deal-row .size-add { flex: none; padding: 6px 12px; border-radius: 999px; border: 0; background: var(--action); color: #fff; font-size: 13.5px; font-weight: 600; }
+.row .v small { display: block; text-align: right; margin: 0 0 -2px; line-height: 1.1; }
+.row .v { text-align: right; }

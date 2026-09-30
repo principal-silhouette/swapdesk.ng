@@ -1,6 +1,6 @@
 // Price List and Trade-In Values: standalone lists for resellers and customers, inside the pop-up.
 import { CONFIG } from '../config.js';
-import { conditionRank, matches, variantOrder } from '../engine.js';
+import { conditionRank, matches, variantOrder, storageRank } from '../engine.js';
 import { html, raw, naira, updatedLabel, variantName, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
@@ -140,41 +140,60 @@ export function listScreen(el, app, view, params) {
     }
     const { rows, deals: ds } = current();
     const fig = (d) => naira(d[meta.figure]);
-    // Each row is one exact version, so the expanded panel is only about that version.
-    const more = (d) => {
-      const inCmp = app.s.compare.includes(d.id);
-      const others = d.condition === 'Deal' ? 0 : all.filter((x) => x.model === d.model && x.id !== d.id).length;
+    const trade = view === 'trade-in';
+    const COND = { 'Foreign USED': '🇺🇸 Foreign USED', 'Foreign USED (Non LLA)': '🇺🇸 Foreign USED (Non LLA)', 'Nigerian USED': '🇳🇬 Nigerian USED' };
+    const condName = (c) => COND[c] || c;
+    const byStorage = (a, b) => storageRank(a.storage) - storageRank(b.storage) || variantOrder(a, b);
+    const minOf = (list) => Math.min(...list.map((d) => d[meta.figure]));
+    const maxOf = (list) => Math.max(...list.map((d) => d[meta.figure]));
+    // Storage sizes inside an opened row: tap one to add it (shop) or value it (trade-in).
+    const sizes = (list) => {
+      const cmp = app.s.compare;
       return html`<div class="row-more">
-        <p class="more-note">${view === 'trade-in'
-          ? `Up to ${fig(d)} for this ${d.model} in good condition. Answer a few questions for your exact figure.`
-          : `${d.model} · ${d.condition === 'Deal' ? [d.storage, d.dealNote].filter(Boolean).join(' · ') : variantName(d)} for ${fig(d)}.${others ? ` ${others} other version${others > 1 ? 's' : ''} listed alongside it.` : ''}`}</p>
-        ${view === 'trade-in'
-          ? html`<button class="btn blue" type="button" data-act="valueThis" data-id="${d.id}">Value This Device</button>`
-          : html`<button class="btn ${inCmp ? '' : 'blue'}" type="button" data-act="addCmp" data-id="${d.id}" ${inCmp ? 'disabled' : ''}>${inCmp ? '✓ In Your Swap Comparison' : 'Add to Swap Comparison'}</button>
-             ${app.s.compare.length ? html`<button class="btn" type="button" data-act="goCmp" style="margin-top:8px">See Comparison (${app.s.compare.length})</button>` : ''}`}
+        <p class="more-note">${trade ? 'Tap your storage size to check the value of your device.' : 'Tap a storage size to add it to your Swap Comparison.'}</p>
+        <div class="sizes">${list.sort(byStorage).map((d) => {
+          const inCmp = !trade && cmp.includes(d.id);
+          return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
+            <span class="st">${d.storage}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+        })}</div>
+        ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
     };
-    const row = (d, deal) => html`
-      <button class="row" type="button" aria-expanded="${open === d.id ? 'true' : 'false'}" data-row="${d.id}">
-        <span class="main"><span class="t">${d.model}${deal ? raw('<span class="tag">One unit</span>') : ''}</span>
-          <span class="s">${deal ? [d.storage, d.dealNote].filter(Boolean).join(' · ') : view === 'trade-in' ? d.storage : variantName(d)}</span></span>
-        <span class="v">${fig(d)}</span>${raw(ICON.chevron)}</button>
-      ${open === d.id ? more(d) : ''}`;
+    const cond = (model, c, list) => {
+      const key = `${model}|${c}`;
+      const lo = minOf(list), hi = maxOf(list);
+      return html`<button class="row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
+          <span class="main"><span class="t">${condName(c)}</span><span class="s">${list.sort(byStorage).map((d) => d.storage).join(' · ')}</span></span>
+          <span class="v">${list.length > 1 && lo !== hi ? html`<small>from</small> ${naira(lo)}` : naira(lo)}</span>${raw(ICON.chevron)}</button>
+        ${open === key ? sizes(list) : ''}`;
+    };
+    const modelCard = (model, list) => {
+      if (trade) {
+        const key = model;
+        const hi = maxOf(list);
+        return html`<div class="group"><button class="row model-row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
+            <span class="main"><span class="t">${model}</span><span class="s">${list.sort(byStorage).map((d) => d.storage).join(' · ')}</span></span>
+            <span class="v"><small>up to</small> ${naira(hi)}</span>${raw(ICON.chevron)}</button>
+          ${open === key ? sizes(list) : ''}</div>`;
+      }
+      const conds = uniq(list.map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
+      return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => d.condition === c)))}</div>`;
+    };
+    const dealRow = (d) => html`<div class="row deal-row"><span class="main"><span class="t">${d.model}${raw('<span class="tag">One unit</span>')}</span>
+        <span class="s">${[d.storage, d.dealNote].filter(Boolean).join(' · ')}</span></span><span class="v">${fig(d)}</span>
+        <button class="size-add" type="button" data-act="addCmp" data-id="${d.id}">${app.s.compare.includes(d.id) ? '✓ Added' : 'Add'}</button></div>`;
     const out = [];
-    const conds = uniq(applyFilters(all, { ...f, cond: '' }).map((d) => d.condition)).sort((a, b) => conditionRank(a) - conditionRank(b));
-    out.push(html`<div class="table-bar">
-      ${view !== 'trade-in' && !f.cond && conds.length > 1 && f.type ? html`<div class="chips">${conds.map((c) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${c}</button>`)}</div>` : ''}
-      <div class="list-actions">
+    out.push(html`<div class="table-bar"><div class="list-actions">
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
       </div></div>`);
-    if (ds.length) out.push(html`<section class="series"><h2 class="series-h">🔥 Deals</h2><div class="group">${ds.map((d) => row(d, true))}</div></section>`);
+    if (ds.length) out.push(html`<section class="series"><h2 class="series-h">🔥 Deals</h2><div class="group">${ds.map(dealRow)}</div></section>`);
     for (const g of groupBySeries(rows, catalog)) {
-      out.push(html`<section class="series"><h2 class="series-h">${g.series}</h2><div class="group">${g.rows.map((d) => row(d, false))}</div></section>`);
+      const models = uniq(g.rows.map((d) => d.model));
+      out.push(html`<section class="series"><h2 class="series-h">${g.series}</h2>${models.map((m) => modelCard(m, g.rows.filter((d) => d.model === m)))}</section>`);
     }
     const n = rows.length + ds.length;
-    out.push(n ? html`<p class="count">${n} ${n === 1 ? 'device' : 'devices'}</p>`
-      : html`<div class="empty"><p>No devices match. Try a shorter search or clear the filters.</p><button class="pill" type="button" data-act="reset">Clear Filters</button></div>`);
+    if (!n) out.push(html`<div class="empty"><p>No devices match. Try a shorter search or clear the filters.</p><button class="pill" type="button" data-act="reset">Clear Filters</button></div>`);
     listEl.innerHTML = out.join('');
   }
 
@@ -230,6 +249,7 @@ export function listScreen(el, app, view, params) {
       case 'valueThis': app.s.mode = 'trade'; history.replaceState(history.state, '', app.urlFor(view, f)); (await import('./flow.js')).SCREENS.startWith(app, id); break;
       case 'addCmp': {
         const max = Number(catalog.settings['compare.maxDevices']) || 6;
+        if (app.s.compare.includes(id)) { app.s.compare = app.s.compare.filter((x) => x !== id); app.s.saved = null; app.save(); app.toast('Removed from your swap comparison.'); drawList(); break; }
         if (app.s.compare.length >= max) { app.toast(`You can compare up to ${max} devices. Remove one first.`); break; }
         app.s.compare.push(id); app.s.saved = null; app.save();
         app.toast(`Added. ${app.s.compare.length} in your swap comparison.`);
