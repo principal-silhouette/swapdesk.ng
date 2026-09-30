@@ -640,7 +640,7 @@ function choose(el, app) {
       <p class="par">Your ${d.model}${d.storage ? ` ${d.storage}` : ''} is worth <strong class="num">${naira(r.value)}</strong>.</p>
     </div>
     <div class="stack q-opts">
-      <button class="opt" type="button" data-act="swap"><span class="main">Swap to another device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
       <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}.</span></span>${raw(ICON.chevron)}</button>
     </div>`, pills(backPill())).toString();
   wire(el, app, {
