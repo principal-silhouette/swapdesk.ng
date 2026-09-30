@@ -200,6 +200,9 @@ function picker(el, app, params) {
     const title = withModel ? d.model : (d.storage || d.condition);
     const sub = deal ? [withModel ? d.storage : '', d.dealNote].filter(Boolean).join(' · ')
       : withModel ? variantName(d) : (d.storage ? d.condition : '');
+    if (add && d.stock === 'soldout') {
+      return html`<div class="opt ver out" aria-disabled="true"><span class="main">${title}${sub ? html`<span class="sub">${sub}</span>` : ''}</span><span class="val sold">Sold out</span></div>`;
+    }
     return html`<button class="opt ver" type="button" role="${add ? 'checkbox' : 'radio'}" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
       <span class="main">${title}${deal ? raw('<span class="tag">One unit</span>') : ''}${sub ? html`<span class="sub">${sub}</span>` : ''}</span>
       <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
@@ -429,6 +432,7 @@ function confirm(el, app) {
     </div>
     <p class="congrats">Congratulations!</p>
     <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. This is its value in good working condition.</p>
+    ${d.onlyIfBought ? html`<p class="notice-only">We only accept this model as a trade-in if it was bought from us.</p>` : ''}
     </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
@@ -664,7 +668,7 @@ function compare(el, app) {
   const r = d && allAnswered(app) ? currentValue(app) : null;
   const tv = r && r.accepted ? r.value : null;
   const max = Number(cat.settings['compare.maxDevices']) || 6;
-  const items = s.compare.map((id) => cat.byId.get(id) || { id, gone: true });
+  const items = s.compare.map((id) => { const x = cat.byId.get(id); return x && x.price > 0 && x.stock !== 'soldout' ? x : { ...(x || {}), id, gone: true }; });
   const live = items.filter((x) => !x.gone).sort(compareOrder(cat.modelOrder));
   const gone = items.filter((x) => x.gone);
 

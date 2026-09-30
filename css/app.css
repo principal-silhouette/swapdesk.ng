@@ -826,3 +826,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .screen-main > .checks { font-size: 13.5px !important; line-height: 1.35; gap: 3px; }
 .screen-main > .checks li { padding-left: 20px; }
 .screen-main > .checks { margin-bottom: 28px !important; }
+
+/* Sold out: listed so customers know we sell it, never priced or selectable. */
+.size.out { opacity: 0.55; background: #f3f6fa; border-style: dashed; }
+.size.out .sa, .opt.out .val.sold, .row .v.out { background: none; color: #c0392b; font-weight: 700; font-size: 13.5px; padding: 0; }
+.opt.ver.out { opacity: 0.55; cursor: default; }
+.notice-only { margin: 12px auto 0; padding: 10px 14px; border-radius: 12px; background: #fff4e5; color: #8a4b00; font-size: 14px; line-height: 1.4; max-width: var(--box); }

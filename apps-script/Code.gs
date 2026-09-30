@@ -54,24 +54,54 @@ function getCatalog_(skipCache) {
     if (hit) return JSON.parse(hit);
   }
   var ss = SpreadsheetApp.getActive();
+  // Deductions come from Site Feed (joined per model). Every other figure comes from Devices:
+  // Site Feed drops rows whose Status isn't Live and lags the Devices rounding rules.
   var feed = ss.getSheetByName('Site Feed').getDataRange().getValues();
-  var devices = [];
+  var dedById = {}, dedByModel = {}, dealNote = {};
   for (var i = 1; i < feed.length; i++) {
-    var r = feed[i];
-    if (!r[0]) continue;
-    var d = {
-      id: String(r[0]), type: r[1], brand: r[2], series: r[3], model: r[4],
-      storage: String(r[5] || ''), condition: r[6],
-      tradeIn: r[7] === true, swapInto: r[8] === true,
-      price: num_(r[9]), tradeInValue: num_(r[10]), deductions: {}
-    };
+    var f = feed[i];
+    if (!f[0]) continue;
+    var ded = {}, any = false;
     for (var k = 0; k < DEDUCTION_KEYS.length; k++) {
-      var v = r[11 + k];
-      if (String(v).trim().toLowerCase() === 'n/a') d.deductions[DEDUCTION_KEYS[k]] = 'n/a';
-      else if (num_(v)) d.deductions[DEDUCTION_KEYS[k]] = num_(v);
+      var v = f[11 + k];
+      if (String(v).trim().toLowerCase() === 'n/a') ded[DEDUCTION_KEYS[k]] = 'n/a';
+      else if (num_(v)) { ded[DEDUCTION_KEYS[k]] = num_(v); any = true; }
     }
-    if (r[23]) d.dealNote = String(r[23]);
+    dedById[String(f[0])] = ded;
+    if (any && !dedByModel[f[4]]) dedByModel[f[4]] = ded;
+    if (f[23]) dealNote[String(f[0])] = String(f[23]);
+  }
+  // Devices B..Z from row 5. Stock tags at the start of Notes (P):
+  //   [Sold out]  listed as Sold out, no price shown (any Selling Price there is a Jiji estimate), not selectable
+  //   [Not sold]  swap only: never on the Shop list or swap targets
+  //   [Swap only if bought from us]  trade-in notice
+  var dv = ss.getSheetByName('Devices');
+  var rows = dv.getRange(5, 2, Math.max(dv.getLastRow() - 4, 1), 25).getValues();
+  var devices = [];
+  rows.forEach(function (r) {
+    if (!r[0] || r[9] !== 'Yes') return;
+    var note = String(r[14] || '');
+    var stock = note.indexOf('[Sold out]') !== -1 ? 'soldout' : note.indexOf('[Not sold]') !== -1 ? 'notsold' : '';
+    var id = String(r[0]);
+    var d = {
+      id: id, type: r[1], brand: r[2], series: r[3], model: r[4], storage: String(r[5] || ''), condition: r[6],
+      tradeIn: r[7] === 'Yes', swapInto: r[8] === 'Yes' && stock !== 'notsold',
+      price: stock ? null : num_(r[17]), tradeInValue: num_(r[22]),
+      deductions: dedById[id] || dedByModel[r[4]] || {}
+    };
+    if (d.swapInto && !d.price && !stock) stock = 'soldout';
+    if (stock) d.stock = stock;
+    if (note.indexOf('[Swap only if bought from us]') !== -1) d.onlyIfBought = true;
+    if (dealNote[id]) d.dealNote = dealNote[id];
     devices.push(d);
+  });
+  // Deals live only in Site Feed (its second FILTER).
+  for (var j = 1; j < feed.length; j++) {
+    var g = feed[j];
+    if (!g[0] || g[6] !== 'Deal') continue;
+    devices.push({ id: String(g[0]), type: g[1], brand: g[2], series: g[3], model: g[4], storage: String(g[5] || ''),
+      condition: 'Deal', tradeIn: false, swapInto: g[8] === true, price: num_(g[9]), tradeInValue: null,
+      deductions: {}, dealNote: String(g[23] || '') });
   }
   var rules = ss.getSheetByName('Rules').getRange('B5:D23').getValues();
   var settings = {};

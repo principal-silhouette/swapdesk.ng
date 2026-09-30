@@ -12,7 +12,8 @@ const META = {
 const TYPE_LABEL = {};
 
 export function listRows(catalog, view) {
-  if (view === 'prices') return catalog.devices.filter((d) => d.swapInto && d.price > 0 && d.condition !== 'Deal');
+  // Sold-out devices stay on the Shop list (no price shown) so customers know we sell them.
+  if (view === 'prices') return catalog.devices.filter((d) => d.swapInto && (d.price > 0 || d.stock === 'soldout') && d.condition !== 'Deal');
   return catalog.devices.filter((d) => d.tradeIn && d.tradeInValue > 0 && d.condition !== 'Deal' && CONFIG.swapTypes.includes(d.type));
 }
 export function dealRows(catalog) {
@@ -141,14 +142,16 @@ export function listScreen(el, app, view, params) {
       return;
     }
     const { rows, deals: ds } = current();
-    const fig = (d) => naira(d[meta.figure]);
     const trade = view === 'trade-in';
+    const out_ = (d) => !trade && d.stock === 'soldout';
+    const fig = (d) => (out_(d) ? 'Sold out' : naira(d[meta.figure]));
     const COND = {};
     const condName = (c) => COND[c] || c;
     // Most expensive first, everywhere in the list.
     const byStorage = (a, b) => (b[meta.figure] || 0) - (a[meta.figure] || 0) || storageRank(b.storage) - storageRank(a.storage);
-    const minOf = (list) => Math.min(...list.map((d) => d[meta.figure]));
-    const maxOf = (list) => Math.max(...list.map((d) => d[meta.figure]));
+    const priced = (list) => list.filter((d) => !out_(d) && d[meta.figure] > 0);
+    const minOf = (list) => (priced(list).length ? Math.min(...priced(list).map((d) => d[meta.figure])) : 0);
+    const maxOf = (list) => (priced(list).length ? Math.max(...priced(list).map((d) => d[meta.figure])) : 0);
     // Storage sizes inside an opened row: tap one to add it (shop) or value it (trade-in).
     const sizes = (list) => {
       const cmp = app.s.compare;
@@ -156,6 +159,7 @@ export function listScreen(el, app, view, params) {
         <p class="more-note">${trade ? 'Tap your storage size to check the value of your device.' : 'Tap a storage size to add it to your Swap Comparison.'}</p>
         <div class="sizes">${list.sort(byStorage).map((d) => {
           const inCmp = !trade && cmp.includes(d.id);
+          if (out_(d)) return html`<div class="size out" aria-disabled="true"><span class="st">${d.storage || d.model}</span><span class="sa">Sold out</span></div>`;
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
             <span class="st">${d.storage}${!trade && ['Foreign USED', 'Active Brand New'].includes(d.condition) ? html` <small class="lla">LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
@@ -167,7 +171,7 @@ export function listScreen(el, app, view, params) {
       const lo = minOf(list), hi = maxOf(list);
       return html`<button class="row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
           <span class="main"><span class="t">${condName(c)}</span><span class="s">${uniq(list.sort(byStorage).map((d) => d.storage)).join(' · ')}</span></span>
-          <span class="v">${list.length > 1 && lo !== hi ? html`<small>from</small> ${naira(lo)}` : naira(lo)}</span>${raw(ICON.chevron)}</button>
+          <span class="v${lo ? '' : ' out'}">${!lo ? 'Sold out' : priced(list).length > 1 && lo !== hi ? html`<small>from</small> ${naira(lo)}` : naira(lo)}</span>${raw(ICON.chevron)}</button>
         ${open === key ? sizes(list) : ''}`;
     };
     const modelCard = (model, list) => {
