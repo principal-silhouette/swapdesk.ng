@@ -9,7 +9,7 @@ const META = {
   prices: { title: 'Price List', figure: 'price' },
   'trade-in': { title: 'Trade-In Values', figure: 'tradeInValue' },
 };
-const TYPE_LABEL = { Phones: 'Smartphones', Tablets: 'iPads & Tablets', Watches: 'Watches', AirPods: 'AirPods', Speakers: 'Speakers' };
+const TYPE_LABEL = {};
 
 export function listRows(catalog, view) {
   if (view === 'prices') return catalog.devices.filter((d) => d.swapInto && d.price > 0 && d.condition !== 'Deal');

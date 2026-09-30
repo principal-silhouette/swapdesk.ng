@@ -34,7 +34,7 @@ export function saveState(s) {
 
 // ---------- shared bits ----------
 
-const TYPE_LABEL = { Phones: 'Smartphone', Tablets: 'iPad & Tablet', Watches: 'Smartwatch', AirPods: 'AirPods' };
+const TYPE_LABEL = {};
 const credit = () => html`<p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p>`;
 const pills = (...b) => html`<div class="pills">${b}</div>`;
 const backPill = (label = 'Go Back') => html`<button class="pill" type="button" data-back>${label}</button>`;
