@@ -124,8 +124,10 @@ function home(el, app) {
   const max = app.catalog.settings['compare.maxDevices'] || 6;
   el.classList.add('home');
   el.innerHTML = layout(html`
-    <h1 class="h-display">The fastest way<br>to <span class="blue">swap.</span></h1>
-    <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
+    <div class="home-intro">
+      <h1 class="h-display">The fastest way<br>to <span class="blue">Swap.</span></h1>
+      <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
+    </div>
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
       <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>

@@ -553,3 +553,10 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* No address line at the top of the pop-up: the credit sits at the bottom. */
 .popup-head { padding: 10px 20px 0; min-height: 10px; }
 @media (max-width: 600px) { .popup-head { padding-top: 8px; } .popup-head .grab { margin-bottom: 2px; } }
+
+/* Home: headline and intro read as one block; buttons and note sit together below it. */
+.home .screen-main { gap: clamp(26px, 4.2vh, 40px); }
+.home-intro .h-display { margin: 0 0 12px !important; }
+.home-intro .lead { margin: 0 auto !important; }
+.home .home-note { margin-top: calc(-1 * clamp(8px, 1.6vh, 16px)) !important; }
+.home .screen-main { gap: clamp(26px, 5.4vh, 52px); }
