@@ -153,9 +153,9 @@ function home(el, app) {
 function startFlow(app, mode) {
   const s = app.s;
   s.mode = mode;
-  // Keep a device that's already valued; start fresh otherwise.
-  if (s.deviceId && allAnswered(app)) { app.save(); app.go('value'); return; }
-  s.pick = { ...freshPick(), type: s.pick.type };
+  // Every start from Home is a new quote: no device, answers or swap choices carried over.
+  Object.assign(s, { deviceId: '', answers: freshAnswers(), compare: [], city: '', saved: null, cash: false });
+  s.pick = freshPick();
   app.save();
   app.go('pick');
 }
@@ -163,7 +163,7 @@ function startFlow(app, mode) {
 /** Deep link from the Trade-In Values list (?device=id). */
 function startWith(app, id) {
   const s = app.s;
-  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; }
+  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; }
   s.mode = 'trade';
   app.save();
   history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
@@ -293,6 +293,9 @@ function picker(el, app, params) {
       <div class="stack">${options}</div>`;
     el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
     prevFrac = frac;
+    // The trail scrolls so the latest choice (the one most likely to be changed) is in view.
+    const trail = $('.trail', el);
+    if (trail) trail.scrollLeft = trail.scrollWidth;
     app.s._pickFrac = frac;
     const bar = $('.pick-progress i', el);
     if (bar && fromFrac !== frac) requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = `scaleX(${frac})`; }));
@@ -364,7 +367,7 @@ function picker(el, app, params) {
           $(`[data-id="${CSS.escape(id)}"]`, el)?.focus({ preventScroll: true });
         } else {
           const cur = ownDevice(app); const nd = app.catalog.byId.get(id);
-          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; }
+          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; }
           const d = app.catalog.byId.get(id);
           Object.assign(st, { type: d.type, brand: d.brand, model: d.model, search: '' });
           app.save();
@@ -637,8 +640,9 @@ function choose(el, app) {
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">What would you like to do?</h2>
-      <p class="par">Your ${d.model}${d.storage ? ` ${d.storage}` : ''} is worth <strong class="num">${naira(r.value)}</strong>.</p>
+      <p class="par">Your ${d.model}${d.storage ? ` ${d.storage}` : ''} is worth</p>
     </div>
+    <p class="big-num choose-num">${naira(r.value)}</p>
     <div class="stack q-opts">
       <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
       <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}.</span></span>${raw(ICON.chevron)}</button>

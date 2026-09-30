@@ -82,7 +82,7 @@ function show(screen, params, dir, inPlace = false) {
   }
   const h = el.querySelector('h1, h2');
   if (h && dir !== 0) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-  const titles = { prices: 'The Menu', 'trade-in': 'Trade-In Menu', quote: 'Swap Quote' };
+  const titles = { prices: 'Shop', 'trade-in': 'Trade-In Values', quote: 'Swap Quote' };
   document.title = titles[screen] ? `${titles[screen]} · SwapDesk` : '@the.swapdesk Trade Ins · Swap, Trade In, Upgrade';
 }
 

@@ -6,8 +6,8 @@ import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
 
 const META = {
-  prices: { title: 'The Menu', sub: 'Premium USED 🇺🇸 & Brand New', figure: 'price' },
-  'trade-in': { title: 'Trade-In Menu', sub: 'Good working condition', figure: 'tradeInValue' },
+  prices: { title: raw('🛒 Shop from <span class="hub">@upgrade.hub</span>'), plain: 'Shop from @upgrade.hub', sub: raw('Enjoy best in class Warranty 💪🏾 &amp; Free Delivery 🚚 when you shop <strong>Premium USED 🇺🇸 &amp; Brand New Devices.</strong>'), figure: 'price' },
+  'trade-in': { title: 'Trade-In Values 📲', plain: 'Trade-In Values', sub: raw('<strong>Ready to Swap to something new?</strong> Here’s what we pay for devices in good working condition.'), figure: 'tradeInValue' },
 };
 const TYPE_LABEL = {};
 
@@ -44,7 +44,7 @@ function filterLabel(f) {
 /** WhatsApp-broadcast text: deals first, series headings, one line per device. */
 export function listText(catalog, view, { rows, deals }, f) {
   const meta = META[view];
-  const out = [`*SwapDesk ${meta.title}*`];
+  const out = [`*${meta.plain}*`];
   if (filterLabel(f)) out.push(filterLabel(f));
   out.push(updatedLabel(catalog.updatedAt));
   if (view === 'trade-in') out.push('For devices in good working condition, battery 85% or higher.');
@@ -72,10 +72,11 @@ export function listScreen(el, app, view, params) {
   el.innerHTML = html`
     <div class="list-head">
       <h1 class="h-title">${meta.title}</h1>
-      <p class="list-sub">${meta.sub} · Updated ${shortDate(catalog.updatedAt)}</p>
+      <p class="list-sub">${meta.sub}</p>
+      <p class="list-date">Updated ${shortDate(catalog.updatedAt)}</p>
     </div>
     <div class="list-top">
-      <label class="field"><span class="visually-hidden">Search ${meta.title}</span>${raw(ICON.search)}
+      <label class="field"><span class="visually-hidden">Search ${meta.plain}</span>${raw(ICON.search)}
         <input type="search" data-search placeholder="Search, e.g. 16 pro max 256" value="${f.search}" autocomplete="off" enterkeyhint="search">
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label>
       <nav class="trail" data-chips="type" aria-label="Your choices"></nav>
@@ -102,6 +103,7 @@ export function listScreen(el, app, view, params) {
     const row = $('[data-chips="type"]', el);
     row.innerHTML = parts.map((p, n) => (n ? '<span class="trail-sep" aria-hidden="true">›</span>' : '') + p).join('');
     row.hidden = !parts.length;
+    row.scrollLeft = row.scrollWidth;
   }
 
   const current = () => (f.cond === 'Deal'
@@ -228,7 +230,7 @@ export function listScreen(el, app, view, params) {
       case 'copy': await copy(listText(catalog, view, current(), f)); app.toast('List copied. Paste it into WhatsApp.'); break;
       case 'share': {
         const url = CONFIG.site + app.urlFor(view, f).replace(/^\.\//, '');
-        const res = await share({ title: `SwapDesk ${meta.title}`, text: `SwapDesk ${meta.title}${filterLabel(f) ? ` · ${filterLabel(f)}` : ''}`, url });
+        const res = await share({ title: meta.plain, text: `${meta.plain}${filterLabel(f) ? ` · ${filterLabel(f)}` : ''}`, url });
         if (res === 'copied') app.toast('Link copied');
         break;
       }

@@ -664,3 +664,22 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Condition checklist: tight like the old site. */
 .checks { gap: 2px; font-size: 15px; line-height: 1.35; }
 .checks li { padding-left: 22px; }
+/* Menu header rows: search, choices, conditions, share/copy and the list, all 14px apart. */
+.list-top { gap: 14px; padding-bottom: 7px; }
+.list-top .trail { margin: 0; padding-top: 0; padding-bottom: 0; }
+.table-bar { gap: 14px; margin: 7px 0 0; }
+.table-bar .chips { padding-top: 0; padding-bottom: 0; }
+.table-bar .list-actions { margin: 0; }
+.table-bar + .series { margin-top: 14px; }
+.wide.picking .screen-main { gap: 0; justify-content: flex-start; }
+.wide.picking .list-head { margin-bottom: 14px; }
+/* Picking headings may wrap to two lines; keep them at the standard title size. */
+.pick-head .h-title { font-size: clamp(1.85rem, 7.4vw, 2.3rem); line-height: 1.12; }
+.wide.picking .screen-main { gap: 0; justify-content: flex-start; }
+.wide.picking .list-head { margin-bottom: 14px; }
+.pick-head .h-title { font-size: clamp(1.85rem, 7.4vw, 2.3rem); line-height: 1.12; }
+.list-head .h-title .hub { color: #6DA64A; }
+.list-sub { font-size: 14.5px; color: var(--ink-2); line-height: 1.4; margin: 2px 0 0; }
+.list-date { font-size: 12.5px; color: var(--ink-3); margin: 4px 0 0; }
+.choose .head-block .h-title { margin-bottom: 14px; }
+.choose .choose-num { margin: -8px 0 0; }
