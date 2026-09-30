@@ -34,12 +34,17 @@ function valid(c) {
 export function prepare(raw, origin) {
   const devices = raw.devices.map((d, i) => ({ ...d, _i: i, _search: searchText(d) }));
   const byId = new Map(devices.map((d) => [d.id, d]));
-  const modelOrder = new Map();
-  const seriesOrder = new Map();
+  // Most expensive first: series by their dearest model, models by their dearest version.
+  // A model we don't sell ranks by its trade-in value instead, so older phones still fall in place.
+  const worth = (d) => d.price || d.tradeInValue || 0;
+  const modelTop = new Map(); const seriesTop = new Map();
   for (const d of devices) {
-    if (!modelOrder.has(d.model)) modelOrder.set(d.model, modelOrder.size);
-    if (!seriesOrder.has(d.series)) seriesOrder.set(d.series, seriesOrder.size);
+    modelTop.set(d.model, Math.max(modelTop.get(d.model) || 0, worth(d) * (d.price ? 1 : 1.4)));
   }
+  for (const d of devices) seriesTop.set(d.series, Math.max(seriesTop.get(d.series) || 0, modelTop.get(d.model)));
+  const rank = (m) => new Map([...m.entries()].sort((a, b) => b[1] - a[1]).map(([k], i) => [k, i]));
+  const modelOrder = rank(modelTop);
+  const seriesOrder = rank(seriesTop);
   return {
     updatedAt: raw.updatedAt,
     origin, // 'live' | 'cache' | 'snapshot'

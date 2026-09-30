@@ -3,7 +3,7 @@ const nf = new Intl.NumberFormat('en-NG', { maximumFractionDigits: 0 });
 
 export const naira = (n) => `₦${nf.format(Math.round(n || 0))}`;
 
-export const deviceName = (d) => [d.model, d.storage, d.condition === 'Deal' ? 'Deal' : d.condition].filter(Boolean).join(' · ');
+
 
 // Non LLA is folded into its condition; only LLA devices are marked.
 const LLA = ['Foreign USED', 'Active Brand New'];
@@ -44,3 +44,5 @@ function render(v) {
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+export const deviceName = (d) => (d.condition === 'Deal' ? [d.model, d.storage, 'Deal'].join(' · ') : [d.model, variantName(d)].filter(Boolean).join(' · '));

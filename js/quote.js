@@ -8,7 +8,7 @@ export function buildQuote({ device, answers, result, compare, city }) {
   return {
     v: 1,
     created: new Date().toISOString(),
-    device: device ? { id: device.id, name: deviceName(device), start: result?.start || 0 } : null,
+    device: device ? { id: device.id, name: [device.model, device.storage].filter(Boolean).join(' · '), start: result?.start || 0 } : null,
     answers: device ? { ...answers, faults: [...(answers.faults || [])] } : null,
     value: result?.accepted ? result.value : 0,
     lines: result?.accepted ? result.lines.map((l) => [l.label, l.amount]) : [],

@@ -145,7 +145,8 @@ export function listScreen(el, app, view, params) {
     const trade = view === 'trade-in';
     const COND = {};
     const condName = (c) => COND[c] || c;
-    const byStorage = (a, b) => storageRank(a.storage) - storageRank(b.storage) || variantOrder(a, b);
+    // Most expensive first, everywhere in the list.
+    const byStorage = (a, b) => (b[meta.figure] || 0) - (a[meta.figure] || 0) || storageRank(b.storage) - storageRank(a.storage);
     const minOf = (list) => Math.min(...list.map((d) => d[meta.figure]));
     const maxOf = (list) => Math.max(...list.map((d) => d[meta.figure]));
     // Storage sizes inside an opened row: tap one to add it (shop) or value it (trade-in).
@@ -178,7 +179,7 @@ export function listScreen(el, app, view, params) {
             <span class="v"><small>up to</small> ${naira(hi)}</span>${raw(ICON.chevron)}</button>
           ${open === key ? sizes(list) : ''}</div>`;
       }
-      const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => conditionRank(a) - conditionRank(b));
+      const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => minOf(list.filter((d) => fam(d.condition) === b)) - minOf(list.filter((d) => fam(d.condition) === a)) || conditionRank(a) - conditionRank(b));
       return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => fam(d.condition) === c)))}</div>`;
     };
     const dealRow = (d) => html`<div class="row deal-row"><span class="main"><span class="t">${d.model}${raw('<span class="tag">One unit</span>')}</span>
@@ -192,6 +193,9 @@ export function listScreen(el, app, view, params) {
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
       </div></div>`);
+    const soon = trade || f.cond ? [] : (CONFIG.comingSoon || []).filter((c) => (!f.type || c.type === f.type) && (!f.brand || c.brand === f.brand)
+      && (!f.search || f.search.toLowerCase().split(/\s+/).every((w) => c.model.toLowerCase().includes(w))));
+    if (soon.length) out.push(html`<section class="series"><h2 class="series-h">Coming Soon</h2>${soon.map((c) => html`<div class="group"><div class="row soon-row"><span class="main"><span class="t">${c.model}</span><span class="s">Price and storage sizes coming soon</span></span><span class="soon-tag">Coming Soon</span></div></div>`)}</section>`);
     if (ds.length) out.push(html`<section class="series"><h2 class="series-h">🔥 Deals</h2><div class="group">${ds.map(dealRow)}</div></section>`);
     for (const g of groupBySeries(rows, catalog)) {
       const models = uniq(g.rows.map((d) => d.model));
