@@ -745,3 +745,13 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .home .stack.tight .btn { min-height: 48px; }
 }
 @media (max-width: 360px) { .home .h-display { font-size: 10.2vw; } }
+
+/* List pages: same header rhythm and text as every other page, held to the same column as the home page. */
+.list-head, .list-top .field, .list-top .trail, .table-bar { width: min(100%, 440px); margin-left: auto !important; margin-right: auto !important; }
+.list-head .h-title { margin: 0 0 8px !important; }
+.list-head .list-sub { font-size: 16px; line-height: 1.45; color: var(--ink-2); margin: 0 0 6px !important; }
+.list-head .list-date { margin: 0 !important; }
+.wide.picking .list-head { margin-bottom: 18px; }
+/* Condition chips wrap and centre instead of running off the edge. */
+.table-bar .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; overflow: visible; margin: 0; padding-inline: 0; }
+.table-bar .chips .chip { flex: none; }

@@ -6,7 +6,7 @@ import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
 
 const META = {
-  prices: { title: raw('🛒 Shop from <span class="hub">@upgrade.hub</span>'), plain: 'Shop from @upgrade.hub', sub: raw('Enjoy best in class Warranty 💪🏾 &amp; Free Delivery 🚚 when you shop <strong>Premium USED 🇺🇸 &amp; Brand New Devices.</strong>'), figure: 'price' },
+  prices: { title: '🛒 @shopupgrade.ng', plain: '@shopupgrade.ng', sub: raw('Enjoy best in class Warranty 💪🏾 &amp; Free Delivery 🚚 when you shop <strong>Premium USED 🇺🇸 &amp; Brand New Devices.</strong>'), figure: 'price' },
   'trade-in': { title: 'Trade-In Values 📲', plain: 'Trade-In Values', sub: raw('<strong>Ready to Swap to something new?</strong> Here’s what we pay for devices in good working condition.'), figure: 'tradeInValue' },
 };
 const TYPE_LABEL = {};
