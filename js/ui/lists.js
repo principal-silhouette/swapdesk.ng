@@ -21,7 +21,7 @@ export function dealRows(catalog) {
 
 const uniq = (a) => [...new Set(a)];
 // LLA and Non LLA foreign-used phones are all sold as Foreign USED.
-const fam = (c) => (c === 'Foreign USED (Non LLA)' ? 'Foreign USED' : c);
+const fam = (c) => (c || '').replace(/ \(Non LLA\)$/, '');
 const plural = (n) => `${n} ${n === 1 ? 'device' : 'devices'}`;
 const shortDate = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`; };
 const applyFilters = (rows, f) => rows.filter((d) => (!f.type || d.type === f.type) && (!f.brand || d.brand === f.brand) &&
@@ -122,7 +122,7 @@ export function listScreen(el, app, view, params) {
   const current = () => (view === 'trade-in'
     ? { rows: onePerVersion(applyFilters(all, { ...f, cond: '' })), deals: [] }
     : f.cond === 'Deal'
-      ? { rows: [], deals }
+      ? { rows: [], deals: applyFilters(deals, { ...f, cond: '' }) }
       : { rows: applyFilters(all, f), deals: f.cond ? [] : applyFilters(deals, { ...f, cond: '' }) });
 
   function drawList() {
@@ -156,7 +156,7 @@ export function listScreen(el, app, view, params) {
         <div class="sizes">${list.sort(byStorage).map((d) => {
           const inCmp = !trade && cmp.includes(d.id);
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${d.storage}${!trade && d.condition.includes('Non LLA') && d.condition.startsWith('Foreign') ? html` <small>Non LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            <span class="st">${d.storage}${!trade && d.condition.includes('Non LLA') ? html` <small>Non LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
@@ -185,9 +185,10 @@ export function listScreen(el, app, view, params) {
         <span class="s">${[d.storage, d.dealNote].filter(Boolean).join(' · ')}</span></span><span class="v">${fig(d)}</span>
         <button class="size-add" type="button" data-act="addCmp" data-id="${d.id}">${app.s.compare.includes(d.id) ? '✓ Added' : 'Add'}</button></div>`;
     const out = [];
-    const condsAll = uniq(applyFilters(all, { ...f, cond: '' }).map((d) => fam(d.condition))).sort((a, b) => conditionRank(a) - conditionRank(b));
-    const condName2 = (c) => ({ 'Foreign USED': '🇺🇸 Foreign USED', 'Nigerian USED': '🇳🇬 Nigerian USED' }[c] || c);
-    out.push(html`<div class="table-bar">${!trade && !f.cond && f.type && condsAll.length > 1 ? html`<div class="chips">${condsAll.map((c) => html`<button class="chip" type="button" aria-pressed="${f.cond === c ? 'true' : 'false'}" data-k="cond" data-v="${c}">${condName2(c)}</button>`)}</div>` : ''}<div class="list-actions">
+    // Shop filters: only these four.
+    const here = new Set(applyFilters(all, { ...f, cond: '' }).map((d) => fam(d.condition)));
+    const FILTERS = [['Brand New', 'Brand New'], ['Active Brand New', 'Active Brand New'], ['Foreign USED', '🇺🇸 Foreign USED']].filter(([c]) => here.has(c));
+    out.push(html`<div class="table-bar">${!trade && !f.cond && f.type && FILTERS.length ? html`<div class="chips">${FILTERS.map(([c, label]) => html`<button class="chip" type="button" aria-pressed="false" data-k="cond" data-v="${c}">${label}</button>`)}<button class="chip" type="button" aria-pressed="false" data-k="deals" data-v="Deal">🔥 Deals</button></div>` : ''}<div class="list-actions">
         <button class="link" type="button" data-act="share">${raw(ICON.share)} Share this list</button>
         <button class="link" type="button" data-act="copy">${raw(ICON.copy)} Copy as text</button>
       </div></div>`);
@@ -197,7 +198,8 @@ export function listScreen(el, app, view, params) {
       out.push(html`<section class="series"><h2 class="series-h">${g.series}</h2>${models.map((m) => modelCard(m, g.rows.filter((d) => d.model === m)))}</section>`);
     }
     const n = rows.length + ds.length;
-    if (!n) out.push(html`<div class="empty"><p>No devices match. Try a shorter search or clear the filters.</p><button class="pill" type="button" data-act="reset">Clear Filters</button></div>`);
+    if (!n && f.cond === 'Deal') out.push(html`<div class="empty"><p>No deals right now. Check back soon, or follow @shopupgrade.ng for new ones.</p><button class="pill" type="button" data-act="nocond">See All Devices</button></div>`);
+    else if (!n) out.push(html`<div class="empty"><p>No devices match. Try a shorter search or clear the filters.</p><button class="pill" type="button" data-act="reset">Clear Filters</button></div>`);
     listEl.innerHTML = out.join('');
   }
 
@@ -248,6 +250,7 @@ export function listScreen(el, app, view, params) {
     switch (act.dataset.act) {
       case 'home': app.back(); break;
       case 'clear': f.search = ''; $('[data-search]', el).value = ''; drawList(); sync(); break;
+      case 'nocond': f.cond = ''; drawChips(); drawList(); sync(); break;
       case 'reset': Object.assign(f, { type: '', brand: '', cond: '', search: '' }); $('[data-search]', el).value = ''; drawChips(); drawList(); sync(); break;
       case 'value': (await import('./flow.js')).SCREENS.startFlow(app, 'trade'); break;
       case 'valueThis': app.s.mode = 'trade'; history.replaceState(history.state, '', app.urlFor(view, f)); (await import('./flow.js')).SCREENS.startWith(app, id); break;
