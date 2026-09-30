@@ -854,3 +854,27 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .cmp.slim .n { font-size: 19px; display: inline; }
 .cmp.slim .cmp-go { margin-top: 6px; height: 38px; font-size: 15px; }
 .cmp.slim .x { top: -2px; right: -2px; }
+/* Choose page: value sits closer under the subtext so both options and Go Back show without scrolling. */
+.choose .screen-main > .head-block + .dev-value, .choose .screen-main > .head-block + * { margin-top: 14px !important; }
+.choose .screen-main > :last-child { margin-bottom: 0 !important; }
+.choose .q-opts .opt { min-height: 0; padding: 18px 22px; }
+@media (max-height: 760px) {
+  .choose .screen-main { justify-content: flex-start !important; }
+  .choose .head-block .par { margin-bottom: 10px !important; }
+  .choose .screen-main > .head-block + .dev-value { margin-top: 4px !important; }
+  .choose .dev-value .big-num { font-size: 46px; }
+  .choose .q-opts { gap: 10px; }
+  .choose .q-opts .opt { padding: 13px 18px; }
+  .choose .q-opts .opt .main { font-size: 17px; }
+}
+@media (max-height: 760px) {
+  .choose .screen-main { gap: 12px !important; }
+  .choose .head-block .par { margin-bottom: 0 !important; }
+  .choose .q-opts .opt .sub { font-size: 14px; }
+}
+@media (max-height: 760px) {
+  .choose .screen-main { gap: 8px !important; }
+  .choose .dev-value .big-num { font-size: 40px; }
+  .choose .q-opts .opt { padding: 10px 16px; }
+  .choose .q-opts { gap: 8px; }
+}
