@@ -34,7 +34,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #000000;
     --card: #1c1c1e;
     --card-2: #242426;
@@ -57,7 +57,33 @@
     --scrim: rgba(0, 0, 0, 0.55);
     --shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --card-2: #242426;
+    --label: #f5f5f7;
+    --secondary: #a1a1a6;
+    --tertiary: #8d8d93;
+    --sep: rgba(84, 84, 88, 0.55);
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-2: rgba(118, 118, 128, 0.34);
+    --accent: #32c671;
+    --accent-ink: #03230f;
+    --accent-text: #4cd98a;
+    --accent-soft: rgba(50, 198, 113, 0.16);
+    --warn: #ffb340;
+    --warn-soft: rgba(255, 159, 10, 0.18);
+    --danger: #ff6961;
+    --danger-soft: rgba(255, 69, 58, 0.18);
+    --bar-bg: rgba(0, 0, 0, 0.7);
+    --sheet-bg: rgba(28, 28, 30, 0.94);
+    --scrim: rgba(0, 0, 0, 0.55);
+    --shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
