@@ -560,3 +560,19 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .home-intro .lead { margin: 0 auto !important; }
 .home .home-note { margin-top: calc(-1 * clamp(8px, 1.6vh, 16px)) !important; }
 .home .screen-main { gap: clamp(26px, 5.4vh, 52px); }
+
+.tiv { margin: 4px 0 0; }
+.tiv-label { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+.tiv .big-num { margin: 2px 0 0; }
+
+.tiv { margin: 4px 0 0; }
+.tiv-label { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+.tiv .big-num { margin: 2px 0 0; }
+
+.home .lead { max-width: none; font-size: clamp(13.5px, min(3.9vw, 2.2vh), 17px); }
+.home .lead .nw { white-space: nowrap; }
+.home .lead .lead-2 { display: inline-block; margin-top: 6px; color: var(--ink-3); }
+
+.home .lead { font-size: clamp(14px, min(4.4vw, 2.4vh), 18px); }
+@media (max-height: 700px) and (max-width: 600px) { .home .lead { display: block; font-size: 14px; } .home .lead .lead-2 { display: none; } }
+.home .lead { font-size: clamp(13.5px, min(4.05vw, 2.4vh), 18px); }

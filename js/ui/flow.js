@@ -126,7 +126,7 @@ function home(el, app) {
   el.innerHTML = layout(html`
     <div class="home-intro">
       <h1 class="h-display">The fastest way<br>to <span class="blue">Swap.</span></h1>
-      <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
+      <p class="lead"><span class="nw">Trade in the Phone, Watch, Speaker or AirPods</span><br><span class="nw">you’ve got for the one you love 💙</span><br><span class="lead-2">Get your swap balance in under a minute.</span></p>
     </div>
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
@@ -379,13 +379,17 @@ function confirm(el, app) {
   const name = [d.storage, d.model].filter(Boolean).join(', ');
   el.innerHTML = html`
     <h2 class="h-title">Your Device</h2>
+    <p class="par">Here’s what we can offer for it.</p>
     <div class="stack crumbs">
       <button class="opt crumb" type="button" data-act="change"><span class="main">${d.model}</span><span class="edit">Change</span></button>
       ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${d.storage}</span><span class="edit">Change</span></button>` : ''}
     </div>
+    <div class="tiv">
+      <p class="tiv-label">Up to</p>
+      <p class="big-num">${naira(upTo)}</p>
+    </div>
     <p class="congrats">Congratulations! 🥳</p>
-    <p class="lead big-lead">You can get up to <strong class="num">${naira(upTo)}</strong> when you Trade In your <strong>${name}</strong>. You can either Trade In for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device.</p>
-    <p class="small">This value applies if your ${d.model} is in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
+    <p class="par">Trade In your <strong>${name}</strong> for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device. This is its value in perfect condition ✨. Answer a few quick questions for your exact figure.</p>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
