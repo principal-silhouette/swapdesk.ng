@@ -594,3 +594,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .result-block .congrats { margin: 0 0 8px; }
 .result-block .par { margin: 0; }
 .result-block .tiv { margin-bottom: 16px; } .result-block .congrats { margin-bottom: 10px; }
+
+.checks { list-style: none; margin: 4px auto 0; padding: 0; width: var(--col); text-align: left; font-size: 15.5px; line-height: 1.4; display: grid; gap: 8px; }
+.checks li { position: relative; padding-left: 26px; }
+.checks li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--action); font-weight: 700; }

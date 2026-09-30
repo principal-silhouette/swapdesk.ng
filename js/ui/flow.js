@@ -416,13 +416,48 @@ function confirm(el, app) {
       <p class="tiv-label">Up to</p>
       <p class="big-num">${naira(upTo)}</p>
     </div>
-    <p class="congrats">Congratulations! 🥳</p>
-    <p class="par">Trade In your <strong>${name}</strong> for <strong>Cash 💵</strong> or <strong>Swap 🔄</strong> to another device. This is its value in perfect condition ✨. Answer a few quick questions for your exact figure.</p>
+    <p class="congrats">Congratulations!</p>
+    <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. This is its value in good working condition.</p>
     </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
-    ok: () => app.go('q', { i: 0 }),
+    ok: () => app.go('good'),
+  });
+}
+
+// ---------- optional: "good working condition?" (the old SwapDesk shortcut) ----------
+
+function good(el, app) {
+  CATALOG = app.catalog;
+  const d = ownDevice(app);
+  if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  const th = app.catalog.settings.batteryThreshold || 85;
+  const items = [
+    ['Bluetooth, mobile data and Wi-Fi', 'work normally'],
+    applies(d, 'camera') && ['Cameras', 'work, and every lens is intact'],
+    applies(d, 'battery') && ['Battery health', `is ${th}% or higher`],
+    applies(d, 'body') && ['Body', 'has no dents or deep scratches'],
+    applies(d, 'screen') && ['Screen and back glass', 'are not broken'],
+    applies(d, 'network') && d.type === 'Phones' && ['Network', 'is not locked, and no chip is used'],
+    (applies(d, 'faceId') || applies(d, 'touchId')) && ['Face ID or Touch ID', 'works normally'],
+  ].filter(Boolean);
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">Is it in good working condition?</h2>
+      <p class="par">You can say <strong>Yes</strong> if:</p>
+    </div>
+    <ul class="checks">${items.map(([b, t]) => html`<li><b>${b}</b> ${t}.</li>`)}</ul>
+    <div class="stack q-opts">
+      <button class="opt" type="button" data-act="yes"><span class="main">Yes<span class="sub">Get my value now</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="no"><span class="main">No<span class="sub">Answer a few questions for an exact figure</span></span>${raw(ICON.chevron)}</button>
+    </div>`, pills(backPill())).toString();
+  wire(el, app, {
+    yes: () => {
+      Object.assign(app.s.answers, { icloudLocked: false, battery: '', batteryUnknown: true, neatness: 'spotless', network: 'factory', faults: [], faultsDone: true, quick: true });
+      app.s.saved = null; app.save(); app.go('value');
+    },
+    no: () => { app.s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
   });
 }
 
@@ -454,11 +489,11 @@ function question(el, app, params) {
               <span class="main">${label}<span class="sub">${hint}</span></span><span class="tick" aria-hidden="true"></span></button>`;
           })}</div>`;
       case 'icloud':
-        return html`<h2 class="h-title">${apple ? 'Is it signed out of iCloud?' : 'Is it signed out of your accounts?'}</h2>
-          <p class="par">${apple ? 'Find My must be turned off so the next owner can set it up.' : 'Remove your Google and Samsung accounts so the next owner can set it up.'}</p>
+        return html`<div class="head-block"><h2 class="h-title">${apple ? 'Is it iCloud Locked?' : 'Is it Account Locked?'}</h2>
+          <p class="par">${apple ? 'Do you remember your iCloud password, and can you sign out of the device?' : 'Do you remember your Google or Samsung account password, and can you sign out of the device?'}</p></div>
           <div class="stack q-opts" role="radiogroup">
-            ${opt(a.icloudLocked === false, 'data-act="icloud" data-v="no"', 'Yes, it’s signed out')}
-            ${opt(a.icloudLocked === true, 'data-act="icloud" data-v="yes"', 'No, it’s still locked')}</div>
+            ${opt(a.icloudLocked === false, 'data-act="icloud" data-v="no"', 'Yes, I can Sign Out')}
+            ${opt(a.icloudLocked === true, 'data-act="icloud" data-v="yes"', apple ? 'No, It is iCloud Locked' : 'No, It is Account Locked')}</div>
           ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>` : ''}`;
       case 'battery':
       {
@@ -580,20 +615,21 @@ function value(el, app) {
     <p class="par"><strong>${d.model}</strong>${d.storage ? ` · ${d.storage}` : ''}</p>
     <p class="big-num" data-value="${r.start}">${naira(r.start)}</p>
     <p class="small">Estimated. Confirmed when we check your device in store, and slightly negotiable.</p>
-    <div class="card">
+    <div class="card"${s.answers.quick ? raw(' hidden') : ''}>
       <ul class="lines">
         <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
         ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
         ${r.lines.length ? html`<li class="total"><span>Your trade-in value</span><span>${naira(r.value)}</span></li>` : ''}
       </ul>
     </div>
-    <p><button class="link" type="button" data-act="edit">Edit answers</button></p>`;
+    ${s.answers.quick ? html`<p class="small">Based on your device being in good working condition.</p>` : ''}
+    <p><button class="link" type="button" data-act="edit">${s.answers.quick ? 'Answer condition questions instead' : 'Edit answers'}</button></p>`;
   el.innerHTML = layout(raw(el.innerHTML), html`
     <button class="btn blue" type="button" data-act="swap">${s.mode === 'swap' ? 'Compare Swap Devices' : 'Calculate My Swap Rate'}</button>
     ${pills(backPill(), html`<button class="pill" type="button" data-act="cash">Trade In for Cash</button>`)}`).toString();
   requestAnimationFrame(() => animateNumber($('.big-num', el), r.value, naira));
   wire(el, app, {
-    edit: () => app.go('q', { i: 0 }),
+    edit: () => { s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
     cash: () => { s.cash = true; app.save(); app.go('finish'); },
   });
@@ -637,7 +673,7 @@ function compare(el, app) {
           <span class="main"><span class="eyebrow-s">Your device</span><b>${d.model}</b><span class="sub">${d.storage}</span></span>
           <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
         </div>
-        ${r && r.accepted ? html`<p class="mine-cond">${answersText(engineAnswers(s.answers, d))}</p>
+        ${r && r.accepted ? html`<p class="mine-cond">${s.answers.quick ? 'Good working condition' : answersText(engineAnswers(s.answers, d))}</p>
         <details class="mine-how"><summary>How we got ${naira(tv)}</summary>
           <ul class="lines">
             <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
@@ -761,6 +797,7 @@ export const SCREENS = {
   home,
   pick: picker,
   loading,
+  good,
   confirm,
   q: question,
   value,
