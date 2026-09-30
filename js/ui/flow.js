@@ -412,7 +412,7 @@ function confirm(el, app) {
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
   const upTo = d.tradeInValue || 0;
-  const name = [d.model, d.storage].filter(Boolean).join(' ');
+  const name = [d.model, d.storage].filter(Boolean).join(', ');
   el.innerHTML = html`
     <div class="head-block">
       <h2 class="h-title">Your Device</h2>
@@ -493,7 +493,7 @@ function question(el, app, params) {
     switch (q.key) {
       case 'origin':
         return html`<h2 class="h-title">Is it new or used?</h2>
-          <p class="par">This sets the starting value for your ${d.model}${d.storage ? ` ${d.storage}` : ''}.</p>
+          <p class="par">This sets the starting value for your ${d.model}${d.storage ? `, ${d.storage}` : ''}.</p>
           <div class="stack q-opts" role="radiogroup">${q.options.map((o) => {
             const [label, hint] = ORIGIN_LABEL[o.condition] || [o.condition, ''];
             return html`<button class="opt ver" type="button" role="radio" aria-checked="${a.origin === o.id ? 'true' : 'false'}" data-act="origin" data-v="${o.id}">
@@ -647,7 +647,7 @@ function choose(el, app) {
     ${devValue(d, r.value)}
     <div class="stack q-opts">
       <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}${d.storage ? `, ${d.storage}` : ''}.</span></span>${raw(ICON.chevron)}</button>
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
