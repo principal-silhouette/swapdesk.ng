@@ -67,7 +67,7 @@ export function listScreen(el, app, view, params) {
   const meta = META[view];
   const all = listRows(catalog, view);
   const deals = view === 'prices' ? dealRows(catalog) : [];
-  const f = { type: params.type || '', brand: params.brand || '', cond: params.cond || '', search: params.search || '' };
+  const f = { type: params.type || '', brand: params.brand || '', cond: view === 'trade-in' ? '' : (params.cond || ''), search: params.search || '' };
   let open = '';
 
   el.classList.add('wide', 'picking');
