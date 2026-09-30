@@ -3,7 +3,10 @@ export const CONFIG = {
   // Apps Script web app URL (ends in /exec). Empty = use the built-in snapshot only.
   endpoint: '',
   snapshot: 'data/catalog-snapshot.json',
-  site: 'https://swapdesk.ng/',
+  // Links in shared quotes and lists point at wherever the site is running (swapdesk.ng in production).
+  site: typeof location !== 'undefined' && /^https?:$/.test(location.protocol)
+    ? location.origin + location.pathname.replace(/[^/]*$/, '')
+    : 'https://swapdesk.ng/',
   whatsapp: '2347037853959',
   whatsappDisplay: '0703 785 3959',
   instagram: 'the.swapdesk',

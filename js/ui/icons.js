@@ -3,8 +3,8 @@ const s = (d, vb = '0 0 24 24', extra = '') => `<svg class="ico" viewBox="${vb}"
 
 export const ICON = {
   search: s('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
-  clear: '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".45"/><path d="M7 7l6 6M13 7l-6 6" stroke="var(--card)" stroke-width="1.8" stroke-linecap="round"/></svg>',
-  chevron: '<svg class="row-chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  clear: '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".45"/><path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  chevron: '<svg class="chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   plus: s('<path d="M12 5v14M5 12h14"/>'),
   x: s('<path d="M6 6l12 12M18 6L6 18"/>'),
   share: s('<path d="M12 3v12M7.5 7.5L12 3l4.5 4.5"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>'),

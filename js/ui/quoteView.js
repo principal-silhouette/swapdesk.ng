@@ -1,124 +1,98 @@
 // A saved quote, read-only, exactly as quoted. Offers today's figures when they differ.
 import { CONFIG } from '../config.js';
-import { valueDevice, swapTerms } from '../engine.js';
-import { html, raw, naira, dateLabel } from '../format.js';
+import { valueDevice } from '../engine.js';
+import { html, raw, naira, dateLabel, $ } from '../format.js';
 import { ICON } from './icons.js';
-import {
-  decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays,
-} from '../quote.js';
+import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays } from '../quote.js';
 import { loadQuoteRemote } from '../data.js';
-import { freshAnswers, saveSwap } from './swap.js';
 
-export async function renderQuote(main, app) {
-  const r = app.route;
-  main.innerHTML = '<div class="wrap narrow boot"><div class="skeleton" style="width:50%"></div><div class="skeleton tall"></div></div>';
-  let q;
-  try {
-    q = r.packed ? decodeQuote(r.packed) : await loadQuoteRemote(r.id);
-  } catch {
-    main.innerHTML = html`<div class="wrap narrow empty">
-      <p class="title-3">We couldn’t open this quote</p>
-      <p>The link may be incomplete, or we’re offline. Check the link, or start a new quote.</p>
-      <p><a class="btn primary small" href="./" data-new>Start a new quote</a></p></div>`.toString();
-    main.onclick = (e) => { if (e.target.closest('[data-new]')) { e.preventDefault(); app.navigate({ view: 'swap' }); } };
-    return;
-  }
-  if (app.route !== r && app.route.view !== 'quote') return; // navigated away while loading
+export function quoteScreen(el, app, p) {
+  el.classList.add('wide');
+  el.innerHTML = '<p class="eyebrow">Opening your quote…</p>';
+  (async () => {
+    let q;
+    try {
+      q = p.packed ? decodeQuote(p.packed) : await loadQuoteRemote(p.id);
+    } catch {
+      el.innerHTML = html`<h2 class="h-title">We couldn’t open this quote</h2>
+        <p class="par">The link may be incomplete, or we’re offline. Check the link, or start a new quote.</p>
+        <div class="pills"><button class="pill go" type="button" data-act="new">Start a New Quote</button></div>`.toString();
+      el.onclick = (e) => { if (e.target.closest('[data-act="new"]')) app.go('home'); };
+      return;
+    }
+    render(el, app, p, q);
+  })();
+}
 
-  const { catalog } = app;
-  const link = r.id ? `${CONFIG.site}?q=${r.id}` : `${CONFIG.site}?s=${r.packed}`;
+function render(el, app, p, q) {
+  const cat = app.catalog;
+  const link = p.id ? `${CONFIG.site}?q=${p.id}` : `${CONFIG.site}?s=${p.packed}`;
   const expired = ageDays(q) > CONFIG.quoteValidDays;
+  const dev = q.device && cat.byId.get(q.device.id);
+  const today = dev && q.answers ? valueDevice(dev, q.answers, cat.settings) : null;
+  const avail = (id) => { const d = cat.byId.get(id); return d && d.swapInto && d.price > 0 ? d : null; };
+  const changed = (today && today.accepted && today.value !== q.value) || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
 
-  // Compare with today's figures.
-  const dev = q.device && catalog.byId.get(q.device.id);
-  const todayValue = dev && q.answers ? valueDevice(dev, q.answers, catalog.settings) : null;
-  const available = (c) => {
-    const d = catalog.byId.get(c.id);
-    return d && d.swapInto && d.price > 0 ? d : null;
-  };
-  const changed = (todayValue && todayValue.accepted && todayValue.value !== q.value) ||
-    q.compare.some((c) => available(c) && available(c).price !== c.price);
+  el.innerHTML = html`
+    <p class="eyebrow">Swap Quote${p.id ? ` ${p.id}` : ''} · ${dateLabel(q.created)}</p>
+    <h1 class="h-title">${q.device ? 'Your Swap Quote' : 'Your Comparison'}</h1>
+    ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
+      : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
+    ${q.device ? html`
+      <p class="par"><strong>${q.device.name}</strong><br><span class="small">${answersText(q.answers)}</span></p>
+      <p class="big-num">${naira(q.value)}</p>
+      <p class="small">Trade-in value. Estimated, confirmed when we check the device in store.</p>
+      <div class="card"><ul class="lines">
+        <li><span>Starting value, perfect condition</span><span>${naira(q.device.start)}</span></li>
+        ${q.lines.map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
+      </ul></div>` : ''}
+    ${q.compare.length ? html`
+      <h2 class="h-sub">${q.device ? 'Swap Rates' : 'Devices'}</h2>
+      <div class="cmp-grid">${q.compare.map((c) => {
+        const gone = !avail(c.id);
+        const [model, ...rest] = c.name.split(' · ');
+        const label = q.device ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'price';
+        return html`<article class="cmp ${c.kind}${gone ? ' gone' : ''}">
+          <span class="t">${model}${gone ? raw('<span class="tag warn">No longer available</span>') : ''}</span>
+          <span class="s">${c.dealNote || rest.join(' · ')}</span>
+          <span class="p">Price ${naira(c.price)}</span>
+          <span class="k">${label}</span>
+          <span class="n">${q.device ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></article>`;
+      })}</div>` : ''}
+    <div class="stack">
+      <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
+      <button class="btn" type="button" data-act="share">${raw(ICON.share)} Share Quote</button>
+      <button class="btn" type="button" data-act="today">Use Today’s Figures</button>
+    </div>
+    <p class="small">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
+    <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p>`.toString();
 
-  main.innerHTML = html`
-    <div class="wrap narrow flow">
-      <p class="eyebrow" style="margin-top:0.75rem">Swap quote${r.id ? ` ${r.id}` : ''} · ${dateLabel(q.created)}</p>
-      <h1 class="large-title">${q.device ? 'Your swap quote' : 'Your comparison'}</h1>
-      ${expired ? html`<p class="note warn">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link-btn" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></p>`
-        : changed ? html`<p class="note warn">Prices have changed since this quote. <button class="link-btn" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></p>` : ''}
-
-      ${q.device ? html`
-        <section class="card value-card section">
-          <p class="eyebrow">Trade-in value</p>
-          <p class="sub" style="margin:0 0 0.5rem"><span class="headline" style="color:var(--label)">${q.device.name}</span><br>${answersText(q.answers)}</p>
-          <p class="hero-num">${naira(q.value)}</p>
-          <p class="caption">Estimated. Confirmed when we check the device in store, and slightly negotiable.</p>
-          <ul class="lines">
-            <li><span>Starting value, good condition</span><span>${naira(q.device.start)}</span></li>
-            ${q.lines.map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
-          </ul>
-        </section>` : ''}
-
-      ${q.compare.length ? html`
-        <section class="section">
-          <h2 class="title-3" style="margin-bottom:0.75rem">${q.device ? 'Swap options' : 'Devices'}</h2>
-          <div class="compare-grid">
-            ${q.compare.map((c) => {
-              const gone = !available(c);
-              return html`<article class="card cmp ${c.kind}${gone ? ' gone' : ''}">
-                <p class="row-title" style="padding:0">${c.name.split(' · ')[0]}</p>
-                <p class="sub" style="margin:0">${c.dealNote || c.name.split(' · ').slice(1).join(' · ')}</p>
-                ${gone ? raw('<p style="margin:0.25rem 0 0"><span class="tag warn">No longer available</span></p>') : ''}
-                <p class="price" style="margin:0.25rem 0 0">Price ${naira(c.price)}</p>
-                <div class="topup"><p class="topup-label" style="margin:0">${q.device ? termsText(c).replace(/ ₦[\d,]+$/, '').replace(/^./, (m) => m.toUpperCase()) : 'Price'}</p>
-                  <p class="topup-num" style="margin:0">${q.device ? (c.kind === 'even' ? naira(0) : naira(c.amount)) : naira(c.price)}</p></div>
-              </article>`;
-            })}
-          </div>
-        </section>` : ''}
-
-      <section class="section stack">
-        <button class="btn primary block" type="button" data-act="wa">${raw(ICON.whatsapp)} Send to SwapDesk on WhatsApp</button>
-        <div class="btn-row">
-          <button class="btn" type="button" data-act="share">${raw(ICON.share)} Share</button>
-          <button class="btn" type="button" data-act="today">Use today’s figures</button>
-        </div>
-        <p class="caption">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days. SwapDesk · An Upgrade Brands product.</p>
-      </section>
-    </div>`.toString();
-  document.title = `Swap quote${r.id ? ` ${r.id}` : ''} · SwapDesk`;
-
-  main.onclick = async (e) => {
+  el.onclick = async (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'wa') location.href = whatsappURL(whatsappMessage(q, link, q.city));
     if (act === 'share') {
-      const res = await share({ title: 'SwapDesk quote', text: summaryText(q, ''), url: link });
-      if (res === 'copied') app.toast('Quote and link copied');
+      const r = await share({ title: 'SwapDesk quote', text: summaryText(q, ''), url: link });
+      if (r === 'copied') app.toast('Quote and link copied');
     }
     if (act === 'today') {
-      const s = app.swap;
+      const { freshAnswers } = await import('./flow.js');
       const a = q.answers || {};
-      Object.assign(s, {
-        home: false,
-        deviceId: dev ? dev.id : '',
+      Object.assign(app.s, {
+        mode: 'swap', cash: false, deviceId: dev ? dev.id : '',
         answers: {
           ...freshAnswers(),
-          icloudLocked: a.icloudLocked ? true : (dev ? false : null),
+          icloudLocked: dev ? !!a.icloudLocked : null,
           battery: a.battery === null || a.battery === undefined ? '' : String(a.battery),
-          batteryUnknown: dev ? a.battery === null || a.battery === undefined : false,
-          neatness: a.neatness || null,
-          network: a.network || null,
-          faults: a.faults || [],
-          faultsDone: !!dev,
+          batteryUnknown: !!dev && (a.battery === null || a.battery === undefined),
+          neatness: a.neatness || null, network: a.network || null, faults: a.faults || [], faultsDone: !!dev,
         },
-        phase: dev ? 'done' : 'pick',
-        qi: 0,
-        compare: q.compare.map((c) => c.id).filter((id) => available({ id })),
+        compare: q.compare.map((c) => c.id).filter((id) => avail(id)),
         saved: null,
       });
-      saveSwap(s);
-      app.navigate({ view: 'swap' });
+      app.save();
+      history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
+      app.go('compare');
     }
   };
+  $('h1', el)?.focus?.({ preventScroll: true });
 }
-
-export { swapTerms };

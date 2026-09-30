@@ -3,64 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SwapDesk · Trade in and swap your phone</title>
-  <meta name="description" content="Find out what your phone, iPad, Apple Watch or AirPods are worth, compare swaps into up to six devices, and complete your swap with SwapDesk. An Upgrade Brands product.">
+  <title>@the.swapdesk Trade Ins · Swap, Trade In, Upgrade</title>
+  <meta name="description" content="Check prices, get your trade-in value and calculate your swap rate for up to six devices at once. SwapDesk, an Upgrade Brands product.">
   <meta name="author" content="Upgrade Brands">
-  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
   <link rel="canonical" href="https://swapdesk.ng/">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SwapDesk · An Upgrade Brands product">
-  <meta property="og:title" content="SwapDesk · Trade in and swap your phone">
-  <meta property="og:description" content="Value your device, compare swaps and see today’s Price List and Trade-In Values. An Upgrade Brands product.">
+  <meta property="og:title" content="SwapDesk · Swap, Trade In, Upgrade.">
+  <meta property="og:description" content="Check prices, get your trade-in value and calculate your swap rate. An Upgrade Brands product.">
   <meta property="og:url" content="https://swapdesk.ng/">
   <meta property="og:image" content="https://swapdesk.ng/assets/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="league-spartan-master/webfonts/leaguespartan-bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="data/catalog-snapshot.json" as="fetch" crossorigin>
   <link rel="stylesheet" href="css/app.css">
   <script type="module" src="js/app.js"></script>
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
+<body class="intro">
+  <div class="stage" aria-hidden="true">
+    <img class="wave wave-a" src="assets/wave-a.svg" alt="">
+    <img class="wave wave-b" src="assets/wave-b.svg" alt="">
+    <p class="stage-tag"><span class="t1">Swap,</span><br><span class="t2">Trade In,</span><br><span class="t3">Upgrade.</span></p>
+    <img class="stage-arrows" src="assets/arrows.svg" alt="">
+  </div>
+  <a class="stage-logo" href="./" data-home aria-label="SwapDesk home"><img src="assets/swapdesk-logo.png" alt="swapdesk" width="744" height="203"></a>
+  <p class="stage-credit"><b><a href="https://instagram.com/the.swapdesk" rel="noopener">@the.swapdesk</a></b>An Upgrade Brands product</p>
 
-  <header class="bar" id="bar">
-    <div class="bar-row wrap">
-      <a class="brand" href="./" data-nav="swap" aria-label="SwapDesk home">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 12.5h11.5l-3-3M23 19.5H11.5l3 3" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>SwapDesk</span>
-      </a>
-      <nav class="seg" aria-label="Sections">
-        <a href="./" data-nav="swap">Swap</a>
-        <a href="./?view=prices" data-nav="prices">Price List</a>
-        <a href="./?view=trade-in" data-nav="trade-in">Trade-In Values</a>
-      </nav>
-    </div>
-    <div class="bar-extra wrap" id="bar-extra"></div>
-  </header>
-
-  <main id="main" tabindex="-1">
-    <div class="boot wrap" aria-busy="true">
-      <div class="skeleton" style="width:60%"></div>
-      <div class="skeleton" style="width:40%"></div>
-      <div class="skeleton tall"></div>
+  <main class="popup" id="popup" aria-live="polite">
+    <p class="popup-head"><span class="grab" aria-hidden="true"></span>www.swapdesk.ng</p>
+    <div class="popup-body" id="body" tabindex="-1">
+      <div class="screen"><p class="eyebrow">Loading prices…</p></div>
     </div>
   </main>
 
-  <footer class="foot wrap">
-    <p class="foot-brand"><strong>SwapDesk</strong> · An Upgrade Brands product</p>
-    <p class="foot-links">
-      <a href="https://wa.me/2347037853959" rel="noopener">WhatsApp 0703 785 3959</a>
-      <a href="https://instagram.com/the.swapdesk" rel="noopener">Instagram @the.swapdesk</a>
-    </p>
-    <p class="foot-note">Trade-in values are estimates and are confirmed when we check your device in store.</p>
-  </footer>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <noscript><p class="wrap">SwapDesk needs JavaScript to show prices. Message us on WhatsApp on 0703 785 3959.</p></noscript>
+  <noscript><p style="position:fixed;inset:auto 0 0;padding:20px;background:#fff;text-align:center">SwapDesk needs JavaScript to show prices. Message us on WhatsApp on 0703 785 3959.</p></noscript>
 </body>
 </html>
