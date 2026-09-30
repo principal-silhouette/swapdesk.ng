@@ -390,3 +390,13 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .mine-how[open] summary::after { transform: rotate(-90deg); }
 .mine-how .lines { background: #fff; border-radius: 10px; padding: 4px 14px; }
 .mine-cond::first-letter { text-transform: uppercase; }
+.btn.two { flex-direction: column; gap: 2px; min-height: 64px; padding-top: 10px; padding-bottom: 10px; }
+.btn .bsub { font-size: 13px; font-weight: 400; opacity: 0.85; letter-spacing: -0.005em; }
+.btn.green .bsub, .btn:not(.blue) .bsub { color: var(--ink-2); opacity: 1; }
+.home .lead { max-width: 32ch; }
+@media (max-height: 700px) and (max-width: 600px) {
+  .home .h-display { font-size: 2.1rem; margin: 4px 0 6px; }
+  .home .kicker { margin-top: 2px; }
+  .home .lead { font-size: 15px; }
+  .btn.two { min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
+}

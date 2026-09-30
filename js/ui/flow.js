@@ -102,15 +102,11 @@ function home(el, app) {
     <p class="kicker">Swap · Trade In · Upgrade</p>
     <h1 class="h-display">The fastest way<br>to <span class="blue">swap.</span></h1>
     <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
-    <ol class="steps">
-      <li><span class="n">1</span><span><b>Value your device</b>Battery, body and faults, priced line by line.</span></li>
-      <li><span class="n">2</span><span><b>Compare up to ${max} devices</b>Your swap balance for each, side by side.</span></li>
-      <li><span class="n">3</span><span><b>Swap in your city</b>PH, Abuja, Lagos, Uyo, Yenagoa, or waybill.</span></li>
-    </ol>`, html`
+`, html`
     <div class="stack tight">
-      <button class="btn green" type="button" data-act="prices">Check for Prices</button>
-      <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
-      <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
+      <button class="btn green two" type="button" data-act="prices">Check for Prices<span class="bsub">USED 🇺🇸 and Brand New, plus deals</span></button>
+      <button class="btn two" type="button" data-act="trade">Check My Trade-In Value<span class="bsub">Battery, body and faults, line by line</span></button>
+      <button class="btn blue two" type="button" data-act="swap">Calculate My Swap Rate<span class="bsub">Compare up to ${max} devices at once</span></button>
     </div>
     <p class="foot-link"><button class="link" type="button" data-act="tradeList">See all Trade-In Values</button></p>`).toString();
   wire(el, app, {
