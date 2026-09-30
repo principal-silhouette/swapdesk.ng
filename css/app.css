@@ -811,3 +811,5 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .deal-row .size-add { flex: none; padding: 6px 12px; border-radius: 999px; border: 0; background: var(--action); color: #fff; font-size: 13.5px; font-weight: 600; }
 .row .v small { display: block; text-align: right; margin: 0 0 -2px; line-height: 1.1; }
 .row .v { text-align: right; }
+/* Default header line, a little higher on every page (progress bar and counter still clear it). */
+.screen:not(.home) .screen-main { padding-top: 46px !important; }
