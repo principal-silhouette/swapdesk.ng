@@ -400,3 +400,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .home .lead { font-size: 15px; }
   .btn.two { min-height: 58px; padding-top: 8px; padding-bottom: 8px; }
 }
+.home-note { margin: 2px 4px 0; font-size: 14px; line-height: 1.45; color: var(--ink-2); text-align: center; }
+@media (max-height: 700px) and (max-width: 600px) { .home-note { font-size: 13px; } }
+@media (max-height: 700px) and (max-width: 600px) { .home .lead { display: none; } }

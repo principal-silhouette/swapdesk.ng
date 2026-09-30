@@ -104,10 +104,11 @@ function home(el, app) {
     <p class="lead">Trade in the phone you have for the one you love 💙 Get your swap balance in under a minute.</p>
 `, html`
     <div class="stack tight">
-      <button class="btn green two" type="button" data-act="prices">Check for Prices<span class="bsub">USED 🇺🇸 and Brand New, plus deals</span></button>
-      <button class="btn two" type="button" data-act="trade">Check My Trade-In Value<span class="bsub">Battery, body and faults, line by line</span></button>
-      <button class="btn blue two" type="button" data-act="swap">Calculate My Swap Rate<span class="bsub">Compare up to ${max} devices at once</span></button>
+      <button class="btn green" type="button" data-act="prices">Check for Prices</button>
+      <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
+      <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
+    <p class="home-note">Value your device line by line, compare your swap balance for up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or waybill from anywhere.</p>
     <p class="foot-link"><button class="link" type="button" data-act="tradeList">See all Trade-In Values</button></p>`).toString();
   wire(el, app, {
     prices: () => app.go('prices'),
