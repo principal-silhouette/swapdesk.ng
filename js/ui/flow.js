@@ -63,9 +63,9 @@ export const BATTERY_BANDS = [
 const ORIGIN_LABEL = {
   'Brand New': ['Brand new, still sealed', 'Never opened or activated.'],
   'Active Brand New': ['Brand new, but activated', 'Opened and set up, barely used.'],
-  'Active Brand New (Non LLA)': ['Brand new, activated (non-LLA)', 'Opened and set up; not an LL/A model.'],
+  'Active Brand New (Non LLA)': ['Brand new, but activated', 'Opened and set up, barely used.'],
   'Foreign USED': ['Used, bought abroad', 'UK or US used, imported.'],
-  'Foreign USED (Non LLA)': ['Used, bought abroad (non-LLA)', 'UK or US used; not an LL/A model.'],
+  'Foreign USED (Non LLA)': ['Used, bought abroad', 'UK or US used, imported.'],
   'Nigerian USED': ['Used in Nigeria', 'Bought and used locally.'],
 };
 let CATALOG = null;
