@@ -974,3 +974,19 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Go Back (and every outline pill) uses the same outline as the outline buttons. */
 .pill:not(.go) { border: 1px solid var(--action) !important; }
 .choose .screen-main > .btn.trade-add { width: calc(var(--box) * 0.98) !important; max-width: calc(var(--box) * 0.98) !important; height: 57px !important; min-height: 57px !important; }
+
+/* Device list: fixed columns (name · storage · value · remove), one line each, whatever the name length. */
+.choose .dev-list { width: min(100%, 380px) !important; max-width: none !important; padding: 2px 4px 2px 12px; }
+.dev-list .dev-line { grid-template-columns: minmax(0, 1fr) 58px 96px 30px !important; column-gap: 6px; padding: 6px 0 !important; }
+.dev-list .dev-line strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.dev-list .ds { text-align: center; font-size: 13.5px; }
+.dev-list .dv { text-align: center !important; margin: 0; font-size: 14px; }
+.dev-list .x { width: 30px; height: 30px; justify-self: center; }
+/* Same space under the total whether or not the add button is there. */
+.choose.multi .screen-main > .dev-value + .nav-stack { margin-top: 16px !important; }
+.choose .dev-list { padding: 2px 2px 2px 10px; }
+.dev-list .dev-line { grid-template-columns: minmax(0, 1fr) 50px 86px 26px !important; column-gap: 4px; }
+.dev-list .dev-line strong { text-overflow: clip; }
+.dev-list .ds { font-size: 13px; }
+.dev-list .dv { font-size: 13.5px; }
+.dev-list .x { width: 26px; height: 26px; }

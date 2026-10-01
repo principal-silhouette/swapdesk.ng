@@ -682,7 +682,7 @@ function choose(el, app) {
       <p class="par">${multi ? 'Swap them for something new, or trade them in for cash.' : 'Swap it for something new, or trade it in for cash.'}</p>
     </div>
     ${multi ? html`<div class="dev-value">
-        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong>${t.d.model}</strong><span class="ds">${t.d.storage ? ` · ${t.d.storage}` : ''}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
+        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong title="${t.d.model}">${t.d.model}</strong><span class="ds">${t.d.storage || ''}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
         <p class="tiv-label">Total trade-in value</p>
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
@@ -691,6 +691,10 @@ function choose(el, app) {
       <button class="btn blue" type="button" data-act="swap">Swap to another Device</button>
       <button class="btn" type="button" data-act="cash">Swap for Cash</button>
     </div>`, pills(backPill())).toString();
+  // Long names (iPads) shrink a little to stay on one line in their column.
+  requestAnimationFrame(() => el.querySelectorAll('.dev-list strong').forEach((n) => {
+    let fs = 14; while (n.scrollWidth > n.clientWidth + 0.5 && fs > 11) { fs -= 0.5; n.style.fontSize = `${fs}px`; }
+  }));
   wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
     cash: () => { s.cash = true; app.save(); app.go('finish'); },
