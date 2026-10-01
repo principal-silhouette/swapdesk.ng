@@ -877,3 +877,20 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .choose .q-opts .opt { padding: 10px 16px; }
   .choose .q-opts { gap: 8px; }
 }
+/* Swap Rates cards never grow past their column (long names wrap or trim instead). */
+.cmp-grid { grid-template-columns: minmax(0, 1fr) !important; }
+@media (min-width: 560px) { .cmp-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; } }
+.cmp, .cmp.slim .row2, .cmp.slim .t { min-width: 0; }
+.cmp.slim .row2 .p { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp.slim .t { white-space: normal; overflow: visible; }
+.cmp.slim .row2 .p { overflow: visible; white-space: nowrap; font-size: 13px; }
+.cmp.slim .row2 { flex-wrap: wrap; row-gap: 2px; }
+.cmp.slim .n { font-size: 18px; }
+.cmp.slim .k { font-size: 10.5px; }
+.cmp.slim .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp.slim .row2 { flex-wrap: nowrap; }
+.cmp.slim .row2 .p { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; }
+.cmp.slim .row2 { align-items: flex-end; }
+.cmp.slim .row2 .p { white-space: nowrap; overflow: visible; line-height: 1.35; }
+.cmp.slim .kn { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
+.cmp.slim .n { font-size: 21px; }

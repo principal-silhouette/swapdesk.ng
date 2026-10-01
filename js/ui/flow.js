@@ -4,7 +4,7 @@ import { CONFIG, CITIES } from '../config.js';
 import {
   NEATNESS, NETWORK, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
-import { html, raw, naira, variantName, $, $$ } from '../format.js';
+import { html, raw, naira, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -680,8 +680,8 @@ function compare(el, app) {
     const t = tv === null ? null : swapTerms(x, tv);
     // Three lines: what it is · price and what you add · proceed.
     return html`<article class="cmp slim ${t ? t.kind : ''}">
-      <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''} <span class="s">· ${x.condition === 'Deal' ? [x.storage, x.dealNote].filter(Boolean).join(' · ') : variantName(x)}</span></span>
-      <span class="row2"><span class="p">Price ${naira(x.price)}</span><span class="kn"><span class="k">${t ? termsLabel(t) : 'Price'}</span> <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span></span></span>
+      <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
+      <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${naira(x.price)}</span><span class="kn"><span class="k">${t ? termsLabel(t) : 'Price'}</span> <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span></span></span>
       ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
     </article>`;
@@ -693,10 +693,10 @@ function compare(el, app) {
     <p class="par">Compare what it costs to swap into up to ${max} devices.</p></div>
     ${d ? html`<div class="mine slim">
         <div class="mine-top">
-          <span class="main"><b>${d.model}</b><span class="sub"> · ${d.storage}</span></span>
+          <span class="main"><b>${d.model}</b></span>
           <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
         </div>
-        ${r && r.accepted ? html`<p class="mine-cond">${s.answers.quick ? 'Good working condition' : answersText(engineAnswers(s.answers, d))}</p>
+        ${r && r.accepted ? html`<p class="mine-cond">${[d.storage, s.answers.quick ? 'Good working condition' : answersText(engineAnswers(s.answers, d))].filter(Boolean).join(' · ')}</p>
         <details class="mine-how"><summary>How we got ${naira(tv)}</summary>
           <ul class="lines">
             <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
