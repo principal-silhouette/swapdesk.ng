@@ -952,3 +952,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .choose.multi .dev-list { padding-top: 2px; padding-bottom: 2px; }
 .choose .q-opts .opt[data-act="addtrade"] .main { white-space: nowrap; }
 .choose .screen-main > .btn.trade-add { margin-bottom: 10px !important; }
+
+/* Choose page: navigation buttons, centred like the rest of the site's navigation. */
+.choose .screen-main > .btn.trade-add, .choose .nav-stack { width: var(--box) !important; max-width: var(--box) !important; margin-left: auto !important; margin-right: auto !important; }
+.choose .nav-stack { display: grid; gap: 10px; }
+.choose .nav-stack .btn { width: 100%; min-height: 56px; justify-content: center; text-align: center; font-size: 17px; }
+.choose .screen-main > .btn.trade-add { min-height: 56px; justify-content: center; }

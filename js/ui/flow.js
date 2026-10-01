@@ -687,9 +687,9 @@ function choose(el, app) {
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
     ${trades.length < MAX_TRADE ? html`<button class="btn add trade-add" type="button" data-act="addtrade">${raw(ICON.plus)} Trade In Another Device</button>` : ''}
-    <div class="stack q-opts">
-      <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="cash"><span class="main">Swap for Cash<span class="sub">Get ${naira(total)} for your ${multi ? `${trades.length} devices` : `${d.model}${d.storage ? `, ${d.storage}` : ''}`}.</span></span>${raw(ICON.chevron)}</button>
+    <div class="stack nav-stack">
+      <button class="btn blue" type="button" data-act="swap">Swap to another Device</button>
+      <button class="btn" type="button" data-act="cash">Swap for Cash</button>
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
