@@ -967,13 +967,10 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .choose.multi .dev-value { margin-bottom: 0 !important; }
 .choose.multi .dev-value .big-num { line-height: 1; padding-bottom: 0; }
 .choose.multi .screen-main > .dev-value + .btn.trade-add { margin-top: 16px !important; }
-/* Trade In Another Device reads as the secondary action: a little shorter than the two main buttons. */
-.choose .screen-main > .btn.trade-add { height: 50px !important; min-height: 50px !important; font-size: 16px !important; }
-.choose .screen-main > .btn.trade-add svg { width: 18px; height: 18px; }
 /* Device list: values line up on the right. */
 .dev-list .dev-line { display: grid !important; grid-template-columns: auto 1fr auto 34px; align-items: center; }
 .dev-list .dev-line .dv { text-align: right; }
 .dev-list .ds { white-space: nowrap; color: var(--ink-2); }
-.choose .screen-main > .btn.trade-add { width: calc(var(--box) * 0.86) !important; max-width: calc(var(--box) * 0.86) !important; }
 /* Go Back (and every outline pill) uses the same outline as the outline buttons. */
 .pill:not(.go) { border: 1px solid var(--action) !important; }
+.choose .screen-main > .btn.trade-add { width: calc(var(--box) * 0.98) !important; max-width: calc(var(--box) * 0.98) !important; height: 57px !important; min-height: 57px !important; }
