@@ -111,6 +111,7 @@ function getCatalog_(skipCache) {
   var out = {
     updatedAt: new Date().toISOString(),
     source: 'live',
+    version: 3,
     settings: settings,
     devices: devices
   };
@@ -161,6 +162,16 @@ function saveQuote_(q) {
     compare: compare.map(function (c) {
       return { id: c.id, name: cut_(c.name, 120), price: int_(c.price), kind: cut_(c.kind, 12), amount: int_(c.amount), dealNote: cut_(c.dealNote, 120) };
     }),
+    items: (q.items || []).slice(0, 3).filter(function (it) { return it && byId[it.id]; }).map(function (it) {
+      var ia = it.answers || {};
+      return {
+        id: it.id, name: cut_(it.name, 120), start: int_(it.start), value: int_(it.value),
+        answers: { icloudLocked: ia.icloudLocked === true, battery: ia.battery === null || ia.battery === '' || ia.battery === undefined ? null : int_(ia.battery),
+          neatness: cut_(ia.neatness, 20), network: cut_(ia.network, 20), faults: (ia.faults || []).slice(0, 12).map(function (f) { return cut_(f, 20); }),
+          batteryLabel: cut_(ia.batteryLabel, 20) },
+        lines: (it.lines || []).slice(0, 15).map(function (l) { return [cut_(l[0], 60), l[1] === null ? null : int_(l[1])]; })
+      };
+    }),
     city: cut_(q.city, 40),
     name: cut_(q.name, 60),
     phone: cut_(q.phone, 20).replace(/[^\d+ ]/g, '')
@@ -179,7 +190,7 @@ function saveQuote_(q) {
     var a = clean.answers || {};
     var row = [
       id, new Date(), clean.name, clean.phone, clean.city,
-      dev.id || '', clean.device ? clean.device.name : '',
+      dev.id || '', clean.items.length > 1 ? clean.items.map(function (it) { return it.name + ' (' + it.value + ')'; }).join('\n') : (clean.device ? clean.device.name : ''),
       a.battery === null || a.battery === undefined ? '' : a.battery,
       a.neatness || '', a.network || '', (a.faults || []).join(', '),
       a.icloudLocked ? 'Yes' : 'No',

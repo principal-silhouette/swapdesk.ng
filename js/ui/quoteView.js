@@ -31,14 +31,23 @@ function render(el, app, p, q) {
   const dev = q.device && cat.byId.get(q.device.id);
   const today = dev && q.answers ? valueDevice(dev, q.answers, cat.settings) : null;
   const avail = (id) => { const d = cat.byId.get(id); return d && d.swapInto && d.price > 0 ? d : null; };
-  const changed = (today && today.accepted && today.value !== q.value) || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
+  const changed = (!(q.items && q.items.length > 1) && today && today.accepted && today.value !== q.value) || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
 
   el.innerHTML = html`
     <p class="eyebrow">Swap Quote${p.id ? ` ${p.id}` : ''} · ${dateLabel(q.created)}</p>
     <h1 class="h-title">${q.device ? 'Your Swap Quote' : 'Your Comparison'}</h1>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
-    ${q.device ? html`
+    ${q.items && q.items.length > 1 ? html`
+      <p class="par">Trading in ${q.items.length} devices</p>
+      <p class="big-num">${naira(q.value)}</p>
+      <p class="small">Total trade-in value. Estimated, confirmed when we check the devices in store.</p>
+      ${q.items.map((it) => html`<div class="card"><ul class="lines">
+        <li class="total"><span>${it.name}</span><span>${naira(it.value)}</span></li>
+        <li><span class="small">${answersText(it.answers)}</span><span></span></li>
+        <li><span>Starting value, perfect condition</span><span>${naira(it.start)}</span></li>
+        ${it.lines.map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
+      </ul></div>`)}` : q.device ? html`
       <p class="par"><strong>${q.device.name}</strong><br><span class="small">${answersText(q.answers)}</span></p>
       <p class="big-num">${naira(q.value)}</p>
       <p class="small">Trade-in value. Estimated, confirmed when we check the device in store.</p>

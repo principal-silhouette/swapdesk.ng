@@ -21,7 +21,7 @@ export const freshAnswers = () => ({
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
 
 export function restoreState() {
-  const base = { mode: 'swap', cash: false, deviceId: '', answers: freshAnswers(), compare: [], city: '', saved: null, pick: freshPick(), add: freshPick() };
+  const base = { mode: 'swap', cash: false, deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, pick: freshPick(), add: freshPick() };
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (s && typeof s === 'object') return { ...base, ...s, answers: { ...freshAnswers(), ...(s.answers || {}) }, pick: { ...freshPick(), ...(s.pick || {}) }, add: freshPick() };
@@ -117,6 +117,25 @@ function currentValue(app) {
   const d = ownDevice(app);
   return d ? valueDevice(d, engineAnswers(app.s.answers, d), app.catalog.settings) : null;
 }
+/** Up to 3 trade-in devices: the ones already valued (s.more) plus the one in progress. */
+export const MAX_TRADE = 3;
+function tradeIns(app) {
+  const s = app.s;
+  const out = [];
+  for (const m of s.more || []) {
+    const d = app.catalog.byId.get(m.deviceId);
+    if (d) out.push({ d, answers: m.answers, r: valueDevice(d, engineAnswers(m.answers, d), app.catalog.settings) });
+  }
+  const d = ownDevice(app);
+  if (d && allAnswered(app)) out.push({ d, answers: s.answers, r: currentValue(app), current: true });
+  return out;
+}
+/** Combined trade-in value of every device, or null if any isn't accepted. */
+function totalValue(app) {
+  const t = tradeIns(app);
+  if (!t.length || t.some((x) => !x.r || !x.r.accepted)) return null;
+  return t.reduce((sum, x) => sum + x.r.value, 0);
+}
 function allAnswered(app) {
   CATALOG = app.catalog;
   const d = ownDevice(app);
@@ -154,7 +173,7 @@ function startFlow(app, mode) {
   const s = app.s;
   s.mode = mode;
   // Every start from Home is a new quote: no device, answers or swap choices carried over.
-  Object.assign(s, { deviceId: '', answers: freshAnswers(), compare: [], city: '', saved: null, cash: false });
+  Object.assign(s, { deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, cash: false });
   s.pick = freshPick();
   app.save();
   app.go('pick');
@@ -163,7 +182,7 @@ function startFlow(app, mode) {
 /** Deep link from the Trade-In Values list (?device=id). */
 function startWith(app, id) {
   const s = app.s;
-  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; }
+  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; s.more = []; s.adding = false; }
   s.mode = 'trade';
   app.save();
   history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
@@ -370,7 +389,7 @@ function picker(el, app, params) {
           $(`[data-id="${CSS.escape(id)}"]`, el)?.focus({ preventScroll: true });
         } else {
           const cur = ownDevice(app); const nd = app.catalog.byId.get(id);
-          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; }
+          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; if (!s.adding) { s.compare = []; s.city = ''; } }
           const d = app.catalog.byId.get(id);
           Object.assign(st, { type: d.type, brand: d.brand, model: d.model, search: '' });
           app.save();
@@ -639,8 +658,9 @@ function value(el, app) {
 function choose(el, app) {
   const d = ownDevice(app);
   if (!d || !allAnswered(app)) { app.go('home', {}, { replace: true }); return false; }
-  const r = currentValue(app);
   const s = app.s;
+  if (s.adding) { s.adding = false; s.mode = 'swap'; s.cash = false; app.save(); app.go('compare', {}, { replace: true }); return false; }
+  const r = currentValue(app);
   const max = Number(app.catalog.settings['compare.maxDevices']) || 6;
   el.classList.add('choose');
   el.innerHTML = layout(html`
@@ -663,10 +683,16 @@ function choose(el, app) {
 
 function compare(el, app) {
   const s = app.s;
+  if (s.adding) {
+    // Came back without finishing the extra device: put the last valued one back.
+    s.adding = false;
+    if ((!ownDevice(app) || !allAnswered(app)) && (s.more || []).length) { const last = s.more.pop(); s.deviceId = last.deviceId; s.answers = last.answers; }
+    app.save();
+  }
   const cat = app.catalog;
   const d = ownDevice(app);
-  const r = d && allAnswered(app) ? currentValue(app) : null;
-  const tv = r && r.accepted ? r.value : null;
+  const trades = tradeIns(app);
+  const tv = totalValue(app);
   const max = Number(cat.settings['compare.maxDevices']) || 6;
   const items = s.compare.map((id) => { const x = cat.byId.get(id); return x && x.price > 0 && x.stock !== 'soldout' ? x : { ...(x || {}), id, gone: true }; });
   const live = items.filter((x) => !x.gone).sort(compareOrder(cat.modelOrder));
@@ -691,21 +717,24 @@ function compare(el, app) {
   el.innerHTML = html`
     <div class="head-block"><h2 class="h-title">Your Swap Rates</h2>
     <p class="par">Compare what it costs to swap into up to ${max} devices.</p></div>
-    ${d ? html`<div class="mine slim">
+    ${trades.length ? html`${trades.map((t, i) => html`<div class="mine slim${trades.length > 1 ? ' multi' : ''}">
         <div class="mine-top">
-          <span class="main"><b>${d.model}</b></span>
-          <span class="val">${tv === null ? 'Not valued yet' : naira(tv)}</span>
+          <span class="main"><b>${t.d.model}</b></span>
+          <span class="val">${t.r.accepted ? naira(t.r.value) : 'Not accepted'}</span>
+          ${trades.length > 1 ? html`<button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>` : ''}
         </div>
-        ${r && r.accepted ? html`<p class="mine-cond">${[d.storage, s.answers.quick ? 'Good working condition' : answersText(engineAnswers(s.answers, d))].filter(Boolean).join(' · ')}</p>
-        <details class="mine-how"><summary>How we got ${naira(tv)}</summary>
+        <p class="mine-cond">${[t.d.storage, t.answers.quick ? 'Good working condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</p>
+        ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${naira(t.r.value)}</summary>
           <ul class="lines">
-            <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
-            ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
-            <li class="total"><span>Your trade-in value</span><span>${naira(tv)}</span></li>
+            <li><span>Starting value, perfect condition</span><span>${naira(t.r.start)}</span></li>
+            ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
+            <li class="total"><span>Trade-in value</span><span>${naira(t.r.value)}</span></li>
           </ul>
-          <button class="link" type="button" data-act="edit">Edit answers</button>
-        </details>` : ''}
-      </div>`
+          ${t.current ? html`<button class="link" type="button" data-act="edit">Edit answers</button>` : ''}
+        </details>` : html`<p class="mine-cond">${t.r.reason || ''}</p>`}
+      </div>`)}
+      ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total trade-in value</span><b>${naira(tv)}</b></div>` : ''}
+      ${trades.length < MAX_TRADE && tv !== null ? html`<button class="btn add trade-add" type="button" data-act="addtrade">${raw(ICON.plus)} Trade In Another Device</button>` : ''}`
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
     ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
@@ -716,6 +745,20 @@ function compare(el, app) {
     val: () => app.go('value'),
     edit: () => app.go('q', { i: 0 }),
     own: () => startFlow(app, 'swap'),
+    addtrade: () => {
+      // Park the device just valued, then value the next one; choose() sends us back here.
+      s.more = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
+      s.deviceId = ''; s.answers = freshAnswers(); s.adding = true; s.saved = null;
+      s.pick = { ...freshPick() };
+      app.save(); app.go('pick');
+    },
+    rmtrade: (b) => {
+      const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
+      all.splice(Number(b.dataset.i), 1);
+      const last = all.pop();
+      s.more = all; s.deviceId = last.deviceId; s.answers = last.answers; s.saved = null;
+      app.save(); app.refresh();
+    },
     add: () => { s.add = { ...freshPick(), type: d?.type || '' }; app.go('pick', { purpose: 'add' }); },
     pick: (b) => { s.chosen = b.dataset.id; s.cash = false; app.save(); app.go('finish'); },
     savequotes: () => { s.chosen = ''; app.save(); app.go('saved'); },
@@ -743,13 +786,20 @@ function compare(el, app) {
 
 function quoteNow(app, { onlyChosen = false } = {}) {
   const s = app.s;
-  const d = ownDevice(app);
-  const r = currentValue(app);
+  const trades = tradeIns(app);
+  const first = trades[0];
+  const total = totalValue(app);
   const ids = onlyChosen && s.chosen ? [s.chosen] : s.compare;
   const list = s.cash ? [] : ids.map((id) => app.catalog.byId.get(id)).filter(Boolean)
     .sort(compareOrder(app.catalog.modelOrder))
-    .map((x) => ({ device: x, terms: r?.accepted ? swapTerms(x, r.value) : { kind: 'unavailable', amount: 0 } }));
-  return buildQuote({ device: d ? { ...d, condition: '' } : d, answers: d ? engineAnswers(s.answers, d) : null, result: r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
+    .map((x) => ({ device: x, terms: total !== null ? swapTerms(x, total) : { kind: 'unavailable', amount: 0 } }));
+  const q = buildQuote({ device: first ? { ...first.d, condition: '' } : null, answers: first ? engineAnswers(first.answers, first.d) : null, result: first?.r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
+  if (trades.length > 1) {
+    q.items = trades.map((t) => ({ id: t.d.id, name: [t.d.model, t.d.storage].filter(Boolean).join(' · '), start: t.r.start || 0, value: t.r.accepted ? t.r.value : 0,
+      answers: engineAnswers(t.answers, t.d), lines: t.r.accepted ? t.r.lines.map((l) => [l.label, l.amount]) : [] }));
+    q.value = total || 0;
+  }
+  return q;
 }
 async function ensureSaved(app, extra = {}, opts = {}) {
   const s = app.s;
@@ -804,9 +854,9 @@ function devValue(d, value, animateFrom) {
 function chosenCard(app) {
   const s = app.s;
   const x = !s.cash && s.chosen && app.catalog.byId.get(s.chosen);
-  const r = currentValue(app);
-  if (!x || !r?.accepted) return '';
-  const t = swapTerms(x, r.value);
+  const total = totalValue(app);
+  if (!x || total === null) return '';
+  const t = swapTerms(x, total);
   return html`<div class="mine chosen">
     <div class="mine-top"><span class="main"><span class="eyebrow-s">Swapping into</span><b>${x.model}</b><span class="sub">${variantName(x)}</span></span>
     <span class="val"><small>${termsLabel(t)}</small>${naira(t.kind === 'even' ? 0 : t.amount)}</span></div></div>`;
@@ -851,9 +901,10 @@ async function saveQuoteImage(q, link, app) {
   // A phone screen of the site: white background with the brand waves, the logo on top,
   // and the quote on the light-blue pop-up.
   const W = 1080;
-  const lines = q.lines || [];
+  const items = q.items && q.items.length > 1 ? q.items : null;
+  const lines = items ? items.map((it) => [it.name, it.value]) : (q.lines || []);
   const rows = q.compare.length;
-  const bH = 70 + (lines.length + 1) * 52 + (lines.length ? 52 : 0);
+  const bH = 70 + (lines.length + 1) * 52 + (lines.length ? 52 : 0) - (items ? 52 : 0);
   const content = 470 + bH + 36 + rows * 186 + 150;
   const PT = 300; // pop-up top
   const H = Math.max(1920, PT + content + 80);
@@ -887,7 +938,7 @@ async function saveQuoteImage(q, link, app) {
   g.fillStyle = '#454545'; g.font = font(400, 30);
   g.fillText(new Date(q.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, y + 52);
   y += 150;
-  const [dm, ...ds] = q.device.name.split(' · ');
+  const [dm, ...ds] = (items ? `${items.length} devices · traded in together` : q.device.name).split(' · ');
   g.font = font(700, 38); const dmW = g.measureText(dm).width;
   g.font = font(400, 38); const dsT = ds.length ? ` · ${ds.join(' · ')}` : ''; const dsW = g.measureText(dsT).width;
   g.textAlign = 'left'; g.fillStyle = '#1d1d1f';
@@ -896,24 +947,30 @@ async function saveQuoteImage(q, link, app) {
   g.textAlign = 'center'; g.fillStyle = '#18577b'; g.font = font(800, 120);
   g.fillText(naira(q.value), W / 2, y + 125);
   g.fillStyle = '#454545'; g.font = font(400, 28);
-  g.fillText('Trade-in value · confirmed when we check the device', W / 2, y + 180);
+  g.fillText(items ? 'Total trade-in value · confirmed when we check the devices' : 'Trade-in value · confirmed when we check the device', W / 2, y + 180);
   y += 230;
   // How the value was reached.
-  g.fillStyle = '#ffffff'; roundRect(g, IX, y, IW, bH, 28); g.fill();
+  g.fillStyle = '#ffffff'; roundRect(g, IX + 1.5, y + 1.5, IW - 3, bH - 3, 36); g.fill(); g.strokeStyle = '#d9e2ea'; g.lineWidth = 3; g.stroke();
   g.textAlign = 'left'; g.fillStyle = '#18577b'; g.font = font(700, 26);
-  g.fillText(lines.length ? 'HOW WE GOT YOUR VALUE' : 'GOOD WORKING CONDITION', IX + 40, y + 52);
+  g.fillText(items ? 'YOUR TRADE-IN DEVICES' : lines.length ? 'HOW WE GOT YOUR VALUE' : 'GOOD WORKING CONDITION', IX + 40, y + 52);
   const row = (label, amt, bold, yy) => {
     g.textAlign = 'left'; g.fillStyle = bold ? '#1d1d1f' : '#454545'; g.font = font(bold ? 700 : 400, 30); g.fillText(label, IX + 40, yy);
     g.textAlign = 'right'; g.fillStyle = bold ? '#18577b' : '#1d1d1f'; g.font = font(bold ? 800 : 500, 30); g.fillText(amt, IX + IW - 40, yy);
   };
   let ly = y + 104;
-  row('Starting value, good condition', naira(q.device.start), false, ly);
-  for (const [label, amt] of lines) { ly += 52; row(label, amt === null ? 'Checked in store' : `− ${naira(amt)}`, false, ly); }
-  if (lines.length) { ly += 52; row('Your trade-in value', naira(q.value), true, ly); }
+  if (items) {
+    ly -= 52;
+    for (const it of items) { ly += 52; row(it.name, naira(it.value), false, ly); }
+    ly += 52; row('Total trade-in value', naira(q.value), true, ly);
+  } else {
+    row('Starting value, good condition', naira(q.device.start), false, ly);
+    for (const [label, amt] of lines) { ly += 52; row(label, amt === null ? 'Checked in store' : `− ${naira(amt)}`, false, ly); }
+    if (lines.length) { ly += 52; row('Your trade-in value', naira(q.value), true, ly); }
+  }
   y += bH + 36;
   // Each swap option, on the site's selected blue.
   for (const cmp of q.compare) {
-    g.fillStyle = '#c8e4ff'; roundRect(g, IX, y, IW, 160, 28); g.fill();
+    g.fillStyle = '#c8e4ff'; roundRect(g, IX + 1.5, y + 1.5, IW - 3, 157, 36); g.fill(); g.strokeStyle = '#9fcaf5'; g.lineWidth = 3; g.stroke();
     const [model, ...rest] = cmp.name.split(' · ');
     g.textAlign = 'left'; g.fillStyle = '#1d1d1f'; g.font = font(700, 36); g.fillText(model, IX + 40, y + 58);
     g.fillStyle = '#454545'; g.font = font(400, 27); g.fillText(cmp.dealNote || rest.join(' · '), IX + 40, y + 100);

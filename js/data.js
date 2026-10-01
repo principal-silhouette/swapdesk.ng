@@ -34,6 +34,8 @@ function valid(c) {
 
 /** Prepare a raw catalogue for the UI: indexes, orders, search text. */
 export function prepare(raw, origin) {
+  // Feed version 3+ keeps multi-device trade-ins in saved quotes.
+  if (Number(raw.version) >= 3) CONFIG.remoteItems = true;
   const devices = raw.devices.map((d, i) => ({ ...d, _i: i, _search: searchText(d) }));
   const byId = new Map(devices.map((d) => [d.id, d]));
   // Most expensive first: series by their dearest model, models by their dearest version.

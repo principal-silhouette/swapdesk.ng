@@ -41,6 +41,7 @@ export function encodeQuote(q) {
     1, q.created, q.device ? [q.device.id, q.device.name, q.device.start] : 0,
     a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', a.faults.join('.'), a.batteryLabel || ''] : 0,
     q.value, q.lines, q.compare.map((c) => [c.id, c.name, c.price, c.kind, c.amount, c.dealNote || '']), q.city || '',
+    (q.items || []).map((it) => [it.id, it.name, it.start, it.value, packAnswers(it.answers), it.lines]),
   ];
   return b64u.enc(JSON.stringify(packed));
 }
@@ -48,7 +49,7 @@ export function encodeQuote(q) {
 export function decodeQuote(s) {
   const p = JSON.parse(b64u.dec(s));
   if (p[0] !== 1) throw new Error('Unknown quote version');
-  const [, created, dev, a, value, lines, compare, city] = p;
+  const [, created, dev, a, value, lines, compare, city, items] = p;
   return {
     v: 1, created,
     device: dev ? { id: dev[0], name: dev[1], start: dev[2] } : null,
@@ -56,7 +57,14 @@ export function decodeQuote(s) {
     value, lines,
     compare: compare.map(([id, name, price, kind, amount, dealNote]) => ({ id, name, price, kind, amount, dealNote })),
     city,
+    ...(items && items.length ? { items: items.map(([id, name, start, v, ans, ls]) => ({ id, name, start, value: v, answers: unpackAnswers(ans), lines: ls })) } : {}),
   };
+}
+function packAnswers(a) {
+  return a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', (a.faults || []).join('.'), a.batteryLabel || ''] : 0;
+}
+function unpackAnswers(a) {
+  return a ? { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}) } : null;
 }
 
 export function localLink(q) {
@@ -65,6 +73,7 @@ export function localLink(q) {
 
 /** Save to the sheet (short link); fall back to a self-contained link. */
 export async function saveQuote(q, extra = {}) {
+  if (q.items && q.items.length > 1 && !(CONFIG.remoteItems)) return { id: null, link: localLink(q), saved: false };
   try {
     const r = await saveQuoteRemote({ ...q, ...extra });
     return { id: r.id, link: r.link, saved: true };
@@ -98,7 +107,15 @@ export function answersText(a) {
 
 export function summaryText(q, link) {
   const out = [];
-  if (q.device) {
+  if (q.items && q.items.length > 1) {
+    out.push(`Trading in ${q.items.length} devices:`);
+    q.items.forEach((it) => {
+      out.push(`• ${it.name}: ${naira(it.value)}`);
+      const at = answersText(it.answers);
+      if (at) out.push(`  ${at}`);
+    });
+    out.push(`Total trade-in value: ${naira(q.value)}`);
+  } else if (q.device) {
     out.push(`My device: ${q.device.name}`);
     const at = answersText(q.answers);
     if (at) out.push(at);

@@ -894,3 +894,21 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .cmp.slim .row2 .p { white-space: nowrap; overflow: visible; line-height: 1.35; }
 .cmp.slim .kn { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
 .cmp.slim .n { font-size: 21px; }
+
+/* Several trade-in devices on Swap Rates */
+.mine.multi { margin-bottom: 10px !important; position: relative; }
+.mine.multi .mine-top { padding-right: 34px; }
+.mine.multi .eyebrow-s { display: block; }
+.mine .x { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; border: 0; background: none; color: #6a7c90; display: grid; place-items: center; border-radius: 50%; }
+.mine .x svg { width: 16px; height: 16px; }
+.screen-main > .trade-total { width: var(--box); max-width: var(--box); margin: 0 auto 12px !important; display: flex; justify-content: space-between; align-items: baseline; padding: 4px 14px; font-size: 15px; color: var(--ink-2); }
+.trade-total b { font: 800 22px/1 Inter; color: var(--brand-deep); letter-spacing: -0.02em; }
+.screen-main > .btn.trade-add { margin-bottom: 22px !important; min-height: 48px; font-size: 16px; background: transparent; border-style: dashed; }
+.mine.multi { padding-top: 8px; }
+.mine.multi .mine-top .main { flex-wrap: nowrap; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: block; }
+.mine.multi .mine-top b, .mine.multi .mine-top .sub { display: inline; }
+.mine.multi .mine-top .val { font-size: 17px; flex: none; }
+.mine.multi .mine-how summary { min-height: 30px; padding: 2px 0; font-size: 13.5px; }
+.mine.multi .x { top: 2px; right: 0; }
+.mine.multi .mine-top .main { white-space: normal; overflow: visible; min-width: 0; flex: 1; }
+.mine.multi .mine-top b { font-size: 15.5px; line-height: 1.25; }
