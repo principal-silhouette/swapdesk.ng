@@ -1011,3 +1011,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .qv-tot .qv-name strong { font-size: 15px; }
 .qv-foot { margin-top: 10px !important; }
 .qv-name strong { display: block; white-space: nowrap; overflow: hidden; }
+
+/* Quote page: what they pay leads */
+.screen-main > .qv-label:first-of-type { margin-top: 4px !important; }
+.qv-head + .qv-label, .notice + .qv-label { margin-top: 4px !important; }
+.cmp-grid .cmp.slim .n { font-size: 24px; color: var(--brand-deep); }
+.qv-card + .qv-foot { margin-top: 8px !important; }

@@ -953,12 +953,13 @@ async function quoteImageFile(q) {
   const nameLines = items.map((it) => { measure.font = font(800, 34); const vW = measure.measureText(naira(it.value)).width; measure.font = font(700, 34); return wrap(measure, it.name.split(' · ')[0], IW - 80 - vW - 30); });
   const rowH = subLines.map((l, i) => 56 + (nameLines[i].length - 1) * 42 + l.length * 34);
   const amtOf = (cmp) => naira(items.length ? (cmp.kind === 'even' ? 0 : cmp.amount) : cmp.price);
-  const swapLines = q.compare.map((cmp) => { measure.font = font(800, 48); const aW = measure.measureText(amtOf(cmp)).width; measure.font = font(700, 36); return wrap(measure, cmp.name.split(' · ')[0], IW - 80 - aW - 36); });
-  const swapH = swapLines.map((l) => 168 + (l.length - 1) * 44);
+  const swapLines = q.compare.map((cmp) => { measure.font = font(800, 60); const aW = measure.measureText(amtOf(cmp)).width; measure.font = font(700, 36); return wrap(measure, cmp.name.split(' · ')[0], IW - 80 - aW - 36); });
+  const swapH = swapLines.map((l) => 180 + (l.length - 1) * 44);
   const breakdown = multi ? 0 : (items[0]?.lines.length || 0) + 1;
   const cardH = items.length ? 36 + rowH.reduce((a, b) => a + b, 0) + (breakdown ? 16 + breakdown * lineRow : 0) + (multi ? 70 : 0) + 24 : 0;
   const swapsH = q.compare.length ? H_LABEL + swapH.reduce((a, b) => a + b + GAP, 0) - GAP : 0;
-  const PH = 34 + H_HEAD + (items.length ? H_HERO + H_LABEL + cardH : 0) + (swapsH ? 40 + swapsH : 0) + 40 + H_FOOT;
+  const hero = items.length && !q.compare.length;
+  const PH = 34 + H_HEAD + (items.length ? (hero ? H_HERO : 0) + H_LABEL + cardH : 0) + (swapsH ? 40 + swapsH : 0) + 40 + H_FOOT;
   const logoH = 112, GAPLOGO = 64;
   const H = Math.max(1920, PH + logoH + GAPLOGO + 240);
   const top = Math.round((H - (logoH + GAPLOGO + PH)) / 2);
@@ -993,12 +994,13 @@ async function quoteImageFile(q) {
   text(`${date} · valid for ${CONFIG.quoteValidDays} days`, W / 2, y + 126, 400, 29, '#5b5b60', 'center');
   y += H_HEAD;
 
-  if (items.length) {
-    // hero total
-    text(multi ? `TOTAL TRADE-IN VALUE · ${items.length} DEVICES` : 'YOUR TRADE-IN VALUE', W / 2, y + 40, 700, 26, '#18577b', 'center');
-    text(naira(q.value), W / 2, y + 160, 800, 118, '#18577b', 'center');
-    y += H_HERO;
-    label(multi ? 'YOUR TRADE-IN DEVICES' : 'HOW WE GOT YOUR VALUE', y + 36);
+  const drawTrade = () => {
+    if (hero) {
+      text(multi ? `TOTAL TRADE-IN VALUE · ${items.length} DEVICES` : 'YOUR TRADE-IN VALUE', W / 2, y + 40, 700, 26, '#18577b', 'center');
+      text(naira(q.value), W / 2, y + 160, 800, 118, '#18577b', 'center');
+      y += H_HERO;
+    }
+    label(multi ? 'YOUR TRADE-IN DEVICES' : 'YOUR TRADE-IN', y + 36);
     y += H_LABEL;
     // white card
     g.fillStyle = '#ffffff'; roundRect(g, IX, y, IW, cardH, 36); g.fill(); g.strokeStyle = '#d9e2ea'; g.lineWidth = 3; g.stroke();
@@ -1032,27 +1034,29 @@ async function quoteImageFile(q) {
       text(naira(q.value), CR, cy + 52, 800, 32, '#18577b', 'right');
     }
     y += cardH;
-  }
+  };
 
-  if (q.compare.length) {
-    y += 40;
-    label(items.length ? 'YOUR SWAP OPTIONS' : 'DEVICES', y + 36);
+  const drawSwaps = () => {
+    label(items.length ? 'WHAT YOU PAY TO SWAP' : 'DEVICES', y + 36);
     y += H_LABEL;
     q.compare.forEach((cmp, i) => {
-      const hh = swapH[i], ex = hh - 168;
+      const hh = swapH[i], ex = hh - 180;
       g.fillStyle = '#c8e4ff'; roundRect(g, IX + 1.5, y + 1.5, IW - 3, hh - 3, 36); g.fill(); g.strokeStyle = '#9fcaf5'; g.lineWidth = 3; g.stroke();
       const rest = cmp.name.split(' · ').slice(1);
       const CX = IX + 40, CR = IX + IW - 40;
       const amt = amtOf(cmp);
       swapLines[i].forEach((ln, k) => text(ln, CX, y + 58 + k * 44, 700, 36, '#1d1d1f'));
-      text(cmp.dealNote || rest.join(' · '), CX, y + ex + 100, 400, 27, '#3a3a3e');
-      if (items.length) text(`Price ${naira(cmp.price)}`, CX, y + ex + 138, 400, 27, '#3a3a3e');
-      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, y + 62 + ex / 2, 700, 24, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
-      text(amt, CR, y + 124 + ex / 2, 800, 48, '#1d1d1f', 'right');
+      text(cmp.dealNote || rest.join(' · '), CX, y + ex + 104, 400, 27, '#3a3a3e');
+      if (items.length) text(`Price ${naira(cmp.price)}`, CX, y + ex + 144, 400, 27, '#3a3a3e');
+      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, y + 60 + ex / 2, 700, 24, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
+      text(amt, CR, y + 134 + ex / 2, 800, 60, '#18577b', 'right');
       y += hh + GAP;
     });
     y -= GAP;
-  }
+  };
+
+  // What they pay leads; the trade-in that funds it follows.
+  if (q.compare.length) { drawSwaps(); if (items.length) { y += 40; drawTrade(); } } else if (items.length) drawTrade();
 
   // footer, inside the pop-up
   const fy = PT + PH - H_FOOT;

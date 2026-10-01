@@ -44,13 +44,23 @@ function render(el, app, p, q) {
     </div>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
+    ${q.compare.length ? html`
+      <p class="qv-label">${items.length ? 'What you pay to swap' : 'Devices'}</p>
+      <div class="cmp-grid">${q.compare.map((c) => {
+        const gone = !avail(c.id);
+        const [model, rest] = nameParts(c.name);
+        return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
+          <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
+          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
+        </article>`;
+      })}</div>` : ''}
     ${items.length ? html`
-      <div class="dev-value qv-total">
+      ${!q.compare.length ? html`<div class="dev-value qv-total">
         <p class="tiv-label">${multi ? `Total trade-in value · ${items.length} devices` : 'Your trade-in value'}</p>
         <p class="big-num">${naira(q.value)}</p>
         <p class="small">Estimated. Confirmed when we check ${multi ? 'the devices' : 'the device'} in store.</p>
-      </div>
-      <p class="qv-label">${multi ? 'Your trade-in devices' : 'How we got your value'}</p>
+      </div>` : ''}
+      <p class="qv-label">${multi ? 'Your trade-in devices' : 'Your trade-in'}</p>
       <div class="qv-card">
         ${items.map((it) => { const [m, rest] = nameParts(it.name); return html`<div class="qv-dev">
           <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${naira(it.value)}</span></p>
@@ -62,16 +72,6 @@ function render(el, app, p, q) {
         </div>`; })}
         ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total trade-in value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}
       </div>` : ''}
-    ${q.compare.length ? html`
-      <p class="qv-label">${items.length ? 'Your swap options' : 'Devices'}</p>
-      <div class="cmp-grid">${q.compare.map((c) => {
-        const gone = !avail(c.id);
-        const [model, rest] = nameParts(c.name);
-        return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
-          <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
-          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
-        </article>`;
-      })}</div>` : ''}
     ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
       <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
