@@ -36,6 +36,7 @@ export const NETWORK = [
 export const FAULTS = [
   { key: 'screen', label: 'Faulty screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working. Covers the repair and the value lost to a changed screen.' },
   { key: 'screenReplaced', label: 'Replaced screen', hint: 'Screen has been changed and is not the original (shows “Unknown Part” on iPhone).' },
+  { key: 'batteryReplaced', label: 'Replaced battery', hint: 'The battery has been changed and is not the original (shows “Unknown Part” or “Non-genuine battery” on iPhone).' },
   { key: 'trueTone', label: 'No True Tone', hint: 'True Tone is missing from Control Centre or Display settings, usually after a screen change.' },
   { key: 'backGlass', label: 'Back glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
   { key: 'faceId', label: 'Face ID', hint: 'Face ID won’t set up, or doesn’t recognise your face.' },
@@ -72,6 +73,12 @@ export function amountFor(device, key) {
     if (typeof tt === 'number' && tt > 0) return tt;
     const base = device?.price || device?.tradeInValue;
     return base > 0 ? Math.ceil((base * 0.2) / 1000) * 1000 : null;
+  }
+  if (key === 'batteryReplaced' && device?.deductions?.batteryReplaced === undefined) {
+    // Daniel, 1 Oct: a changed battery carries 60% of a new battery charge, in case we need to replace it.
+    const b = device?.deductions?.battery;
+    if (b === 'n/a') return 'n/a';
+    return typeof b === 'number' && b > 0 ? Math.ceil((b * 0.6) / 1000) * 1000 : null;
   }
   const v = device?.deductions?.[key];
   if (v === 'n/a') return 'n/a';
@@ -151,6 +158,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
       continue;
     }
     if (f.key === 'screenReplaced' && faults.has('screen')) continue; // one screen line: a faulty screen gets replaced anyway
+    if (f.key === 'batteryReplaced' && lines.some((l) => l.key === 'battery')) continue; // low health already charges a full new battery
     push(f.key, f.label, amountFor(device, f.key));
   }
 

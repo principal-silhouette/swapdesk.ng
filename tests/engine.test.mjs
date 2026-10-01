@@ -113,3 +113,11 @@ test('replaced screen = 20% of device value (the True Tone figure), covers True 
   const r2 = valueDevice(phone, { ...good, faults: ['screen', 'screenReplaced'] }, settings);
   assert.deepEqual(r2.lines.map((l) => l.key), ['screen']);
 });
+
+test('replaced battery = 60% of a new battery, not charged again when battery health is already low', () => {
+  const r1 = valueDevice(phone, { ...good, faults: ['batteryReplaced'] }, settings);
+  assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['batteryReplaced', 24000]]); // 60% of 40,000
+  const r2 = valueDevice(phone, { ...good, battery: 80, faults: ['batteryReplaced'] }, settings);
+  assert.deepEqual(r2.lines.map((l) => l.key), ['battery']);
+  assert.ok(!faultsFor({ deductions: { battery: 'n/a' } }).some((f) => f.key === 'batteryReplaced'));
+});
