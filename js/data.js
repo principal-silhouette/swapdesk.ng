@@ -88,6 +88,15 @@ export async function loadCatalog(onUpdate) {
   try {
     return await live;
   } catch {
+    // The live feed can take longer than the timeout on a cold start. Show the snapshot now,
+    // and swap in the live copy when it arrives.
+    if (CONFIG.endpoint) {
+      fetchJSON(`${CONFIG.endpoint}?action=catalog`, 30000).then((c) => {
+        if (!valid(c)) return;
+        store.set(c);
+        onUpdate?.(prepare(c, 'live'));
+      }).catch(() => {});
+    }
     const snap = await fetchJSON(CONFIG.snapshot, 15000);
     return prepare(snap, 'snapshot');
   }
