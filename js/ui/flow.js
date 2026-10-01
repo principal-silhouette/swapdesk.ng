@@ -682,7 +682,7 @@ function choose(el, app) {
       <p class="par">${multi ? 'Swap them for something new, or trade them in for cash.' : 'Swap it for something new, or trade it in for cash.'}</p>
     </div>
     ${multi ? html`<div class="dev-value">
-        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong>${t.d.model}</strong>${t.d.storage ? ` · ${t.d.storage}` : ''} <span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
+        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong>${t.d.model}</strong><span class="ds">${t.d.storage ? ` · ${t.d.storage}` : ''}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
         <p class="tiv-label">Total trade-in value</p>
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
