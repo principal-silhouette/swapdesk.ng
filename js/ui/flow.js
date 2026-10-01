@@ -57,8 +57,8 @@ export function ownDevice(app) {
 export const BATTERY_BANDS = [
   { key: '90', label: '90% and above', hint: 'Like new', value: 95 },
   { key: '85', label: '85% – 89%', hint: 'No deduction', value: 87 },
-  { key: '80', label: '80% – 84%', hint: 'Battery deduction applies', value: 82 },
-  { key: '79', label: '79% or less', hint: 'Battery deduction applies', value: 75 },
+  { key: '80', label: '80% – 84%', hint: 'Partial battery deduction applies', value: 82 },
+  { key: '79', label: '79% or less', hint: 'Full battery deduction applies', value: 75 },
 ];
 const ORIGIN_LABEL = {
   'Brand New': ['Brand new, still sealed', 'Never opened or activated.'],

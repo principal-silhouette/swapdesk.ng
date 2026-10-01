@@ -21,7 +21,8 @@ const good = { battery: 90, neatness: 'prettyNeat', network: 'factory', faults: 
 const cases = [
   ['good condition keeps the full value', good, 392000, []],
   ['battery exactly at threshold: no deduction', { ...good, battery: 85 }, 392000, []],
-  ['battery below threshold', { ...good, battery: 84 }, 352000, [['battery', 40000]]],
+  ['battery 80–84%: 60% of a new battery', { ...good, battery: 84 }, 368000, [['battery', 24000]]],
+  ['battery 79% or less: full new battery', { ...good, battery: 79 }, 352000, [['battery', 40000]]],
   ['a few spots = half body', { ...good, neatness: 'fewSpots' }, 377000, [['body', 15000]]],
   ['pretty rough = 1.5 × body', { ...good, neatness: 'rough' }, 347000, [['body', 45000]]],
   ['chip unlocked = half network', { ...good, network: 'chip' }, 362000, [['network', 30000]]],
@@ -118,6 +119,6 @@ test('replaced battery = 60% of a new battery, not charged again when battery he
   const r1 = valueDevice(phone, { ...good, faults: ['batteryReplaced'] }, settings);
   assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['batteryReplaced', 24000]]); // 60% of 40,000
   const r2 = valueDevice(phone, { ...good, battery: 80, faults: ['batteryReplaced'] }, settings);
-  assert.deepEqual(r2.lines.map((l) => l.key), ['battery']);
+  assert.deepEqual(r2.lines.map((l) => [l.key, l.amount]), [['battery', 24000]]);
   assert.ok(!faultsFor({ deductions: { battery: 'n/a' } }).some((f) => f.key === 'batteryReplaced'));
 });

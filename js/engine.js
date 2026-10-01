@@ -4,6 +4,9 @@
 
 export const DEFAULT_SETTINGS = {
   batteryThreshold: 85,
+  // Daniel, 1 Oct: 80–84% carries 60% of a new battery; 79% and below is the full charge.
+  'battery.fullBelow': 80,
+  'battery.partialShare': 0.6,
   'neatness.spotless': 0,
   'neatness.prettyNeat': 0,
   'neatness.fewSpots': 0.5,
@@ -128,7 +131,10 @@ export function valueDevice(device, answers = {}, settings = {}) {
   const battery = Number(answers.battery);
   if (applies(device, 'battery') && Number.isFinite(battery) && answers.battery !== null && answers.battery !== '' &&
       battery < s(settings, 'batteryThreshold')) {
-    push('battery', answers.batteryLabel ? `Battery health ${answers.batteryLabel}` : `Battery health ${battery}%`, amountFor(device, 'battery'));
+    const label = answers.batteryLabel ? `Battery health ${answers.batteryLabel}` : `Battery health ${battery}%`;
+    const full = amountFor(device, 'battery');
+    if (battery < s(settings, 'battery.fullBelow')) push('battery', label, full);
+    else push('battery', label, typeof full === 'number' ? Math.ceil((full * s(settings, 'battery.partialShare')) / 1000) * 1000 : full);
   }
 
   // Body
