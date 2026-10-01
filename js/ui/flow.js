@@ -1065,7 +1065,7 @@ async function quoteImageFile(q) {
   // footer, inside the pop-up
   const fy = PT + PH - H_FOOT;
   g.fillStyle = 'rgba(24,87,123,0.12)'; g.fillRect(IX, fy, IW, 2);
-  text(`WhatsApp ${CONFIG.whatsappDisplay}  ·  swapdesk.ng`, W / 2, fy + 56, 600, 30, '#007bff', 'center');
+  text('swapdesk.ng', W / 2, fy + 56, 600, 30, '#007bff', 'center');
   text('An Upgrade Brands product', W / 2, fy + 96, 400, 24, '#6a6a70', 'center');
   const blob = await new Promise((res) => c.toBlob(res, 'image/png'));
   return new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
