@@ -975,3 +975,5 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .dev-list .dev-line .dv { text-align: right; }
 .dev-list .ds { white-space: nowrap; color: var(--ink-2); }
 .choose .screen-main > .btn.trade-add { width: calc(var(--box) * 0.86) !important; max-width: calc(var(--box) * 0.86) !important; }
+/* Go Back (and every outline pill) uses the same outline as the outline buttons. */
+.pill:not(.go) { border: 1px solid var(--action) !important; }
