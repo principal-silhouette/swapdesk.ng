@@ -917,10 +917,14 @@ async function saveQuoteImage(q, link, app) {
   measure.font = font(400, 26);
   const subOf = (it) => { const rest = it.name.split(' · ').slice(1).join(' · '); return multi ? [rest, answersText(it.answers)].filter(Boolean).join(' · ') : rest; };
   const subLines = items.map((it) => wrap(measure, subOf(it), IW - 80));
-  const rowH = subLines.map((l) => 56 + l.length * 34);
+  const nameLines = items.map((it) => { measure.font = font(800, 34); const vW = measure.measureText(naira(it.value)).width; measure.font = font(700, 34); return wrap(measure, it.name.split(' · ')[0], IW - 80 - vW - 30); });
+  const rowH = subLines.map((l, i) => 56 + (nameLines[i].length - 1) * 42 + l.length * 34);
+  const amtOf = (cmp) => naira(items.length ? (cmp.kind === 'even' ? 0 : cmp.amount) : cmp.price);
+  const swapLines = q.compare.map((cmp) => { measure.font = font(800, 48); const aW = measure.measureText(amtOf(cmp)).width; measure.font = font(700, 36); return wrap(measure, cmp.name.split(' · ')[0], IW - 80 - aW - 36); });
+  const swapH = swapLines.map((l) => 168 + (l.length - 1) * 44);
   const breakdown = multi ? 0 : (items[0]?.lines.length || 0) + 1;
   const cardH = items.length ? 36 + rowH.reduce((a, b) => a + b, 0) + (breakdown ? 16 + breakdown * lineRow : 0) + (multi ? 70 : 0) + 24 : 0;
-  const swapsH = q.compare.length ? H_LABEL + q.compare.length * (H_SWAP + GAP) - GAP : 0;
+  const swapsH = q.compare.length ? H_LABEL + swapH.reduce((a, b) => a + b + GAP, 0) - GAP : 0;
   const PH = 34 + H_HEAD + (items.length ? H_HERO + H_LABEL + cardH : 0) + (swapsH ? 40 + swapsH : 0) + 40 + H_FOOT;
   const logoH = 112, GAPLOGO = 64;
   const H = Math.max(1920, PH + logoH + GAPLOGO + 240);
@@ -971,9 +975,10 @@ async function saveQuoteImage(q, link, app) {
       if (i) { g.fillStyle = '#e6ebf0'; g.fillRect(CX, cy - 4, CR - CX, 2); }
       const [nm, ...rest] = it.name.split(' · ');
       g.font = font(700, 34); const vW = (() => { g.font = font(800, 34); return g.measureText(naira(it.value)).width; })();
-      g.font = font(700, 34); text(fit(g, nm, CR - CX - vW - 30), CX, cy + 38, 700, 34, '#1d1d1f');
+      nameLines[i].forEach((ln, k) => text(ln, CX, cy + 38 + k * 42, 700, 34, '#1d1d1f'));
       text(naira(it.value), CR, cy + 38, 800, 34, '#18577b', 'right');
-      subLines[i].forEach((ln, k) => text(ln, CX, cy + 76 + k * 34, 400, 26, '#5b5b60'));
+      const sy = (nameLines[i].length - 1) * 42;
+      subLines[i].forEach((ln, k) => text(ln, CX, cy + sy + 76 + k * 34, 400, 26, '#5b5b60'));
       cy += rowH[i];
     });
     if (breakdown) {
@@ -1000,19 +1005,19 @@ async function saveQuoteImage(q, link, app) {
     y += 40;
     label(items.length ? 'YOUR SWAP OPTIONS' : 'DEVICES', y + 36);
     y += H_LABEL;
-    for (const cmp of q.compare) {
-      g.fillStyle = '#c8e4ff'; roundRect(g, IX, y, IW, H_SWAP, 36); g.fill(); g.strokeStyle = '#9fcaf5'; g.lineWidth = 3; g.stroke();
-      const [model, ...rest] = cmp.name.split(' · ');
+    q.compare.forEach((cmp, i) => {
+      const hh = swapH[i], ex = hh - 168;
+      g.fillStyle = '#c8e4ff'; roundRect(g, IX + 1.5, y + 1.5, IW - 3, hh - 3, 36); g.fill(); g.strokeStyle = '#9fcaf5'; g.lineWidth = 3; g.stroke();
+      const rest = cmp.name.split(' · ').slice(1);
       const CX = IX + 40, CR = IX + IW - 40;
-      const amt = naira(items.length ? (cmp.kind === 'even' ? 0 : cmp.amount) : cmp.price);
-      g.font = font(800, 48); const aW = g.measureText(amt).width;
-      g.font = font(700, 36); text(fit(g, model, CR - CX - aW - 36), CX, y + 58, 700, 36, '#1d1d1f');
-      g.font = font(400, 27); text(fit(g, cmp.dealNote || rest.join(' · '), CR - CX - aW - 36), CX, y + 100, 400, 27, '#3a3a3e');
-      if (items.length) text(`Price ${naira(cmp.price)}`, CX, y + 138, 400, 27, '#3a3a3e');
-      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, y + 62, 700, 24, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
-      text(amt, CR, y + 124, 800, 48, '#1d1d1f', 'right');
-      y += H_SWAP + GAP;
-    }
+      const amt = amtOf(cmp);
+      swapLines[i].forEach((ln, k) => text(ln, CX, y + 58 + k * 44, 700, 36, '#1d1d1f'));
+      text(cmp.dealNote || rest.join(' · '), CX, y + ex + 100, 400, 27, '#3a3a3e');
+      if (items.length) text(`Price ${naira(cmp.price)}`, CX, y + ex + 138, 400, 27, '#3a3a3e');
+      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, y + 62 + ex / 2, 700, 24, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
+      text(amt, CR, y + 124 + ex / 2, 800, 48, '#1d1d1f', 'right');
+      y += hh + GAP;
+    });
     y -= GAP;
   }
 
