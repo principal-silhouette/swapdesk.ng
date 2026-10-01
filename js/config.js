@@ -1,7 +1,7 @@
 // Site settings. Prices live in the Google Sheet, not here.
 export const CONFIG = {
   // Apps Script web app URL (ends in /exec). Empty = use the built-in snapshot only.
-  endpoint: '',
+  endpoint: 'https://script.google.com/macros/s/AKfycbxzQrWPBr0arYZgp5kCF48qTE-uNG8_iHEAyC3R6AttBNukQBz9E5wlF9sI9_h0E2jn/exec',
   snapshot: 'data/catalog-snapshot.json',
   // Links in shared quotes and lists point at wherever the site is running (swapdesk.ng in production).
   site: typeof location !== 'undefined' && /^https?:$/.test(location.protocol)

@@ -27,7 +27,9 @@ async function fetchJSON(url, ms = 6000, init) {
 }
 
 function valid(c) {
-  return c && Array.isArray(c.devices) && c.devices.length > 0 && c.settings;
+  // A feed without stock tags comes from the old script (it would show Jiji estimates as prices), so it's refused
+  // and the site falls back to the bundled snapshot.
+  return c && Array.isArray(c.devices) && c.devices.length > 0 && c.settings && c.devices.some((d) => 'stock' in d);
 }
 
 /** Prepare a raw catalogue for the UI: indexes, orders, search text. */
