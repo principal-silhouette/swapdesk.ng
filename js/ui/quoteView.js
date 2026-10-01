@@ -33,47 +33,55 @@ function render(el, app, p, q) {
   const avail = (id) => { const d = cat.byId.get(id); return d && d.swapInto && d.price > 0 ? d : null; };
   const changed = (!(q.items && q.items.length > 1) && today && today.accepted && today.value !== q.value) || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
 
+  const items = q.items && q.items.length > 1 ? q.items
+    : q.device ? [{ name: q.device.name, value: q.value, start: q.device.start, answers: q.answers, lines: q.lines || [] }] : [];
+  const multi = items.length > 1;
+  const nameParts = (n) => { const [m, ...r] = n.split(' · '); return [m, r.join(' · ')]; };
   el.innerHTML = html`
-    <p class="eyebrow">Swap Quote${p.id ? ` ${p.id}` : ''} · ${dateLabel(q.created)}</p>
-    <h1 class="h-title">${q.device ? 'Your Swap Quote' : 'Your Comparison'}</h1>
+    <div class="head-block qv-head">
+      <h2 class="h-title">${items.length ? 'Your Swap Quote' : 'Your Comparison'}</h2>
+      <p class="par">${p.id ? `${p.id} · ` : ''}${dateLabel(q.created)} · valid for ${CONFIG.quoteValidDays} days</p>
+    </div>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
-    ${q.items && q.items.length > 1 ? html`
-      <p class="par">Trading in ${q.items.length} devices</p>
-      <p class="big-num">${naira(q.value)}</p>
-      <p class="small">Total trade-in value. Estimated, confirmed when we check the devices in store.</p>
-      ${q.items.map((it) => html`<div class="card"><ul class="lines">
-        <li class="total"><span>${it.name}</span><span>${naira(it.value)}</span></li>
-        <li><span class="small">${answersText(it.answers)}</span><span></span></li>
-        <li><span>Starting value, perfect condition</span><span>${naira(it.start)}</span></li>
-        ${it.lines.map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
-      </ul></div>`)}` : q.device ? html`
-      <p class="par"><strong>${q.device.name}</strong><br><span class="small">${answersText(q.answers)}</span></p>
-      <p class="big-num">${naira(q.value)}</p>
-      <p class="small">Trade-in value. Estimated, confirmed when we check the device in store.</p>
-      <div class="card"><ul class="lines">
-        <li><span>Starting value, perfect condition</span><span>${naira(q.device.start)}</span></li>
-        ${q.lines.map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
-      </ul></div>` : ''}
+    ${items.length ? html`
+      <div class="dev-value qv-total">
+        <p class="tiv-label">${multi ? `Total trade-in value · ${items.length} devices` : 'Your trade-in value'}</p>
+        <p class="big-num">${naira(q.value)}</p>
+        <p class="small">Estimated. Confirmed when we check ${multi ? 'the devices' : 'the device'} in store.</p>
+      </div>
+      <p class="qv-label">${multi ? 'Your trade-in devices' : 'How we got your value'}</p>
+      <div class="qv-card">
+        ${items.map((it) => { const [m, rest] = nameParts(it.name); return html`<div class="qv-dev">
+          <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${naira(it.value)}</span></p>
+          <p class="qv-cond">${[rest, answersText(it.answers)].filter(Boolean).join(' · ')}</p>
+          ${!multi ? html`<ul class="lines">
+            <li><span>Starting value, perfect condition</span><span>${naira(it.start)}</span></li>
+            ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
+          </ul>` : ''}
+        </div>`; })}
+        ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total trade-in value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}
+      </div>` : ''}
     ${q.compare.length ? html`
-      <h2 class="h-sub">${q.device ? 'Swap Rates' : 'Devices'}</h2>
+      <p class="qv-label">${items.length ? 'Your swap options' : 'Devices'}</p>
       <div class="cmp-grid">${q.compare.map((c) => {
         const gone = !avail(c.id);
-        const [model, ...rest] = c.name.split(' · ');
-        const label = q.device ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'price';
-        return html`<article class="cmp ${c.kind}${gone ? ' gone' : ''}">
-          <span class="t">${model}${gone ? raw('<span class="tag warn">No longer available</span>') : ''}</span>
-          <span class="s">${c.dealNote || rest.join(' · ')}</span>
-          <span class="p">Price ${naira(c.price)}</span>
-          <span class="k">${label}</span>
-          <span class="n">${q.device ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></article>`;
+        const [model, rest] = nameParts(c.name);
+        return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
+          <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
+          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
+        </article>`;
       })}</div>` : ''}
-    <p class="small">${q.city ? `City: ${q.city}. ` : ''}Quotes are valid for ${CONFIG.quoteValidDays} days.</p>`;
+    ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
       <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
       <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill go" type="button" data-act="today">Today’s Prices</button></div>
       <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p></div>`.toString();
 
+  // Long names (iPads) shrink slightly to stay on one line.
+  requestAnimationFrame(() => el.querySelectorAll('.qv-name strong').forEach((n) => {
+    let fs = 15; while (n.scrollWidth > n.clientWidth + 0.5 && fs > 12) { fs -= 0.5; n.style.fontSize = `${fs}px`; }
+  }));
   el.onclick = async (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'wa') location.href = whatsappURL(whatsappMessage(q, link, q.city));

@@ -105,25 +105,23 @@ export function answersText(a) {
 }
 
 export function summaryText(q, link) {
+  // WhatsApp text: no indented lines (they wrap badly), *bold* headings, one fact per line.
   const out = [];
-  if (q.items && q.items.length > 1) {
-    out.push(`Trading in ${q.items.length} devices:`);
-    q.items.forEach((it) => {
-      out.push(`• ${it.name}: ${naira(it.value)}`);
+  const nm = (name) => name.replace(/ · /g, ', ');
+  const items = q.items && q.items.length > 1 ? q.items : q.device ? [{ name: q.device.name, value: q.value, answers: q.answers }] : [];
+  if (items.length) {
+    out.push(items.length > 1 ? `*Trading in ${items.length} devices*` : '*My device*');
+    items.forEach((it, i) => {
+      if (i) out.push('');
+      out.push(`${items.length > 1 ? `${i + 1}. ` : ''}${nm(it.name)}: *${naira(it.value)}*`);
       const at = answersText(it.answers);
-      if (at) out.push(`  ${at}`);
+      if (at) out.push(`_${at}_`);
     });
-    out.push(`Total trade-in value: ${naira(q.value)}`);
-  } else if (q.device) {
-    out.push(`My device: ${q.device.name}`);
-    const at = answersText(q.answers);
-    if (at) out.push(at);
-    out.push(`Trade-in value: ${naira(q.value)}`);
+    out.push('', `*${items.length > 1 ? 'Total trade-in value' : 'Trade-in value'}: ${naira(q.value)}*`);
   }
   if (q.compare.length) {
-    out.push('');
-    out.push(q.device ? 'Swap options:' : 'Devices:');
-    q.compare.forEach((c) => out.push(`• ${c.name}: ${q.device ? termsText(c) : naira(c.price)}`));
+    out.push('', items.length ? '*Swap options*' : '*Devices*');
+    q.compare.forEach((c) => out.push(`• ${nm(c.name)}: ${items.length ? termsText(c) : naira(c.price)}`));
   }
   if (link) out.push('', link);
   return out.join('\n');

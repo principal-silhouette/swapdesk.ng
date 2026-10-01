@@ -896,33 +896,41 @@ function saved(el, app) {
   const s = app.s;
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
   el.classList.add('choose');
+  // Make the picture as soon as the page opens, so the tap can go straight to the share sheet.
+  let ready = null;
+  const making = ensureSaved(app).then(({ q }) => quoteImageFile(q));
+  making.then((f) => { ready = f; }).catch(() => {});
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">Save Your Quotes</h2>
       <p class="par">Keep every swap rate you checked, or send them to someone on WhatsApp. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
     </div>
     <div class="stack q-opts">
-      <button class="opt" type="button" data-act="image"><span class="main">Download as Image<span class="sub">Save a picture of your quotes to your phone.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="image"><span class="main">Download as Image<span class="sub">Save a picture of your quotes to your Photos.</span></span>${raw(ICON.chevron)}</button>
       <button class="opt" type="button" data-act="walink"><span class="main">Share Link on WhatsApp<span class="sub">Send a link that opens these exact quotes.</span></span>${raw(ICON.chevron)}</button>
       <button class="opt" type="button" data-act="copy"><span class="main">Copy Link<span class="sub">Paste it anywhere to come back later.</span></span>${raw(ICON.chevron)}</button>
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     image: async (b) => {
+      if (ready) { deliverImage(ready, app); return; }
       b.disabled = true;
-      const { q, link } = await ensureSaved(app);
-      await saveQuoteImage(q, link, app).catch(() => app.toast('Couldn’t make the image. Try Share Link instead.'));
+      try { ready = await making; } catch { ready = null; }
       b.disabled = false;
+      if (!ready) { app.toast('Couldn’t make the image. Try Share Link instead.'); return; }
+      // The tap that started this has expired; ask for one more so the phone lets us open the share sheet.
+      if (navigator.canShare?.({ files: [ready] })) { app.toast('Image ready. Tap Download as Image again to save it.'); return; }
+      deliverImage(ready, app);
     },
     walink: async () => {
       const { q, link } = await ensureSaved(app);
-      location.href = `https://wa.me/?text=${encodeURIComponent(`My SwapDesk swap quotes\n\n${summaryText(q, '')}\n\n${link}`)}`;
+      location.href = `https://wa.me/?text=${encodeURIComponent(`*My SwapDesk swap quotes*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`)}`;
     },
     copy: async () => { const { link } = await ensureSaved(app); await copy(link); app.toast('Link copied'); },
   });
 }
 
 /** Draw the quotes as a shareable picture (no libraries): white card, logo, value and each swap. */
-async function saveQuoteImage(q, link, app) {
+async function quoteImageFile(q) {
   // A phone-screen image of the quote in the site's look: logo on white, everything on the blue pop-up,
   // laid out from measured heights and centred so there is no dead space.
   const W = 1080;
@@ -1052,12 +1060,19 @@ async function saveQuoteImage(q, link, app) {
   text(`WhatsApp ${CONFIG.whatsappDisplay}  ·  swapdesk.ng`, W / 2, fy + 56, 600, 30, '#007bff', 'center');
   text('An Upgrade Brands product', W / 2, fy + 96, 400, 24, '#6a6a70', 'center');
   const blob = await new Promise((res) => c.toBlob(res, 'image/png'));
-  const file = new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
+  return new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
+}
+/** Phones: open the share sheet (Save Image puts it in Photos). Must run straight from the tap, so the file is made in advance. */
+function deliverImage(file, app) {
   if (navigator.canShare?.({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: 'My SwapDesk quotes' }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+    navigator.share({ files: [file] }).catch((e) => { if (e?.name !== 'AbortError') downloadFile(file, app); });
+    return;
   }
+  downloadFile(file, app);
+}
+function downloadFile(file, app) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'swapdesk-quotes.png';
+  a.href = URL.createObjectURL(file); a.download = file.name;
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   app.toast('Image saved');

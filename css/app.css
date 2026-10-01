@@ -990,3 +990,24 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .dev-list .ds { font-size: 13px; }
 .dev-list .dv { font-size: 13.5px; }
 .dev-list .x { width: 26px; height: 26px; }
+
+/* Quote page (opened from a link) */
+.qv-head .par { margin-bottom: 12px !important; color: var(--ink-3); font-size: 15px !important; }
+.qv-total { margin: 0 auto 8px; text-align: center; }
+.qv-total .tiv-label { margin: 0 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
+.qv-total .big-num { margin: 0; line-height: 1.05; }
+.qv-total .small { margin: 6px 0 0; }
+.screen-main > .qv-label { width: var(--box); max-width: var(--box); margin: 14px auto 6px !important; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-deep); text-align: left; }
+.screen-main > .qv-card { width: var(--box); max-width: var(--box); margin: 0 auto 6px !important; background: #fff; border: 1px solid #d9e2ea; border-radius: 14px; padding: 4px 14px; text-align: left; }
+.qv-dev + .qv-dev { border-top: 1px solid #e6ebf0; }
+.qv-dev { padding: 8px 0; }
+.qv-row { display: flex; align-items: baseline; gap: 10px; margin: 0; }
+.qv-name { flex: 1; min-width: 0; font-size: 15px; }
+.qv-sub { color: var(--ink-2); font-weight: 400; white-space: nowrap; }
+.qv-val { flex: none; font-weight: 800; color: var(--brand-deep); font-variant-numeric: tabular-nums; font-size: 15.5px; }
+.qv-cond { margin: 2px 0 0; font-size: 13px; color: var(--ink-3); line-height: 1.35; }
+.qv-card .lines { margin: 8px 0 2px; padding: 0; }
+.qv-tot { border-top: 1px solid #e6ebf0; padding: 10px 0 8px; }
+.qv-tot .qv-name strong { font-size: 15px; }
+.qv-foot { margin-top: 10px !important; }
+.qv-name strong { display: block; white-space: nowrap; overflow: hidden; }
