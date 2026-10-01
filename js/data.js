@@ -35,6 +35,9 @@ function valid(c) {
 /** Prepare a raw catalogue for the UI: indexes, orders, search text. */
 export function prepare(raw, origin) {
   const devices = raw.devices.map((d, i) => ({ ...d, _i: i, _search: searchText(d) }));
+  // LLA only means something where the same model is also sold Non LLA; elsewhere it isn't shown.
+  const nonLla = new Set(devices.filter((d) => /\(Non LLA\)$/.test(d.condition || '')).map((d) => `${d.model}|${d.condition.replace(/ \(Non LLA\)$/, '')}`));
+  for (const d of devices) d.lla = nonLla.has(`${d.model}|${d.condition}`);
   const byId = new Map(devices.map((d) => [d.id, d]));
   // Most expensive first: series by their dearest model, models by their dearest version.
   // A model we don't sell ranks by its trade-in value instead, so older phones still fall in place.

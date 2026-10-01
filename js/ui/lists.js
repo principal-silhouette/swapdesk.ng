@@ -161,7 +161,7 @@ export function listScreen(el, app, view, params) {
           const inCmp = !trade && cmp.includes(d.id);
           if (out_(d)) return html`<div class="size out" aria-disabled="true"><span class="st">${d.storage || d.model}</span><span class="sa">Sold out</span></div>`;
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${d.storage}${!trade && ['Foreign USED', 'Active Brand New'].includes(d.condition) ? html` <small class="lla">LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            <span class="st">${d.storage}${!trade && d.lla ? html` <small class="lla">LLA</small>` : ''}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
