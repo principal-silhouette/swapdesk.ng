@@ -130,6 +130,15 @@ function tradeIns(app) {
   if (d && allAnswered(app)) out.push({ d, answers: s.answers, r: currentValue(app), current: true });
   return out;
 }
+/** Left the extra-device steps without finishing: put the last valued device back. */
+function settleAdding(app) {
+  const s = app.s;
+  if (!s.adding) return;
+  if (ownDevice(app) && allAnswered(app)) return; // still in progress or just finished; choose() clears the flag
+  s.adding = false;
+  if ((s.more || []).length) { const last = s.more.pop(); s.deviceId = last.deviceId; s.answers = last.answers; }
+  app.save();
+}
 /** Combined trade-in value of every device, or null if any isn't accepted. */
 function totalValue(app) {
   const t = tradeIns(app);
@@ -656,26 +665,49 @@ function value(el, app) {
 // ---------- what next: swap or cash ----------
 
 function choose(el, app) {
+  const s = app.s;
+  settleAdding(app);
+  s.adding = false;
   const d = ownDevice(app);
   if (!d || !allAnswered(app)) { app.go('home', {}, { replace: true }); return false; }
-  const s = app.s;
-  if (s.adding) { s.adding = false; s.mode = 'swap'; s.cash = false; app.save(); app.go('compare', {}, { replace: true }); return false; }
-  const r = currentValue(app);
+  const trades = tradeIns(app);
+  const total = totalValue(app);
+  const multi = trades.length > 1;
   const max = Number(app.catalog.settings['compare.maxDevices']) || 6;
   el.classList.add('choose');
+  if (multi) el.classList.add('multi');
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">What would you like to do?</h2>
-      <p class="par">Swap it for something new, or trade it in for cash.</p>
+      <p class="par">${multi ? 'Swap them for something new, or trade them in for cash.' : 'Swap it for something new, or trade it in for cash.'}</p>
     </div>
-    ${devValue(d, r.value)}
+    ${multi ? html`<div class="dev-value">
+        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong>${t.d.model}</strong>${t.d.storage ? ` · ${t.d.storage}` : ''} <span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
+        <p class="tiv-label">Total trade-in value</p>
+        <p class="big-num">${naira(total)}</p>
+      </div>` : devValue(d, total)}
     <div class="stack q-opts">
       <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(r.value)} for your ${d.model}${d.storage ? `, ${d.storage}` : ''}.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(total)} for your ${multi ? `${trades.length} devices` : `${d.model}${d.storage ? `, ${d.storage}` : ''}`}.</span></span>${raw(ICON.chevron)}</button>
+      ${trades.length < MAX_TRADE ? html`<button class="opt" type="button" data-act="addtrade"><span class="main">Trade In Another Device <small>(up to ${MAX_TRADE})</small></span>${raw(ICON.plus)}</button>` : ''}
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
     cash: () => { s.cash = true; app.save(); app.go('finish'); },
+    addtrade: () => {
+      // Park the device just valued, value the next one; its Yes / Proceed lands back here.
+      s.more = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
+      s.deviceId = ''; s.answers = freshAnswers(); s.adding = true; s.saved = null;
+      s.pick = { ...freshPick() };
+      app.save(); app.go('pick');
+    },
+    rmtrade: (b) => {
+      const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
+      all.splice(Number(b.dataset.i), 1);
+      const last = all.pop();
+      s.more = all; s.deviceId = last.deviceId; s.answers = last.answers; s.saved = null;
+      app.save(); app.refresh();
+    },
   });
 }
 
@@ -683,12 +715,8 @@ function choose(el, app) {
 
 function compare(el, app) {
   const s = app.s;
-  if (s.adding) {
-    // Came back without finishing the extra device: put the last valued one back.
-    s.adding = false;
-    if ((!ownDevice(app) || !allAnswered(app)) && (s.more || []).length) { const last = s.more.pop(); s.deviceId = last.deviceId; s.answers = last.answers; }
-    app.save();
-  }
+  settleAdding(app);
+  s.adding = false;
   const cat = app.catalog;
   const d = ownDevice(app);
   const trades = tradeIns(app);
@@ -734,7 +762,7 @@ function compare(el, app) {
         </details>` : html`<p class="mine-cond">${t.r.reason || ''}</p>`}
       </div>`)}
       ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total trade-in value</span><b>${naira(tv)}</b></div>` : ''}
-      ${trades.length < MAX_TRADE && tv !== null ? html`<button class="btn add trade-add" type="button" data-act="addtrade">${raw(ICON.plus)} Trade In Another Device</button>` : ''}`
+`
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
     ${s.compare.length < max ? html`<button class="btn add" type="button" data-act="add">${raw(ICON.plus)} ${s.compare.length ? 'Add Another Device' : 'Add a Device'}</button>` : ''}`;
@@ -745,13 +773,6 @@ function compare(el, app) {
     val: () => app.go('value'),
     edit: () => app.go('q', { i: 0 }),
     own: () => startFlow(app, 'swap'),
-    addtrade: () => {
-      // Park the device just valued, then value the next one; choose() sends us back here.
-      s.more = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
-      s.deviceId = ''; s.answers = freshAnswers(); s.adding = true; s.saved = null;
-      s.pick = { ...freshPick() };
-      app.save(); app.go('pick');
-    },
     rmtrade: (b) => {
       const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
       all.splice(Number(b.dataset.i), 1);

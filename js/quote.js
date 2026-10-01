@@ -73,7 +73,6 @@ export function localLink(q) {
 
 /** Save to the sheet (short link); fall back to a self-contained link. */
 export async function saveQuote(q, extra = {}) {
-  if (q.items && q.items.length > 1 && !(CONFIG.remoteItems)) return { id: null, link: localLink(q), saved: false };
   try {
     const r = await saveQuoteRemote({ ...q, ...extra });
     return { id: r.id, link: r.link, saved: true };

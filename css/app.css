@@ -912,3 +912,42 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .mine.multi .x { top: 2px; right: 0; }
 .mine.multi .mine-top .main { white-space: normal; overflow: visible; min-width: 0; flex: 1; }
 .mine.multi .mine-top b { font-size: 15.5px; line-height: 1.25; }
+
+/* Choose page with several trade-in devices */
+.dev-list { width: var(--box); margin: 0 auto 10px; background: rgba(255,255,255,0.7); border: 1px solid #d9e2ea; border-radius: 14px; padding: 4px 6px 4px 14px; }
+.dev-list .dev-line { display: flex; align-items: center; gap: 6px; margin: 0; padding: 6px 0; font-size: 15px; text-align: left; }
+.dev-list .dev-line + .dev-line { border-top: 1px solid #e6ebf0; }
+.dev-list .dv { margin-left: auto; font-weight: 700; color: var(--brand-deep); font-variant-numeric: tabular-nums; }
+.dev-list .x { flex: none; width: 34px; height: 34px; border: 0; background: none; color: #8a99aa; display: grid; place-items: center; border-radius: 50%; }
+.dev-list .x svg { width: 14px; height: 14px; }
+.choose .q-opts .opt svg { flex: none; }
+
+.choose .q-opts .opt[data-act="addtrade"] { min-height: 0; padding: 12px 22px; background: transparent; border: 1.5px dashed #9fcaf5; box-shadow: none; }
+.choose .q-opts .opt[data-act="addtrade"] .main { font-size: 16.5px; color: var(--action); }
+.choose .q-opts .opt[data-act="addtrade"] svg { color: var(--action); width: 18px; height: 18px; }
+.choose.multi .screen-main { justify-content: flex-start !important; gap: 0 !important; }
+.choose.multi .head-block .par { margin-bottom: 12px !important; }
+.choose.multi .screen-main > .head-block + .dev-value { margin-top: 0 !important; }
+.choose.multi .dev-value { margin-bottom: 12px; }
+.choose.multi .dev-list { margin-bottom: 8px; }
+.choose.multi .dev-list .dev-line { padding: 3px 0; font-size: 14.5px; }
+.choose.multi .tiv-label { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
+.choose.multi .big-num { font-size: 46px; line-height: 1.05; margin: 0; }
+.choose.multi .q-opts { gap: 10px; }
+.choose.multi .q-opts .opt { padding: 12px 18px; }
+.choose.multi .q-opts .opt .main { font-size: 17px; }
+.choose.multi .q-opts .opt .sub { font-size: 14px; }
+
+.choose .q-opts .opt[data-act="addtrade"] { padding: 10px 22px; min-height: 48px; }
+.choose .q-opts .opt[data-act="addtrade"] small { font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.choose .q-opts { gap: 10px; }
+.choose .dev-value .big-num { font-size: clamp(44px, 7vh, 64px); }
+.choose .head-block .par { margin-bottom: 10px !important; }
+.choose .screen-main { gap: 8px !important; }
+.choose .screen-main > .head-block + .dev-value { margin-top: 0 !important; }
+.choose .q-opts .opt { padding: 14px 20px; }
+.choose.multi .q-opts .opt { padding: 9px 18px; }
+.choose.multi .q-opts .opt[data-act="addtrade"] { min-height: 42px; padding: 6px 18px; }
+.choose.multi .big-num { font-size: 42px; }
+.choose.multi .dev-list { padding-top: 2px; padding-bottom: 2px; }
+.choose .q-opts .opt[data-act="addtrade"] .main { white-space: nowrap; }
