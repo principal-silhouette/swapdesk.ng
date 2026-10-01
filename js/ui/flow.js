@@ -686,10 +686,10 @@ function choose(el, app) {
         <p class="tiv-label">Total trade-in value</p>
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
+    ${trades.length < MAX_TRADE ? html`<button class="btn add trade-add" type="button" data-act="addtrade">${raw(ICON.plus)} Trade In Another Device</button>` : ''}
     <div class="stack q-opts">
       <button class="opt" type="button" data-act="swap"><span class="main">Swap to another Device<span class="sub">Compare what you add for up to ${max} devices.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="cash"><span class="main">Trade In for Cash<span class="sub">Get ${naira(total)} for your ${multi ? `${trades.length} devices` : `${d.model}${d.storage ? `, ${d.storage}` : ''}`}.</span></span>${raw(ICON.chevron)}</button>
-      ${trades.length < MAX_TRADE ? html`<button class="opt" type="button" data-act="addtrade"><span class="main">Trade In Another Device <small>(up to ${MAX_TRADE})</small></span>${raw(ICON.plus)}</button>` : ''}
+      <button class="opt" type="button" data-act="cash"><span class="main">Swap for Cash<span class="sub">Get ${naira(total)} for your ${multi ? `${trades.length} devices` : `${d.model}${d.storage ? `, ${d.storage}` : ''}`}.</span></span>${raw(ICON.chevron)}</button>
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },

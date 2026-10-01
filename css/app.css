@@ -951,3 +951,4 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .choose.multi .big-num { font-size: 42px; }
 .choose.multi .dev-list { padding-top: 2px; padding-bottom: 2px; }
 .choose .q-opts .opt[data-act="addtrade"] .main { white-space: nowrap; }
+.choose .screen-main > .btn.trade-add { margin-bottom: 10px !important; }
