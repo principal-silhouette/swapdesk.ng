@@ -123,3 +123,12 @@ test('replaced battery = 60% of a new battery, not charged again when battery he
   assert.deepEqual(r2.lines.map((l) => [l.key, l.amount]), [['battery', 24000]]);
   assert.ok(!faultsFor({ deductions: { battery: 'n/a' } }).some((f) => f.key === 'batteryReplaced'));
 });
+
+test('search: "12" finds the iPhone 12, not 128gb or 512gb', async () => {
+  const { matches } = await import('../js/engine.js');
+  const dev = (model, storage) => ({ brand: 'Apple', series: model, model, storage, condition: 'Foreign USED', type: 'Phones' });
+  assert.equal(matches(dev('iPhone 12', '64gb'), '12'), true);
+  assert.equal(matches(dev('iPhone 16', '512gb'), '12'), false);
+  assert.equal(matches(dev('iPhone 16', '128gb'), '12'), false);
+  assert.equal(matches(dev('iPhone 16 Pro Max', '256gb'), '16 pro max 256'), true);
+});

@@ -1031,3 +1031,8 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .share-pg .q-opts { width: 100%; }
 .share-pg .q-opts .opt { min-width: 0; }
 .share-pg .q-opts .opt .tt { font-size: 17px; }
+/* Swap rates: every trade-in card can be removed */
+.mine.slim { position: relative; }
+.mine.slim .mine-top { padding-right: 34px; }
+/* Complete your Swap: change the device being swapped into */
+.mine.chosen .chg { display: block; padding: 0; min-height: 0; margin-top: 6px; font-size: 14.5px; font-weight: 600; color: var(--action); background: none; border: 0; text-align: left; }

@@ -248,7 +248,7 @@ function picker(el, app, params) {
       <span class="main">${withModel ? d.model : (d.storage || 'Standard')}${withModel && d.storage ? html`<span class="sub">${d.storage}</span>` : ''}</span>
       ${raw(ICON.chevron)}</button>`;
 
-  function draw() {
+  function draw(typing = false) {
     const lv = level();
     const q = st.search.trim();
     const crumbs = [];
@@ -311,7 +311,7 @@ function picker(el, app, params) {
     const oldHead = $('.pick-head', el);
     const oldKey = oldHead?.dataset.key;
     const headKey = `${lv}|${title}`;
-    el.innerHTML = html`
+    const mainHtml = html`
       ${add ? '' : html`<div class="progress pick-progress" aria-hidden="true"><i style="transform:scaleX(${fromFrac})"></i></div>`}
       <div class="pick-head-wrap"><div class="pick-head" data-key="${headKey}">
         <h2 class="h-title">${title}</h2>
@@ -322,7 +322,27 @@ function picker(el, app, params) {
         <button class="clear" type="button" data-act="clear" aria-label="Clear search">${raw(ICON.clear)}</button></label></div>
       ${crumbs.length ? html`<nav class="trail" aria-label="Your choices">${crumbs.map(([k, label], n) => html`${n ? raw('<span class="trail-sep" aria-hidden="true">›</span>') : ''}<button class="chip" type="button" aria-pressed="true" data-act="crumb" data-v="${k}" aria-label="${label}, selected. Tap to change.">${label}<span class="chip-x" aria-hidden="true">×</span></button>`)}</nav>` : ''}
       <div class="stack">${options}</div>`;
-    el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
+    const fullHtml = layout(raw(mainHtml.toString()), pills(backPill(), add ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')).toString();
+    // While typing, leave the search box itself alone (re-creating it resets the phone keyboard and slows typing):
+    // swap in only the heading, trail and results.
+    if (typing && $('[data-search]', el)) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = fullHtml;
+      for (const sel of ['.pick-head-wrap', '.stack', '.screen-foot']) {
+        const a = $(sel, el), b = $(sel, tmp);
+        if (a && b && a.innerHTML !== b.innerHTML) a.replaceWith(b);
+      }
+      const oldTrail = $('nav.trail', el), newTrail = $('nav.trail', tmp);
+      if (oldTrail && newTrail) oldTrail.replaceWith(newTrail);
+      else if (oldTrail) oldTrail.remove();
+      else if (newTrail) $('.stack', el)?.before(newTrail);
+      const bar = $('.pick-progress i', el);
+      if (bar) bar.style.transform = `scaleX(${frac})`;
+      prevFrac = frac;
+      app.s._pickFrac = frac;
+      return;
+    }
+    el.innerHTML = fullHtml;
     prevFrac = frac;
     // The trail scrolls so the latest choice (the one most likely to be changed) is in view.
     const trail = $('.trail', el);
@@ -348,11 +368,7 @@ function picker(el, app, params) {
   el.addEventListener('input', (e) => {
     if (!e.target.matches('[data-search]')) return;
     st.search = e.target.value;
-    const pos = e.target.selectionStart;
-    draw();
-    const inp = $('[data-search]', el);
-    inp.focus();
-    try { inp.setSelectionRange(pos, pos); } catch { /* search inputs */ }
+    draw(true);
   });
   el.addEventListener('click', (e) => {
     if (e.target.closest('[data-back]')) {
@@ -705,14 +721,21 @@ function choose(el, app) {
       s.pick = { ...freshPick() };
       app.save(); app.go('pick');
     },
-    rmtrade: (b) => {
-      const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
-      all.splice(Number(b.dataset.i), 1);
-      const last = all.pop();
-      s.more = all; s.deviceId = last.deviceId; s.answers = last.answers; s.saved = null;
-      app.save(); app.refresh();
-    },
+    rmtrade: (b) => { removeTrade(app, Number(b.dataset.i)); app.refresh(); },
   });
+}
+
+/** Take one trade-in device out of the quote; removing the last one leaves the swap list without a device. */
+function removeTrade(app, i) {
+  const s = app.s;
+  const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
+  all.splice(i, 1);
+  const last = all.pop();
+  s.more = all;
+  s.deviceId = last ? last.deviceId : '';
+  s.answers = last ? last.answers : freshAnswers();
+  s.saved = null;
+  app.save();
 }
 
 // ---------- compare swaps ----------
@@ -753,7 +776,7 @@ function compare(el, app) {
         <div class="mine-top">
           <span class="main"><b>${t.d.model}</b></span>
           <span class="val">${t.r.accepted ? naira(t.r.value) : 'Not accepted'}</span>
-          ${trades.length > 1 ? html`<button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>` : ''}
+          <button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>
         </div>
         <p class="mine-cond">${[t.d.storage, t.answers.quick ? 'Good working condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</p>
         ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${naira(t.r.value)}</summary>
@@ -777,13 +800,7 @@ function compare(el, app) {
     val: () => app.go('value'),
     edit: () => app.go('q', { i: 0 }),
     own: () => startFlow(app, 'swap'),
-    rmtrade: (b) => {
-      const all = [...(s.more || []), { deviceId: s.deviceId, answers: s.answers }];
-      all.splice(Number(b.dataset.i), 1);
-      const last = all.pop();
-      s.more = all; s.deviceId = last.deviceId; s.answers = last.answers; s.saved = null;
-      app.save(); app.refresh();
-    },
+    rmtrade: (b) => { removeTrade(app, Number(b.dataset.i)); app.refresh(); },
     add: () => { s.add = { ...freshPick(), type: d?.type || '' }; app.go('pick', { purpose: 'add' }); },
     pick: (b) => { s.chosen = b.dataset.id; s.cash = false; app.save(); app.go('finish'); },
     savequotes: () => { s.chosen = ''; app.save(); app.go('saved'); },
@@ -865,6 +882,7 @@ function finish(el, app) {
       setTimeout(() => app.refresh(), 1200);
     },
     save: () => app.go('saved'),
+    change: () => app.go('compare'),
   });
 }
 
@@ -883,7 +901,7 @@ function chosenCard(app) {
   if (!x || total === null) return '';
   const t = swapTerms(x, total);
   return html`<div class="mine chosen">
-    <div class="mine-top"><span class="main"><span class="eyebrow-s">Swapping into</span><b>${x.model}</b><span class="sub">${variantName(x)}</span></span>
+    <div class="mine-top"><span class="main"><span class="eyebrow-s">Swapping into</span><b>${x.model}</b><span class="sub">${variantName(x)}</span><button class="link chg" type="button" data-act="change">Change device</button></span>
     <span class="val"><small>${termsLabel(t)}</small>${naira(t.kind === 'even' ? 0 : t.amount)}</span></div></div>`;
 }
 

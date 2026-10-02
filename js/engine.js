@@ -233,10 +233,12 @@ export function searchText(d) {
   return norm([d.brand, d.series, d.model, d.storage, d.condition, d.type, d.dealNote].join(' '));
 }
 
-/** Every word in the query must appear somewhere ("16 pro max 256"). */
+/** Every word in the query must start a word in the device ("16 pro max 256"), so "12" finds the iPhone 12, not 512gb. */
 export function matches(d, query) {
   const q = norm(query).trim();
   if (!q) return true;
-  const hay = d._search || searchText(d);
-  return q.split(/\s+/).every((w) => hay.includes(w));
+  const words = (d._search || searchText(d)).split(/[\s/]+/);
+  // A number of two or more digits must be a whole number in the name: "12" is the iPhone 12, not 128gb or 512gb.
+  const hit = (w, x) => (/^\d{2,}$/.test(w) ? (x.match(/^\d+/) || [''])[0] === w : x.startsWith(w));
+  return q.split(/\s+/).every((w) => words.some((x) => hit(w, x)));
 }
