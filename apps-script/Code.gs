@@ -181,15 +181,17 @@ function saveQuote_(q) {
   var lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    var sh = SpreadsheetApp.getActive().getSheetByName('Quotes');
+    // Quotes go to one tab per month ("Quotes Oct 2026"), so no tab grows without end.
+    var sh = monthTab_(new Date());
     var last = Math.max(sh.getLastRow(), QUOTE_FIRST_ROW - 1);
     var ids = last >= QUOTE_FIRST_ROW ? sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 1).getValues().map(function (r) { return r[0]; }) : [];
-    // An edited quote (opened from its link) replaces its original row and keeps its ID, status and notes.
-    var id, existing = -1;
+    // An edited quote (opened from its link) replaces its original row, in whichever month it was made,
+    // and keeps its ID, first-saved date, status and notes.
+    var id, hit = null;
     var replaceId = String(q.replaceId || '');
-    if (/^SD-[A-Z0-9]{6}$/.test(replaceId)) existing = ids.indexOf(replaceId);
-    if (existing !== -1) id = replaceId;
-    else { do { id = newId_(); } while (ids.indexOf(id) !== -1); }
+    if (/^SD-[A-Z0-9]{6}$/.test(replaceId)) hit = findQuote_(replaceId);
+    if (hit) id = replaceId;
+    else { do { id = newId_(); } while (findQuote_(id)); }
     clean.id = id;
     var link = SITE + '?q=' + id;
     var a = clean.answers || {};
@@ -205,8 +207,8 @@ function saveQuote_(q) {
       link, 'New', '', '', JSON.stringify(clean)
     ];
     var target;
-    if (existing !== -1) {
-      target = QUOTE_FIRST_ROW + existing;
+    if (hit) {
+      sh = hit.sheet; target = hit.row;
       var old = sh.getRange(target, 2, 1, row.length).getValues()[0];
       row[1] = old[1];                                   // first saved
       row[16] = old[16]; row[17] = old[17]; row[18] = old[18]; // status and team notes
@@ -228,14 +230,49 @@ function saveQuote_(q) {
 
 function getQuote_(id) {
   if (!/^SD-[A-Z0-9]{6}$/.test(id)) return { ok: false, error: 'Not a quote ID' };
-  var sh = SpreadsheetApp.getActive().getSheetByName('Quotes');
-  var last = sh.getLastRow();
-  if (last < QUOTE_FIRST_ROW) return { ok: false, error: 'Not found' };
-  var found = sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 1)
-    .createTextFinder(id).matchEntireCell(true).findNext();
-  if (!found) return { ok: false, error: 'Not found' };
-  var data = sh.getRange(found.getRow(), 21).getValue();
+  var hit = findQuote_(id);
+  if (!hit) return { ok: false, error: 'Not found' };
+  var data = hit.sheet.getRange(hit.row, 21).getValue();
   return { ok: true, quote: JSON.parse(data) };
+}
+
+/** Every quotes tab: the monthly ones ("Quotes Oct 2026") and the original "Quotes" tab if it's still there. */
+function quoteTabs_() {
+  return SpreadsheetApp.getActive().getSheets().filter(function (sh) { return /^Quotes( [A-Z][a-z]{2} \d{4})?$/.test(sh.getName()); });
+}
+
+/** Find a quote ID in any quotes tab (column B). Returns { sheet, row } or null. */
+function findQuote_(id) {
+  var tabs = quoteTabs_();
+  for (var i = tabs.length - 1; i >= 0; i--) {
+    var sh = tabs[i];
+    var last = sh.getLastRow();
+    if (last < QUOTE_FIRST_ROW) continue;
+    var f = sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
+    if (f) return { sheet: sh, row: f.getRow() };
+  }
+  return null;
+}
+
+/**
+ * This month's quotes tab, made on the first save of the month: a copy of the latest quotes tab's
+ * headings and layout with no rows. The original "Quotes" tab becomes the first month's tab.
+ */
+function monthTab_(date) {
+  var ss = SpreadsheetApp.getActive();
+  var name = 'Quotes ' + Utilities.formatDate(date, ss.getSpreadsheetTimeZone(), 'MMM yyyy');
+  var sh = ss.getSheetByName(name);
+  if (sh) return sh;
+  var legacy = ss.getSheetByName('Quotes');
+  if (legacy) { legacy.setName(name); return legacy; }
+  var tabs = quoteTabs_();
+  var from = tabs[tabs.length - 1];
+  sh = from.copyTo(ss).setName(name);
+  var last = sh.getLastRow();
+  if (last >= QUOTE_FIRST_ROW) sh.getRange(QUOTE_FIRST_ROW, 1, last - QUOTE_FIRST_ROW + 1, sh.getMaxColumns()).clearContent();
+  ss.setActiveSheet(sh);
+  ss.moveActiveSheet(from.getIndex() + 1);
+  return sh;
 }
 
 function describe_(c) {
