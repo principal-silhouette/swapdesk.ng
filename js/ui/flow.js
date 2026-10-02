@@ -2,7 +2,7 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
 import { html, raw, naira, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
@@ -517,8 +517,75 @@ function good(el, app) {
       Object.assign(app.s.answers, { icloudLocked: false, battery: '', batteryUnknown: true, neatness: 'spotless', network: 'factory', faults: [], faultsDone: true, quick: true });
       app.s.saved = null; app.save(); app.go('choose');
     },
-    no: () => { app.s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
+    no: () => { app.s.answers.quick = false; app.save(); app.go('conds'); },
   });
+}
+
+
+// ---------- conditions page: pick only the groups that have an issue ----------
+
+const GROUP = {
+  icloud: (apple) => [apple ? 'iCloud' : 'Account Lock', apple ? 'Is it iCloud locked?' : 'Is it locked to an account?'],
+  battery: () => ['Battery', 'Battery health below 85%'],
+  network: () => ['Network', 'eSIM only, chip or network locked'],
+  neatness: () => ['Body Neatness', 'Scratches, dents or chips'],
+  faults: () => ['Others', 'Screen, Face ID, cameras & more'],
+};
+const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults'];
+
+function conditions(el, app) {
+  const d = ownDevice(app);
+  if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  CATALOG = app.catalog;
+  const s = app.s; const a = s.answers;
+  a.quick = false;
+  const apple = d.brand === 'Apple';
+  const keys = questionsFor(d).map((q) => q.key);
+  const groups = GROUP_ORDER.filter((k) => keys.includes(k));
+  const touched = new Set(a.touched || []);
+  // What each group is set to, shown under its name once it's been filled.
+  const now = (k) => {
+    if (k === 'icloud') return a.icloudLocked === true ? (apple ? 'iCloud locked' : 'Account locked') : a.icloudLocked === false ? 'Not locked' : '';
+    if (k === 'battery') return a.batteryUnknown ? 'Not sure' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
+    if (k === 'network') return NETWORK.find((n) => n.key === a.network)?.label || '';
+    if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
+    if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything works' : ''); }
+    return '';
+  };
+  const r = valueDevice(d, engineAnswers({ ...defaultsFor(a) }, d), app.catalog.settings);
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">Any issues with it?</h2>
+      <p class="par">Tap only what applies to your ${d.model}. Anything you skip counts as fine.</p>
+    </div>
+    <div class="stack q-opts conds" role="group">
+      ${groups.map((k) => { const [name, hint] = GROUP[k](apple); const on = touched.has(k); return html`
+        <button class="opt" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="grp" data-v="${k}">
+          <span class="main">${name}<span class="sub">${on && now(k) ? now(k) : hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`; })}
+    </div>
+    ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>`
+      : r.accepted ? html`<p class="small conds-val">Value so far: <b>${naira(r.value)}</b></p>` : ''}`,
+  pills(backPill(), html`<button class="pill go" type="button" data-act="proceed" ${a.icloudLocked === true ? 'disabled' : ''}>Proceed</button>`)).toString();
+  wire(el, app, {
+    grp: (b) => app.go('q', { k: b.dataset.v }),
+    proceed: () => {
+      Object.assign(a, defaultsFor(a));
+      s.saved = null; app.save();
+      app.go('value');
+    },
+  });
+}
+/** Groups left alone count as "no issue". */
+function defaultsFor(a) {
+  return {
+    ...a,
+    icloudLocked: a.icloudLocked === true,
+    batteryUnknown: a.batteryBand ? false : true,
+    neatness: a.neatness || 'prettyNeat',
+    network: a.network || 'factory',
+    faults: a.faults || [],
+    faultsDone: true,
+  };
 }
 
 // ---------- condition questions, one per screen ----------
@@ -530,7 +597,9 @@ function question(el, app, params) {
   const s = app.s;
   const a = s.answers;
   const qs = questionsFor(d);
-  const i = Math.min(Number(params.i) || 0, qs.length - 1);
+  // Opened from the conditions page: one group (params.k), then straight back to that page.
+  const hub = !!params.k;
+  const i = hub ? Math.max(0, qs.findIndex((x) => x.key === params.k)) : Math.min(Number(params.i) || 0, qs.length - 1);
   const q = qs[i];
 
   const opt = (checked, attrs, main, sub, extra = '') => html`
@@ -588,11 +657,13 @@ function question(el, app, params) {
     const done = qs.filter((x) => answered(x, a)).length;
     const last = i === qs.length - 1;
     el.innerHTML = html`
-      <p class="eyebrow">Question ${i + 1} of ${qs.length} · ${d.model}${r.accepted ? html` · <span class="so-far-inline">so far <b data-live>${naira(r.value)}</b></span>` : ''}</p>
-      <div class="progress" aria-hidden="true"><i style="transform:scaleX(${done / qs.length})"></i></div>
+      ${hub ? html`<p class="eyebrow">${d.model}${r.accepted ? html` · <span class="so-far-inline">so far <b data-live>${naira(r.value)}</b></span>` : ''}</p>`
+        : html`<p class="eyebrow">Question ${i + 1} of ${qs.length} · ${d.model}${r.accepted ? html` · <span class="so-far-inline">so far <b data-live>${naira(r.value)}</b></span>` : ''}</p>
+      <div class="progress" aria-hidden="true"><i style="transform:scaleX(${done / qs.length})"></i></div>`}
       ${body()}`;
-    el.innerHTML = layout(raw(el.innerHTML), html`
-      ${pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${answered(q, a) ? '' : 'disabled'}>${last ? 'See My Value' : 'Next'}</button>`)}`).toString();
+    el.innerHTML = layout(raw(el.innerHTML), hub
+      ? pills(backPill(), q.key === 'faults' ? html`<button class="pill go" type="button" data-act="done">Done</button>` : '')
+      : html`${pills(backPill(), html`<button class="pill go" type="button" data-act="next" ${answered(q, a) ? '' : 'disabled'}>${last ? 'See My Value' : 'Next'}</button>`)}`).toString();
   }
   function next() {
     if (!answered(q, a)) return;
@@ -603,8 +674,11 @@ function question(el, app, params) {
   function set(fn, advance = false) {
     fn(a);
     s.saved = null;
+    if (hub) a.touched = [...new Set([...(a.touched || []), q.key])];
     app.save();
     haptic();
+    // From the conditions page, a single choice goes straight back to it (ticked); Others waits for Done.
+    if (hub && q.key !== 'faults') { app.back(); return; }
     if (advance && answered(q, a)) { next(); return; }
     draw();
   }
@@ -623,6 +697,7 @@ function question(el, app, params) {
       x.faultsDone = x.faults.length > 0;
     }),
     allgood: () => set((x) => { x.faults = []; x.faultsDone = true; }),
+    done: () => { a.faultsDone = true; a.touched = [...new Set([...(a.touched || []), 'faults'])]; app.save(); app.back(); },
     next,
   });
   el.addEventListener('input', (e) => {
@@ -652,7 +727,7 @@ function question(el, app, params) {
 function value(el, app) {
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
-  if (!allAnswered(app)) { app.go('q', { i: 0 }, { replace: true }); return false; }
+  if (!allAnswered(app)) { app.go('conds', {}, { replace: true }); return false; }
   const r = currentValue(app);
   const s = app.s;
   el.innerHTML = html`
@@ -674,7 +749,7 @@ function value(el, app) {
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="proceed">Proceed</button>`)).toString();
   requestAnimationFrame(() => animateNumber($('.big-num', el), r.value, naira));
   wire(el, app, {
-    edit: () => { s.answers.quick = false; app.save(); app.go('q', { i: 0 }); },
+    edit: () => { s.answers.quick = false; app.save(); app.go('conds'); },
     proceed: () => app.go('choose'),
   });
 }
@@ -799,7 +874,7 @@ function compare(el, app) {
     ${pills(backPill(), html`<button class="pill go" type="button" data-act="savequotes" ${ready ? '' : 'disabled'}>Save Quotes</button>`)}`).toString();
   wire(el, app, {
     val: () => app.go('value'),
-    edit: () => app.go('q', { i: 0 }),
+    edit: () => app.go('conds'),
     // Wrong storage or model: pick again from the same model; the swap devices stay.
     chdev: () => { s.pick = { ...freshPick(), type: d?.type || '', brand: d?.brand || '', model: d?.model || '' }; app.save(); app.go('pick'); },
     own: () => {
@@ -1184,6 +1259,7 @@ export const SCREENS = {
   good,
   confirm,
   q: question,
+  conds: conditions,
   value,
   compare,
   finish,
