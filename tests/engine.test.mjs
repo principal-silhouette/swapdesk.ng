@@ -132,3 +132,11 @@ test('search: "12" finds the iPhone 12, not 128gb or 512gb', async () => {
   assert.equal(matches(dev('iPhone 16', '128gb'), '12'), false);
   assert.equal(matches(dev('iPhone 16 Pro Max', '256gb'), '16 pro max 256'), true);
 });
+
+test('console: 1 controller keeps the value, 2+ adds 10,000, games and hacked are checked in store', () => {
+  const ps4 = { id: 'playstation-4-fu', type: 'Games', model: 'PlayStation 4', storage: '', condition: 'Foreign USED', tradeIn: true, tradeInValue: 100000, deductions: {} };
+  assert.equal(valueDevice(ps4, { pads: '1', games: 'none', hacked: false }, settings).value, 100000);
+  const two = valueDevice(ps4, { pads: '2', games: 'few', hacked: true }, settings);
+  assert.equal(two.value, 110000);
+  assert.deepEqual(two.lines.map((l) => [l.key, l.amount]), [['pads', -10000], ['games', null], ['hacked', null]]);
+});

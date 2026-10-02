@@ -2,6 +2,8 @@
 const nf = new Intl.NumberFormat('en-NG', { maximumFractionDigits: 0 });
 
 export const naira = (n) => `₦${nf.format(Math.round(n || 0))}`;
+/** A breakdown line: a deduction (− ₦), an addition (+ ₦, stored as a negative), or checked in store. */
+export const lineAmount = (n) => (n === null || n === undefined ? 'Checked in store' : n < 0 ? `+ ${naira(-n)}` : `− ${naira(n)}`);
 
 
 

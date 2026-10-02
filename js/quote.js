@@ -1,6 +1,6 @@
 // Quotes: build, encode to a link, decode, share and hand off to WhatsApp.
 import { CONFIG } from './config.js';
-import { NEATNESS, NETWORK, FAULTS } from './engine.js';
+import { NEATNESS, NETWORK, FAULTS, PADS, GAMES } from './engine.js';
 import { naira, deviceName } from './format.js';
 import { saveQuoteRemote } from './data.js';
 
@@ -39,7 +39,7 @@ export function encodeQuote(q) {
   const a = q.answers;
   const packed = [
     1, q.created, q.device ? [q.device.id, q.device.name, q.device.start] : 0,
-    a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', a.faults.join('.'), a.batteryLabel || ''] : 0,
+    packAnswers(a),
     q.value, q.lines, q.compare.map((c) => [c.id, c.name, c.price, c.kind, c.amount, c.dealNote || '']), q.city || '',
     (q.items || []).map((it) => [it.id, it.name, it.start, it.value, packAnswers(it.answers), it.lines]),
   ];
@@ -53,7 +53,7 @@ export function decodeQuote(s) {
   return {
     v: 1, created,
     device: dev ? { id: dev[0], name: dev[1], start: dev[2] } : null,
-    answers: a ? { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}) } : null,
+    answers: unpackAnswers(a),
     value, lines,
     compare: compare.map(([id, name, price, kind, amount, dealNote]) => ({ id, name, price, kind, amount, dealNote })),
     city,
@@ -61,10 +61,15 @@ export function decodeQuote(s) {
   };
 }
 function packAnswers(a) {
-  return a ? [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', (a.faults || []).join('.'), a.batteryLabel || ''] : 0;
+  if (!a) return 0;
+  const out = [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', (a.faults || []).join('.'), a.batteryLabel || ''];
+  if (a.pads) out.push(a.pads, a.games || '', a.hacked ? 1 : 0); // consoles
+  return out;
 }
 function unpackAnswers(a) {
-  return a ? { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}) } : null;
+  if (!a) return null;
+  return { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}),
+    ...(a[6] ? { pads: a[6], games: a[7] || '', hacked: !!a[8] } : {}) };
 }
 
 export function localLink(q) {
@@ -101,6 +106,14 @@ export function nairaShort(n) {
 export function answersText(a) {
   if (!a) return '';
   const bits = [];
+  if (a.pads) {
+    // Console
+    bits.push(PADS.find((x) => x.key === a.pads)?.label || '');
+    const g = GAMES.find((x) => x.key === a.games);
+    if (g) bits.push(g.label);
+    bits.push(a.hacked ? 'Hacked' : 'Not hacked');
+    return bits.filter(Boolean).join(' · ');
+  }
   if (a.batteryLabel) bits.push(`Battery ${a.batteryLabel}`);
   else if (a.battery !== null && a.battery !== undefined && a.battery !== '') bits.push(`Battery ${a.battery}%`);
   const n = NEATNESS.find((x) => x.key === a.neatness);

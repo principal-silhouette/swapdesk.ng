@@ -12,7 +12,7 @@ export const CONFIG = {
   instagram: 'the.swapdesk',
   quoteValidDays: 7,
   // Types customers can trade in or swap into. Everything priced still shows on the Price List.
-  swapTypes: ['Phones', 'Tablets', 'Watches', 'AirPods'],
+  swapTypes: ['Phones', 'Tablets', 'Watches', 'AirPods', 'Games'],
   // Shown at the top of the Shop list for that brand, with no price, until the Sheet has them.
   comingSoon: [{ type: 'Phones', brand: 'Apple', model: 'iPhone Duo' }],
   // Ask about faults the sheet hasn't priced yet for a model (checked in store).

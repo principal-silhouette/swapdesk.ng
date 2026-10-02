@@ -19,7 +19,21 @@ export const DEFAULT_SETTINGS = {
   'rounding.tradeIn': 2000,
   'rounding.quote': 1000,
   'compare.maxDevices': 6,
+  // Daniel, 2 Oct: consoles are valued with one controller; 2 or more controllers add 10,000.
+  'console.extraPad': 10000,
 };
+
+// Console questions (type Games). Games included and a hacked console are noted and checked in store.
+export const PADS = [
+  { key: '1', label: '1 controller', hint: 'The console with one controller.' },
+  { key: '2', label: '2 or more controllers', hint: 'Adds to your value.' },
+];
+export const GAMES = [
+  { key: 'none', label: 'No games', hint: 'Just the console and controller.' },
+  { key: 'few', label: '1 – 2 games', hint: 'Discs we check in store.' },
+  { key: 'many', label: '3 games or more', hint: 'Discs we check in store.' },
+];
+export const isConsole = (d) => d?.type === 'Games';
 
 export const NEATNESS = [
   { key: 'spotless', label: 'Spotless', hint: 'No marks at all, like it just left the box.' },
@@ -123,6 +137,16 @@ export function valueDevice(device, answers = {}, settings = {}) {
   }
 
   const lines = [];
+  if (isConsole(device)) {
+    // A console's only questions: controllers, games included, hacked or not.
+    if (answers.pads === '2') lines.push({ key: 'pads', label: '2 or more controllers', amount: -s(settings, 'console.extraPad') });
+    const g = GAMES.find((x) => x.key === answers.games);
+    if (g && g.key !== 'none') lines.push({ key: 'games', label: `${g.label} included`, amount: null });
+    if (answers.hacked) lines.push({ key: 'hacked', label: 'Hacked / jailbroken', amount: null });
+    const total = lines.reduce((a, l) => a + (l.amount || 0), 0);
+    const value = Math.max(0, floorTo(start - total, s(settings, 'rounding.quote')));
+    return { accepted: true, start, lines, pending: lines.filter((l) => l.amount === null).length, value };
+  }
   const push = (key, label, base, mult = 1) => {
     if (base === 'n/a') return;
     lines.push({ key, label, amount: typeof base === 'number' ? Math.round(base * mult) : null });

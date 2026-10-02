@@ -1,7 +1,7 @@
 // A saved quote, read-only, exactly as quoted. Offers today's figures when they differ.
 import { CONFIG } from '../config.js';
 import { valueDevice, termsLabel } from '../engine.js';
-import { html, raw, naira, dateLabel, $ } from '../format.js';
+import { html, raw, naira, lineAmount, dateLabel, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays } from '../quote.js';
 import { loadQuoteRemote } from '../data.js';
@@ -79,7 +79,7 @@ function render(el, app, p, q) {
           <p class="qv-cond">${[rest, answersText(it.answers)].filter(Boolean).join(' · ')}</p>
           ${!multi ? html`<ul class="lines">
             <li><span>Starting value, perfect condition</span><span>${naira(it.start)}</span></li>
-            ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
+            ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${lineAmount(amount)}</span></li>`)}
           </ul>` : ''}
         </div>`; })}
         ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total Trade-In Value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}

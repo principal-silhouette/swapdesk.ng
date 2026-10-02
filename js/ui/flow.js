@@ -2,9 +2,9 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, FAULTS, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
-import { html, raw, naira, variantName, conditionLabel, $, $$ } from '../format.js';
+import { html, raw, naira, lineAmount, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -17,6 +17,7 @@ const KEY = 'swapdesk.state.v2';
 
 export const freshAnswers = () => ({
   batteryBand: '', origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
+  pads: '', games: '', hacked: null,
 });
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
 
@@ -34,7 +35,7 @@ export function saveState(s) {
 
 // ---------- shared bits ----------
 
-const TYPE_LABEL = {};
+const TYPE_LABEL = { Games: 'Consoles' };
 const credit = () => html`<p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p>`;
 const pills = (...b) => html`<div class="pills">${b}</div>`;
 const backPill = (label = 'Go Back') => html`<button class="pill" type="button" data-back>${label}</button>`;
@@ -83,6 +84,8 @@ function defaultRow(rows) {
 }
 
 function questionsFor(device) {
+  // Consoles get their own short check: controllers, games included, hacked or not.
+  if (isConsole(device)) return [{ key: 'pads' }, { key: 'games' }, { key: 'hacked' }];
   const qs = [{ key: 'icloud' }];
 
   if (applies(device, 'battery')) qs.push({ key: 'battery' });
@@ -100,6 +103,9 @@ function answered(q, a) {
     case 'neatness': return !!a.neatness;
     case 'network': return !!a.network;
     case 'faults': return a.faultsDone || a.faults.length > 0;
+    case 'pads': return !!a.pads;
+    case 'games': return !!a.games;
+    case 'hacked': return a.hacked === true || a.hacked === false;
     default: return true;
   }
 }
@@ -111,6 +117,7 @@ export function engineAnswers(a, device) {
     neatness: a.neatness,
     network: device.type === 'Phones' ? a.network : 'factory',
     faults: a.faults,
+    ...(isConsole(device) ? { pads: a.pads, games: a.games, hacked: a.hacked === true } : {}),
   };
 }
 function currentValue(app) {
@@ -162,7 +169,7 @@ function home(el, app) {
   el.innerHTML = layout(html`
     <div class="home-intro">
       <h1 class="h-display">The fastest way<br>to <span class="blue">Swap.</span></h1>
-      <p class="lead">Trade in the Phone, Watch, Speaker or AirPods you’ve got for the one you love 💙 and get your swap balance in under a minute.</p>
+      <p class="lead">Trade in the Phone, Watch, Speaker, Console or AirPods you’ve got for the one you love 💙 and get your swap balance in under a minute.</p>
     </div>
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Check for Prices</button>
@@ -261,6 +268,14 @@ function picker(el, app, params) {
     if (add) {
       title = 'Add a device to compare.';
       help = { type: 'What would you like to swap into? ⤵️', brand: 'Which brand?', model: 'Which model would you like?', version: `Tick each storage and condition you want to compare. ${s.compare.length} of ${max} added.` }[lv];
+    } else if (st.type === 'Games') {
+      title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which console do you have?', version: 'Which edition is it?' }[lv];
+      help = {
+        type: `What kind of device do you want to ${s.mode === 'swap' ? 'Swap' : 'Trade In'}?`,
+        brand: 'Pick the brand of your console.',
+        model: 'Check the label on the back or bottom of the console.',
+        version: 'The Disc edition has a disc slot. The Digital edition doesn’t.',
+      }[lv];
     } else {
       title = { type: 'Select your device to get started.', brand: 'Which brand is it?', model: 'Which model do you have?', version: 'What’s your storage size?' }[lv];
       help = {
@@ -476,13 +491,14 @@ function confirm(el, app) {
       <p class="big-num">${naira(upTo)}</p>
     </div>
     <p class="congrats">Congratulations!</p>
-    <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. This is its value in good working condition.</p>
+    <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. ${isConsole(d) ? 'This is its value with one controller, in good working condition.' : 'This is its value in good working condition.'}</p>
     ${d.onlyIfBought ? html`<p class="notice-only">We only accept this model as a trade-in if it was bought from us.</p>` : ''}
     </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
-    ok: () => app.go('good'),
+    // Consoles skip the phone shortcut and go straight to their three questions.
+    ok: () => (isConsole(d) ? app.go('conds') : app.go('good')),
   });
 }
 
@@ -530,8 +546,12 @@ const GROUP = {
   network: () => ['Network', 'eSIM only, chip or network locked'],
   neatness: () => ['Body Neatness', 'Scratches, dents or chips'],
   faults: () => ['Others', 'Screen, Face ID, cameras & more'],
+  // Consoles (Daniel, 2 Oct)
+  pads: () => ['Controllers', 'Valued with 1 controller. 2 or more adds to it'],
+  games: () => ['Games', 'Any game discs included?'],
+  hacked: () => ['Hacked', 'Jailbroken, modded or custom firmware?'],
 };
-const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults'];
+const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked'];
 
 function conditions(el, app) {
   const d = ownDevice(app);
@@ -549,14 +569,17 @@ function conditions(el, app) {
     if (k === 'battery') return a.batteryUnknown ? 'Not sure' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
     if (k === 'network') return NETWORK.find((n) => n.key === a.network)?.label || '';
     if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
+    if (k === 'pads') return PADS.find((x) => x.key === a.pads)?.label || '';
+    if (k === 'games') return GAMES.find((x) => x.key === a.games)?.label || '';
+    if (k === 'hacked') return a.hacked === true ? 'Hacked' : a.hacked === false ? 'Not hacked' : '';
     if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything works' : ''); }
     return '';
   };
   const r = valueDevice(d, engineAnswers({ ...defaultsFor(a) }, d), app.catalog.settings);
   el.innerHTML = layout(html`
     <div class="head-block">
-      <h2 class="h-title">Any issues with it?</h2>
-      <p class="par">Tap only what applies to your ${d.model}. Anything you skip counts as fine.</p>
+      <h2 class="h-title">${isConsole(d) ? 'About your console' : 'Any issues with it?'}</h2>
+      <p class="par">${isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
     </div>
     <div class="stack q-opts conds" role="group">
       ${groups.map((k) => { const [name, hint] = GROUP[k](apple); const on = touched.has(k); return html`
@@ -585,6 +608,9 @@ function defaultsFor(a) {
     network: a.network || 'factory',
     faults: a.faults || [],
     faultsDone: true,
+    pads: a.pads || '1',
+    games: a.games || 'none',
+    hacked: a.hacked === true,
   };
 }
 
@@ -648,6 +674,20 @@ function question(el, app, params) {
             <button class="opt" type="button" role="checkbox" aria-checked="${a.faultsDone && !a.faults.length ? 'true' : 'false'}" data-act="allgood">
               <span class="main">Everything works</span><span class="tick box" aria-hidden="true"></span></button>
           </div>`;
+      case 'pads':
+        return html`<div class="head-block"><h2 class="h-title">How many controllers?</h2>
+          <p class="par">Count the working controllers you’re bringing with the console.</p></div>
+          <div class="stack q-opts" role="radiogroup">${PADS.map((p) => opt(a.pads === p.key, `data-act="pads" data-v="${p.key}"`, p.label, p.hint))}</div>`;
+      case 'games':
+        return html`<div class="head-block"><h2 class="h-title">Any games included?</h2>
+          <p class="par">Game discs you’re trading in with the console.</p></div>
+          <div class="stack q-opts" role="radiogroup">${GAMES.map((g) => opt(a.games === g.key, `data-act="games" data-v="${g.key}"`, g.label, g.hint))}</div>`;
+      case 'hacked':
+        return html`<div class="head-block"><h2 class="h-title">Is it hacked?</h2>
+          <p class="par">Jailbroken, modded or running custom firmware.</p></div>
+          <div class="stack q-opts" role="radiogroup">
+            ${opt(a.hacked === false, 'data-act="hacked" data-v="no"', 'No, it’s not hacked', 'Original Sony software.')}
+            ${opt(a.hacked === true, 'data-act="hacked" data-v="yes"', 'Yes, it’s hacked', 'We check it in store.')}</div>`;
       default: return '';
     }
   }
@@ -698,6 +738,9 @@ function question(el, app, params) {
     }),
     allgood: () => set((x) => { x.faults = []; x.faultsDone = true; }),
     done: () => { a.faultsDone = true; a.touched = [...new Set([...(a.touched || []), 'faults'])]; app.save(); app.back(); },
+    pads: (b) => set((x) => { x.pads = b.dataset.v; }, true),
+    games: (b) => set((x) => { x.games = b.dataset.v; }, true),
+    hacked: (b) => set((x) => { x.hacked = b.dataset.v === 'yes'; }, true),
     next,
   });
   el.addEventListener('input', (e) => {
@@ -740,7 +783,7 @@ function value(el, app) {
     <div class="card"${s.answers.quick ? raw(' hidden') : ''}>
       <ul class="lines">
         <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
-        ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
+        ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmount(l.amount)}</span></li>`)}
         ${r.lines.length ? html`<li class="total"><span>Your Trade-In Value</span><span>${naira(r.value)}</span></li>` : ''}
       </ul>
     </div>
@@ -858,7 +901,7 @@ function compare(el, app) {
         ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${naira(t.r.value)}</summary>
           <ul class="lines">
             <li><span>Starting value, perfect condition</span><span>${naira(t.r.start)}</span></li>
-            ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
+            ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmount(l.amount)}</span></li>`)}
             <li class="total"><span>Trade-In Value</span><span>${naira(t.r.value)}</span></li>
           </ul>
           ${t.current ? html`<span class="mine-edits"><button class="link" type="button" data-act="edit">Edit answers</button><button class="link" type="button" data-act="chdev">Change device</button></span>` : ''}
@@ -1187,7 +1230,7 @@ async function quoteImageFile(q) {
         cy += lineRow;
       };
       row('Starting value, perfect condition', naira(it.start));
-      it.lines.forEach(([l, amt]) => row(l, amt === null ? 'Checked in store' : `− ${naira(amt)}`));
+      it.lines.forEach(([l, amt]) => row(l, lineAmount(amt)));
     }
     if (multi) {
       g.fillStyle = '#e6ebf0'; g.fillRect(CX, cy + 4, CR - CX, 2);
