@@ -138,7 +138,7 @@ export function summaryText(q, link) {
     if (multi) out.push('', `*Total Value: ${nairaShort(q.value)}*`);
   }
   if (q.compare.length) {
-    out.push('', items.length ? '*Swap Options*' : '*Devices*');
+    out.push('', items.length ? (q.compare.length > 1 ? '*Swap Options*' : '*Swap Device*') : '*Devices*');
     q.compare.forEach((c, i) => {
       const { model, rest } = parts(c.name);
       if (i) out.push('');
