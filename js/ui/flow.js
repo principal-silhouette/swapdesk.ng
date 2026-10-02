@@ -913,7 +913,7 @@ export function sharePage(el, app, { saved, onBack }) {
     <div class="stack q-opts">
       ${opt('image', ICON.download, 'Download Quote as Image', 'Save it to your Photos.')}
       ${opt('walink', ICON.whatsapp, 'Share Quote to WhatsApp', 'Send the quote and its link.')}
-      ${opt('tiktok', ICON.tiktok, 'Share Quote to TikTok', 'Post the quote image.')}
+      ${opt('tiktok', ICON.tiktok, 'Share Quote to TikTok', 'Send it in a TikTok DM.')}
       ${opt('copy', ICON.link, 'Copy Link', 'Come back to it anytime.')}
     </div>`, pills(backPill())).toString();
   el.classList.add('share-pg');
@@ -924,14 +924,10 @@ export function sharePage(el, app, { saved, onBack }) {
     while (n.scrollWidth > n.clientWidth + 0.5 && fs > 12) { fs -= 0.5; n.style.fontSize = `${fs}px`; }
   }));
   // Phones open the share sheet (Save Image, or pick TikTok); computers download the picture.
-  // TikTok gets a plain caption: no WhatsApp *bold* or _italic_ marks.
-  const caption = () => info && `${plainText(summaryText(info.q, ''))}\n\nFull quote: ${info.link}`;
-  const shareImage = async (b, tiktok) => {
-    if (ready) {
-      if (tiktok && caption()) { copy(caption()).then(() => app.toast('Caption copied. Paste it in TikTok.')).catch(() => {}); }
-      deliverImage(ready, app, tiktok ? caption() : '');
-      return;
-    }
+  // The quote as a message: WhatsApp keeps its *bold* and _italic_ marks; TikTok DMs get plain text.
+  const message = (q, link) => `*Swapdesk Quote*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`;
+  const shareImage = async (b) => {
+    if (ready) { deliverImage(ready, app); return; }
     b.disabled = true;
     try { ready = await making; } catch { ready = null; }
     b.disabled = false;
@@ -942,10 +938,17 @@ export function sharePage(el, app, { saved, onBack }) {
   };
   const handlers = {
     image: (b) => shareImage(b),
-    tiktok: (b) => shareImage(b, true),
+    tiktok: async () => {
+      // TikTok has no web link for DMs. Phones: the share sheet, where TikTok sends it as a DM (opened straight from
+      // the tap, so the phone allows it). Computers: copy the message to paste into the DM.
+      const r = info || await saved();
+      const text = plainText(message(r.q, r.link));
+      if (navigator.share && info) { navigator.share({ text }).catch(() => {}); return; }
+      await copy(text); app.toast('Message copied. Paste it in a TikTok DM.');
+    },
     walink: async () => {
       const { q, link } = await saved();
-      location.href = `https://wa.me/?text=${encodeURIComponent(`*My SwapDesk swap quotes*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`)}`;
+      location.href = `https://wa.me/?text=${encodeURIComponent(message(q, link))}`;
     },
     copy: async () => { const { link } = await saved(); await copy(link); app.toast('Link copied'); },
   };
@@ -1103,9 +1106,9 @@ async function quoteImageFile(q) {
 /** Phones: open the share sheet (Save Image puts it in Photos). Must run straight from the tap, so the file is made in advance. */
 /** Strip WhatsApp formatting (*bold*, _italic_) for places that show it literally. */
 function plainText(t) { return t.replace(/\*([^*\n]+)\*/g, '$1').replace(/(^|[\s(])_([^_\n]+)_(?=$|[\s).,])/gm, '$1$2'); }
-function deliverImage(file, app, text = '') {
+function deliverImage(file, app) {
   if (navigator.canShare?.({ files: [file] })) {
-    navigator.share(text ? { files: [file], text } : { files: [file] }).catch((e) => { if (e?.name !== 'AbortError') downloadFile(file, app); });
+    navigator.share({ files: [file] }).catch((e) => { if (e?.name !== 'AbortError') downloadFile(file, app); });
     return;
   }
   downloadFile(file, app);

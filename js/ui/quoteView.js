@@ -6,6 +6,13 @@ import { ICON } from './icons.js';
 import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays } from '../quote.js';
 import { loadQuoteRemote } from '../data.js';
 
+/** The battery range a saved battery reading falls in (the flow asks for a range). */
+function bandFor(b) {
+  if (b === null || b === undefined || b === '') return '';
+  const n = Number(b);
+  return n >= 90 ? '90' : n >= 85 ? '85' : n >= 80 ? '80' : '79';
+}
+
 export function quoteScreen(el, app, p) {
   el.classList.add('wide');
   el.innerHTML = '<p class="eyebrow">Opening your quote…</p>';
@@ -29,9 +36,13 @@ function render(el, app, p, q) {
   const link = p.id ? `${CONFIG.site}?q=${p.id}` : `${CONFIG.site}?s=${p.packed}`;
   const expired = ageDays(q) > CONFIG.quoteValidDays;
   const dev = q.device && cat.byId.get(q.device.id);
-  const today = dev && q.answers ? valueDevice(dev, q.answers, cat.settings) : null;
-  const avail = (id) => { const d = cat.byId.get(id); return d && d.swapInto && d.price > 0 ? d : null; };
-  const changed = (!(q.items && q.items.length > 1) && today && today.accepted && today.value !== q.value) || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
+  const avail = (id) => { const d = cat.byId.get(id); return d && d.swapInto && d.price > 0 && d.stock !== 'soldout' ? d : null; };
+  // Every trade-in device in the quote, re-valued with today's prices and rules.
+  const saved = q.items && q.items.length > 1 ? q.items.map((it) => ({ id: it.id, answers: it.answers, value: it.value }))
+    : dev && q.answers ? [{ id: dev.id, answers: q.answers, value: q.value }] : [];
+  const revalued = saved.map((it) => { const d = cat.byId.get(it.id); return { ...it, d, r: d && it.answers ? valueDevice(d, it.answers, cat.settings) : null }; });
+  const tradeChanged = revalued.some((it) => it.r && it.r.accepted && it.r.value !== it.value);
+  const changed = tradeChanged || q.compare.some((c) => avail(c.id) && avail(c.id).price !== c.price);
 
   const items = q.items && q.items.length > 1 ? q.items
     : q.device ? [{ name: q.device.name, value: q.value, start: q.device.start, answers: q.answers, lines: q.lines || [] }] : [];
@@ -94,18 +105,23 @@ function render(el, app, p, q) {
     }
     if (act === 'today') {
       const { freshAnswers } = await import('./flow.js');
-      const a = q.answers || {};
+      // Put the quote back into the swap flow: every trade-in device with its answers, and the swap devices still on sale.
+      const ui = (a = {}) => ({
+        ...freshAnswers(),
+        icloudLocked: !!a.icloudLocked,
+        batteryBand: bandFor(a.battery),
+        batteryUnknown: a.battery === null || a.battery === undefined,
+        neatness: a.neatness || null, network: a.network || null, faults: a.faults || [], faultsDone: true,
+      });
+      const known = revalued.filter((it) => it.d);
+      const last = known[known.length - 1];
       Object.assign(app.s, {
-        mode: 'swap', cash: false, deviceId: dev ? dev.id : '',
-        answers: {
-          ...freshAnswers(),
-          icloudLocked: dev ? !!a.icloudLocked : null,
-          battery: a.battery === null || a.battery === undefined ? '' : String(a.battery),
-          batteryUnknown: !!dev && (a.battery === null || a.battery === undefined),
-          neatness: a.neatness || null, network: a.network || null, faults: a.faults || [], faultsDone: !!dev,
-        },
+        mode: 'swap', cash: false, adding: false,
+        more: known.slice(0, -1).map((it) => ({ deviceId: it.d.id, answers: ui(it.answers) })),
+        deviceId: last ? last.d.id : '',
+        answers: last ? ui(last.answers) : freshAnswers(),
         compare: q.compare.map((c) => c.id).filter((id) => avail(id)),
-        saved: null,
+        chosen: null, saved: null,
       });
       app.save();
       history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
