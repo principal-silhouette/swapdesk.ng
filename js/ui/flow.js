@@ -912,15 +912,19 @@ function helpMessage(q, link) {
 
 function saved(el, app) {
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
-  sharePage(el, app, { saved: () => ensureSaved(app) });
+  sharePage(el, app, { saved: () => ensureSaved(app), quote: () => quoteNow(app) });
 }
 
 /** The one share page: Download, WhatsApp, TikTok, Copy Link. Used after a new quote and from a reopened quote link. */
-export function sharePage(el, app, { saved, onBack }) {
+export function sharePage(el, app, { saved, onBack, quote }) {
   el.classList.add('choose');
   // Make the picture as soon as the page opens, so the tap can go straight to the share sheet.
   let ready = null, info = null;
-  const making = saved().then((r) => { info = r; return quoteImageFile(r.q); });
+  // The picture is drawn from the quote straight away; it doesn't wait for the quote to be saved online
+  // (that round trip is what made it slow on mobile data). Saving still starts now, for the links.
+  const saving = saved();
+  saving.then((r) => { info = r; }).catch(() => {});
+  const making = (quote ? Promise.resolve(quote()) : saving.then((r) => r.q)).then((q) => quoteImageFile(q));
   making.then((f) => { ready = f; }).catch(() => {});
   const opt = (act, ico, title, sub) => html`<button class="opt" type="button" data-act="${act}"><span class="brand-ico ${act}">${raw(ico)}</span><span class="main"><span class="tt">${title}</span><span class="sub">${sub}</span></span></button>`;
   el.innerHTML = layout(html`
