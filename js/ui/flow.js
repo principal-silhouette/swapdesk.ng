@@ -851,16 +851,24 @@ function quoteNow(app, { onlyChosen = false } = {}) {
   }
   return q;
 }
+// One save per quote: taps that arrive while it's saving share that save, so a slow connection
+// can't create duplicate rows or hand out the long link while the short one is on its way.
+const inFlight = new Map();
 async function ensureSaved(app, extra = {}, opts = {}) {
   const s = app.s;
   const q = quoteNow(app, opts);
   const sig = JSON.stringify({ ...q, created: 0, ...extra });
-  if (s.saved && s.saved.sig === sig) return { q, ...s.saved };
-  // Editing a quote opened from its link updates that quote (same link) instead of making a new one.
-  const r = await saveQuote(q, s.editing ? { ...extra, replaceId: s.editing } : extra);
-  s.saved = { sig, link: r.link, id: r.id, saved: r.saved };
-  app.save();
-  return { q, ...s.saved };
+  if (s.saved && s.saved.sig === sig && s.saved.saved) return { q, ...s.saved };
+  if (!inFlight.has(sig)) {
+    // Editing a quote opened from its link updates that quote (same link) instead of making a new one.
+    const p = saveQuote(q, s.editing ? { ...extra, replaceId: s.editing } : extra).then((r) => {
+      s.saved = { sig, link: r.link, id: r.id, saved: r.saved };
+      app.save();
+      return s.saved;
+    }).finally(() => inFlight.delete(sig));
+    inFlight.set(sig, p);
+  }
+  return { q, ...(await inFlight.get(sig)) };
 }
 
 function finish(el, app) {
@@ -991,10 +999,11 @@ export function sharePage(el, app, { saved, onBack, quote }) {
       await copy(text); app.toast('Message copied. Paste it in a TikTok DM.');
     },
     walink: async () => {
+      if (!info) app.toast('Getting your quote link…');
       const { q, link } = await saved();
       location.href = `https://wa.me/?text=${encodeURIComponent(message(q, link))}`;
     },
-    copy: async () => { const { link } = await saved(); await copy(link); app.toast('Link copied'); },
+    copy: async () => { if (!info) app.toast('Getting your quote link…'); const { link } = await saved(); await copy(link); app.toast('Link copied'); },
   };
   el.onclick = (e) => {
     if (e.target.closest('[data-back]')) { if (onBack) onBack(); else app.back(); return; }

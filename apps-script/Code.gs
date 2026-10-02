@@ -276,11 +276,16 @@ function monthTab_(date) {
 }
 
 function describe_(c) {
-  var n = '₦' + Utilities.formatString('%,d', c.amount || 0);
+  var n = '₦' + commas_(c.amount);
   if (c.kind === 'add') return n + ' to swap';
   if (c.kind === 'receive') return 'we pay ' + n;
   if (c.kind === 'even') return 'even swap';
-  return 'full price ₦' + Utilities.formatString('%,d', c.price || 0);
+  return 'full price ₦' + commas_(c.price);
+}
+
+/** 1785000 → "1,785,000" (Apps Script's formatString doesn't support %,d). */
+function commas_(n) {
+  return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 function newId_() {

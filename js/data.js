@@ -173,7 +173,8 @@ export async function loadCatalog(onUpdate) {
 
 export async function saveQuoteRemote(quote) {
   if (!CONFIG.endpoint) throw new Error('No endpoint');
-  const r = await fetchJSON(CONFIG.endpoint, 10000, {
+  // Google can take a while to wake the script on mobile data; give it time before falling back to a long link.
+  const r = await fetchJSON(CONFIG.endpoint, 30000, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // simple request: no CORS preflight
     body: JSON.stringify({ action: 'saveQuote', quote }),
