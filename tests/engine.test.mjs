@@ -28,6 +28,7 @@ const cases = [
   ['chip unlocked = 70% of network', { ...good, network: 'chip' }, 350000, [['network', 42000]]],
   ['eSIM only, unlocked = 40% of network', { ...good, network: 'esim' }, 368000, [['network', 24000]]],
   ['locked = full network', { ...good, network: 'locked' }, 332000, [['network', 60000]]],
+  ['mobile data issue = same as eSIM locked', { ...good, network: 'nodata' }, 332000, [['network', 60000]]],
   ['no True Tone, blank amount = half screen', { ...good, faults: ['trueTone'] }, 332000, [['trueTone', 60000]]],
   ['bad screen covers True Tone', { ...good, faults: ['screen', 'trueTone'] }, 272000, [['screen', 120000]]],
   ['everything wrong',

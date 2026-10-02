@@ -53,6 +53,7 @@ export const NETWORK = [
   { key: 'esim', label: 'eSIM, unlocked', hint: 'eSIM only (no SIM tray), and works with any network’s eSIM.' },
   { key: 'chip', label: 'Chip unlocked', hint: 'Network locked physical SIM. Works here with an unlock chip or turbo SIM.' },
   { key: 'locked', label: 'eSIM locked', hint: 'eSIM only, tied to one foreign network. Can’t use a local eSIM.' },
+  { key: 'nodata', label: 'Mobile data issue', hint: 'No network or mobile data at all, with any SIM.' },
 ];
 
 // Fault keys match the Site Feed deduction columns.
@@ -182,6 +183,8 @@ export function valueDevice(device, answers = {}, settings = {}) {
     if (answers.network === 'chip') push('network', 'Chip unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
     if (answers.network === 'esim' && !/\bAir\b/.test(device.model || '')) push('network', 'eSIM only', amountFor(device, 'network'), s(settings, 'network.esimShare'));
     if (answers.network === 'locked') push('network', 'eSIM locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
+    // No network at all costs the same as an eSIM-locked phone: either way it can't be used on a local network.
+    if (answers.network === 'nodata') push('network', 'Mobile data issue', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
   }
 
   // Faults
