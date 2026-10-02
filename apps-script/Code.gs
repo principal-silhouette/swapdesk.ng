@@ -18,7 +18,7 @@ var QUOTE_FIRST_ROW = 5;
 
 var SAFE_SETTINGS = [
   'batteryThreshold', 'neatness.spotless', 'neatness.prettyNeat', 'neatness.fewSpots',
-  'neatness.smallDents', 'neatness.rough', 'network.chipShare', 'network.lockedShare',
+  'neatness.smallDents', 'neatness.rough', 'network.chipShare', 'network.esimShare', 'network.lockedShare',
   'trueTone.shareOfScreen', 'rounding.tradeIn', 'rounding.quote', 'compare.maxDevices', 'icloud.locked'
 ];
 var DEDUCTION_KEYS = ['battery', 'body', 'network', 'screen', 'trueTone', 'backGlass', 'faceId',

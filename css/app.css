@@ -1017,3 +1017,17 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .qv-head + .qv-label, .notice + .qv-label { margin-top: 4px !important; }
 .cmp-grid .cmp.slim .n { font-size: 24px; color: var(--brand-deep); }
 .qv-card + .qv-foot { margin-top: 8px !important; }
+/* Share page: brand mark on the left of each option, title and note on one line each */
+.share-pg .q-opts .opt { gap: 14px; padding: 14px 16px; }
+.share-pg .q-opts .opt .tt, .share-pg .q-opts .opt .sub { display: block; white-space: nowrap; overflow: hidden; }
+.q-opts .opt .brand-ico { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; }
+.q-opts .opt .brand-ico svg { width: 22px; height: 22px; }
+.brand-ico.image, .brand-ico.copy { background: #e6f1ff; color: var(--action); }
+.brand-ico.walink { background: #25d366; color: #fff; }
+.brand-ico.tiktok { background: #111; color: #fff; }
+/* Reopened quote: WhatsApp pill */
+.pill.wa, .screen-foot .pill.wa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #1fae55; border-color: #1fae55 !important; color: #fff; }
+.pill.wa svg { width: 20px; height: 20px; flex: none; }
+.share-pg .q-opts { width: 100%; }
+.share-pg .q-opts .opt { min-width: 0; }
+.share-pg .q-opts .opt .tt { font-size: 17px; }

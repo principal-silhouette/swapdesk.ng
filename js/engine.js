@@ -12,7 +12,8 @@ export const DEFAULT_SETTINGS = {
   'neatness.fewSpots': 0.5,
   'neatness.smallDents': 1,
   'neatness.rough': 1.5,
-  'network.chipShare': 0.5,
+  'network.chipShare': 0.6,
+  'network.esimShare': 0.4, // eSIM-only (no SIM tray), unlocked; not the iPhone Air, which is always eSIM-only
   'network.lockedShare': 1,
   'trueTone.shareOfScreen': 0.5,
   'rounding.tradeIn': 2000,
@@ -147,6 +148,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
   // Network
   if (applies(device, 'network')) {
     if (answers.network === 'chip') push('network', 'Chip unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
+    if (answers.network === 'esim' && !/\bAir\b/.test(device.model || '')) push('network', 'eSIM only', amountFor(device, 'network'), s(settings, 'network.esimShare'));
     if (answers.network === 'locked') push('network', 'eSIM locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
   }
 

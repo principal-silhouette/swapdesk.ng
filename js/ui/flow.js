@@ -893,27 +893,45 @@ function helpMessage(q, link) {
 }
 
 function saved(el, app) {
-  const s = app.s;
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
+  sharePage(el, app, { saved: () => ensureSaved(app) });
+}
+
+/** The one share page: Download, WhatsApp, TikTok, Copy Link. Used after a new quote and from a reopened quote link. */
+export function sharePage(el, app, { saved, onBack }) {
   el.classList.add('choose');
   // Make the picture as soon as the page opens, so the tap can go straight to the share sheet.
-  let ready = null;
-  const making = ensureSaved(app).then(({ q }) => quoteImageFile(q));
+  let ready = null, info = null;
+  const making = saved().then((r) => { info = r; return quoteImageFile(r.q); });
   making.then((f) => { ready = f; }).catch(() => {});
+  const opt = (act, ico, title, sub) => html`<button class="opt" type="button" data-act="${act}"><span class="brand-ico ${act}">${raw(ico)}</span><span class="main"><span class="tt">${title}</span><span class="sub">${sub}</span></span></button>`;
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">Save Your Quotes</h2>
       <p class="par">Keep every swap rate you checked, or send them to someone on WhatsApp. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
     </div>
     <div class="stack q-opts">
-      <button class="opt" type="button" data-act="image"><span class="main">Download Quote as Image<span class="sub">Save it to your Photos.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="walink"><span class="main">Share Quote to WhatsApp<span class="sub">Send the quote with its link.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="tiktok"><span class="main">Share Quote to TikTok<span class="sub">Post the quote image on TikTok.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="copy"><span class="main">Copy Link<span class="sub">Come back to your quote anytime.</span></span>${raw(ICON.chevron)}</button>
+      ${opt('image', ICON.download, 'Download Quote as Image', 'Save it to your Photos.')}
+      ${opt('walink', ICON.whatsapp, 'Share Quote to WhatsApp', 'Send the quote and its link.')}
+      ${opt('tiktok', ICON.tiktok, 'Share Quote to TikTok', 'Post the quote image.')}
+      ${opt('copy', ICON.link, 'Copy Link', 'Come back to it anytime.')}
     </div>`, pills(backPill())).toString();
+  el.classList.add('share-pg');
+  document.getElementById('body')?.scrollTo(0, 0);
+  // Keep every title and note on one line, shrinking slightly on narrow phones.
+  requestAnimationFrame(() => el.querySelectorAll('.share-pg .q-opts .tt, .share-pg .q-opts .sub').forEach((n) => {
+    let fs = parseFloat(getComputedStyle(n).fontSize);
+    while (n.scrollWidth > n.clientWidth + 0.5 && fs > 12) { fs -= 0.5; n.style.fontSize = `${fs}px`; }
+  }));
   // Phones open the share sheet (Save Image, or pick TikTok); computers download the picture.
-  const shareImage = async (b) => {
-    if (ready) { deliverImage(ready, app); return; }
+  // TikTok gets a plain caption: no WhatsApp *bold* or _italic_ marks.
+  const caption = () => info && `${plainText(summaryText(info.q, ''))}\n\nFull quote: ${info.link}`;
+  const shareImage = async (b, tiktok) => {
+    if (ready) {
+      if (tiktok && caption()) { copy(caption()).then(() => app.toast('Caption copied. Paste it in TikTok.')).catch(() => {}); }
+      deliverImage(ready, app, tiktok ? caption() : '');
+      return;
+    }
     b.disabled = true;
     try { ready = await making; } catch { ready = null; }
     b.disabled = false;
@@ -922,15 +940,20 @@ function saved(el, app) {
     if (navigator.canShare?.({ files: [ready] })) { app.toast('Image ready. Tap again to share it.'); return; }
     deliverImage(ready, app);
   };
-  wire(el, app, {
+  const handlers = {
     image: (b) => shareImage(b),
-    tiktok: (b) => shareImage(b),
+    tiktok: (b) => shareImage(b, true),
     walink: async () => {
-      const { q, link } = await ensureSaved(app);
+      const { q, link } = await saved();
       location.href = `https://wa.me/?text=${encodeURIComponent(`*My SwapDesk swap quotes*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`)}`;
     },
-    copy: async () => { const { link } = await ensureSaved(app); await copy(link); app.toast('Link copied'); },
-  });
+    copy: async () => { const { link } = await saved(); await copy(link); app.toast('Link copied'); },
+  };
+  el.onclick = (e) => {
+    if (e.target.closest('[data-back]')) { if (onBack) onBack(); else app.back(); return; }
+    const a = e.target.closest('[data-act]');
+    if (a && handlers[a.dataset.act]) handlers[a.dataset.act](a, e);
+  };
 }
 
 /** Draw the quotes as a shareable picture (no libraries): white card, logo, value and each swap. */
@@ -1078,9 +1101,11 @@ async function quoteImageFile(q) {
   return new File([blob], 'swapdesk-quotes.png', { type: 'image/png' });
 }
 /** Phones: open the share sheet (Save Image puts it in Photos). Must run straight from the tap, so the file is made in advance. */
-function deliverImage(file, app) {
+/** Strip WhatsApp formatting (*bold*, _italic_) for places that show it literally. */
+function plainText(t) { return t.replace(/\*([^*\n]+)\*/g, '$1').replace(/(^|[\s(])_([^_\n]+)_(?=$|[\s).,])/gm, '$1$2'); }
+function deliverImage(file, app, text = '') {
   if (navigator.canShare?.({ files: [file] })) {
-    navigator.share({ files: [file] }).catch((e) => { if (e?.name !== 'AbortError') downloadFile(file, app); });
+    navigator.share(text ? { files: [file], text } : { files: [file] }).catch((e) => { if (e?.name !== 'AbortError') downloadFile(file, app); });
     return;
   }
   downloadFile(file, app);

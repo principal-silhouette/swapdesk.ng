@@ -74,8 +74,7 @@ function render(el, app, p, q) {
       </div>` : ''}
     ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
-      <button class="btn green fill" type="button" data-act="wa">${raw(ICON.whatsapp)} Complete on WhatsApp</button>
-      <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill go" type="button" data-act="today">Today’s Prices</button></div>
+      <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill wa" type="button" data-act="wa">${raw(ICON.whatsapp)}WhatsApp</button></div>
       <p class="credit"><b>swapdesk.ng</b> · An Upgrade Brands product</p></div>`.toString();
 
   // Long names (iPads) shrink slightly to stay on one line.
@@ -86,8 +85,12 @@ function render(el, app, p, q) {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'wa') location.href = whatsappURL(whatsappMessage(q, link, q.city));
     if (act === 'share') {
-      const r = await share({ title: 'SwapDesk quote', text: summaryText(q, ''), url: link });
-      if (r === 'copied') app.toast('Quote and link copied');
+      const { sharePage } = await import('./flow.js');
+      const html0 = el.innerHTML, click0 = el.onclick, cls0 = el.className;
+      sharePage(el, app, {
+        saved: () => Promise.resolve({ q, link }),
+        onBack: () => { el.className = cls0; el.innerHTML = html0; el.onclick = click0; document.getElementById('body')?.scrollTo(0, 0); },
+      });
     }
     if (act === 'today') {
       const { freshAnswers } = await import('./flow.js');
