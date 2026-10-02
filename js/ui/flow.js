@@ -171,6 +171,7 @@ function home(el, app) {
   el.classList.add('home');
   el.innerHTML = layout(html`
     <div class="home-intro">
+      <p class="home-kicker">Swap · Trade In · Upgrade</p>
       <h1 class="h-display">The fastest way<br>to <span class="blue">Swap.</span></h1>
       <p class="lead">Trade in the Phone, Watch, Speaker, Console or AirPods you’ve got for the one you love 💙 and get your swap balance in under a minute.</p>
     </div>
