@@ -28,13 +28,13 @@ export const DEFAULT_SETTINGS = {
 
 // Console questions (type Games). Games included and a hacked console are noted and checked in store.
 export const PADS = [
-  { key: '1', label: '1 controller', hint: 'The console with one controller.' },
-  { key: '2', label: '2 or more controllers', hint: 'Adds to your value.' },
+  { key: '1', label: '1 Controller', hint: 'The console with one controller.' },
+  { key: '2', label: '2 or More Controllers', hint: 'Adds to your value.' },
 ];
 export const GAMES = [
-  { key: 'none', label: 'No games', hint: 'Just the console and controller.' },
-  { key: 'few', label: '1 – 2 games', hint: 'Adds ₦5,000.' },
-  { key: 'many', label: '3 games or more', hint: 'Adds ₦10,000.' },
+  { key: 'none', label: 'No Games', hint: 'Just the console and controller.' },
+  { key: 'few', label: '1 – 2 Games', hint: 'Adds ₦5,000.' },
+  { key: 'many', label: '3 Games or More', hint: 'Adds ₦10,000.' },
 ];
 export const isConsole = (d) => d?.type === 'Games';
 // Speakers (Daniel, 2 Oct): no deductions; we only take them in perfect condition.
@@ -42,33 +42,33 @@ export const isSpeaker = (d) => d?.type === 'Speakers';
 
 export const NEATNESS = [
   { key: 'spotless', label: 'Spotless', hint: 'No marks at all, like it just left the box.' },
-  { key: 'prettyNeat', label: 'Pretty neat', hint: 'Faint signs of use you have to look for.' },
-  { key: 'fewSpots', label: 'A few spots & scratches', hint: 'Light scratches you can see at arm’s length.' },
-  { key: 'smallDents', label: 'Small dents & scratches', hint: 'Visible dents or scratches on the frame or screen.' },
-  { key: 'rough', label: 'Pretty rough', hint: 'Deep dents, heavy scratches or chipped edges.' },
+  { key: 'prettyNeat', label: 'Pretty Neat', hint: 'Faint signs of use you have to look for.' },
+  { key: 'fewSpots', label: 'A Few Spots & Scratches', hint: 'Light scratches you can see at arm’s length.' },
+  { key: 'smallDents', label: 'Small Dents & Scratches', hint: 'Visible dents or scratches on the frame or screen.' },
+  { key: 'rough', label: 'Pretty Rough', hint: 'Deep dents, heavy scratches or chipped edges.' },
 ];
 
 export const NETWORK = [
-  { key: 'factory', label: 'Physical SIM, unlocked', hint: 'Takes a SIM card from any network. No chip needed.' },
-  { key: 'esim', label: 'eSIM, unlocked', hint: 'eSIM only (no SIM tray), and works with any network’s eSIM.' },
-  { key: 'chip', label: 'Chip unlocked', hint: 'Network locked physical SIM. Works here with an unlock chip or turbo SIM.' },
-  { key: 'locked', label: 'eSIM locked', hint: 'eSIM only, tied to one foreign network. Can’t use a local eSIM.' },
+  { key: 'factory', label: 'Physical SIM, Unlocked', hint: 'Takes a SIM card from any network. No chip needed.' },
+  { key: 'esim', label: 'eSIM, Unlocked', hint: 'eSIM only (no SIM tray), and works with any network’s eSIM.' },
+  { key: 'chip', label: 'Chip Unlocked', hint: 'Network locked physical SIM. Works here with an unlock chip or turbo SIM.' },
+  { key: 'locked', label: 'eSIM Locked', hint: 'eSIM only, tied to one foreign network. Can’t use a local eSIM.' },
   { key: 'nodata', label: 'Mobile Data Issue', hint: 'No network or mobile data at all, with any SIM.' },
 ];
 
 // Fault keys match the Site Feed deduction columns.
 export const FAULTS = [
-  { key: 'screen', label: 'Faulty screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working. Covers the repair and the value lost to a changed screen.' },
-  { key: 'screenReplaced', label: 'Replaced screen', hint: 'Screen has been changed and is not the original (shows “Unknown Part” on iPhone).' },
-  { key: 'batteryReplaced', label: 'Replaced battery', hint: 'The battery has been changed and is not the original (shows “Unknown Part” or “Non-genuine battery” on iPhone).' },
+  { key: 'screen', label: 'Faulty Screen', hint: 'Cracked glass, lines, dead spots, burn-in or touch not working. Covers the repair and the value lost to a changed screen.' },
+  { key: 'screenReplaced', label: 'Replaced Screen', hint: 'Screen has been changed and is not the original (shows “Unknown Part” on iPhone).' },
+  { key: 'batteryReplaced', label: 'Replaced Battery', hint: 'The battery has been changed and is not the original (shows “Unknown Part” or “Non-genuine battery” on iPhone).' },
   { key: 'trueTone', label: 'No True Tone', hint: 'True Tone is missing from Control Centre or Display settings, usually after a screen change.' },
-  { key: 'backGlass', label: 'Back glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
+  { key: 'backGlass', label: 'Back Glass', hint: 'The glass back is cracked, chipped or has been replaced.' },
   { key: 'faceId', label: 'Face ID', hint: 'Face ID won’t set up, or doesn’t recognise your face.' },
   { key: 'touchId', label: 'Touch ID / Fingerprint', hint: 'The fingerprint sensor doesn’t register or unlock the device.' },
   { key: 'earpiece', label: 'Earpiece', hint: 'Callers sound faint, muffled or crackly when the phone is at your ear.' },
   { key: 'loudspeaker', label: 'Loudspeaker', hint: 'Music, ringtones or speakerphone are quiet, distorted or silent.' },
   { key: 'camera', label: 'Camera', hint: 'Any camera is blurry, black, shaky or won’t focus.' },
-  { key: 'chargingPort', label: 'Charging port / mic', hint: 'Won’t charge, charges only at an angle, or callers can’t hear you.' },
+  { key: 'chargingPort', label: 'Charging Port / Mic', hint: 'Won’t charge, charges only at an angle, or callers can’t hear you.' },
 ];
 
 export const CONDITION_ORDER = [
@@ -148,10 +148,10 @@ export function valueDevice(device, answers = {}, settings = {}) {
   const lines = [];
   if (isConsole(device)) {
     // A console's only questions: controllers, games included, hacked or not.
-    if (answers.pads === '2') lines.push({ key: 'pads', label: '2 or more controllers', amount: -s(settings, 'console.extraPad') });
+    if (answers.pads === '2') lines.push({ key: 'pads', label: '2 or More Controllers', amount: -s(settings, 'console.extraPad') });
     const g = GAMES.find((x) => x.key === answers.games);
-    if (g && g.key !== 'none') lines.push({ key: 'games', label: `${g.label} included`, amount: -s(settings, g.key === 'many' ? 'console.manyGames' : 'console.fewGames') });
-    if (answers.hacked) lines.push({ key: 'hacked', label: 'Hacked / jailbroken', amount: null });
+    if (g && g.key !== 'none') lines.push({ key: 'games', label: `${g.label} Included`, amount: -s(settings, g.key === 'many' ? 'console.manyGames' : 'console.fewGames') });
+    if (answers.hacked) lines.push({ key: 'hacked', label: 'Hacked / Jailbroken', amount: null });
     const total = lines.reduce((a, l) => a + (l.amount || 0), 0);
     const value = Math.max(0, floorTo(start - total, s(settings, 'rounding.quote')));
     return { accepted: true, start, lines, pending: lines.filter((l) => l.amount === null).length, value };
@@ -165,7 +165,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
   const battery = Number(answers.battery);
   if (applies(device, 'battery') && Number.isFinite(battery) && answers.battery !== null && answers.battery !== '' &&
       battery < s(settings, 'batteryThreshold')) {
-    const label = answers.batteryLabel ? `Battery health ${answers.batteryLabel}` : `Battery health ${battery}%`;
+    const label = answers.batteryLabel ? `Battery Health ${answers.batteryLabel}` : `Battery Health ${battery}%`;
     const full = amountFor(device, 'battery');
     if (battery < s(settings, 'battery.fullBelow')) push('battery', label, full);
     else push('battery', label, typeof full === 'number' ? Math.ceil((full * s(settings, 'battery.partialShare')) / 1000) * 1000 : full);
@@ -175,14 +175,14 @@ export function valueDevice(device, answers = {}, settings = {}) {
   const n = NEATNESS.find((x) => x.key === answers.neatness);
   if (n && applies(device, 'body')) {
     const mult = s(settings, `neatness.${n.key}`);
-    if (mult > 0) push('body', `Body: ${n.label.toLowerCase()}`, amountFor(device, 'body'), mult);
+    if (mult > 0) push('body', `Body: ${n.label}`, amountFor(device, 'body'), mult);
   }
 
   // Network
   if (applies(device, 'network')) {
-    if (answers.network === 'chip') push('network', 'Chip unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
-    if (answers.network === 'esim' && !/\bAir\b/.test(device.model || '')) push('network', 'eSIM only', amountFor(device, 'network'), s(settings, 'network.esimShare'));
-    if (answers.network === 'locked') push('network', 'eSIM locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
+    if (answers.network === 'chip') push('network', 'Chip Unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
+    if (answers.network === 'esim' && !/\bAir\b/.test(device.model || '')) push('network', 'eSIM Only', amountFor(device, 'network'), s(settings, 'network.esimShare'));
+    if (answers.network === 'locked') push('network', 'eSIM Locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
     // No network at all costs the same as an eSIM-locked phone: either way it can't be used on a local network.
     if (answers.network === 'nodata') push('network', 'Mobile Data Issue', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
   }

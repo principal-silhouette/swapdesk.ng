@@ -68,7 +68,7 @@ function render(el, app, p, q) {
       })}</div>` : ''}
     ${items.length ? html`
       ${!q.compare.length ? html`<div class="dev-value qv-total">
-        <p class="tiv-label">${multi ? `Total Trade-In Value · ${items.length} devices` : 'Your Trade-In Value'}</p>
+        <p class="tiv-label">${multi ? `Total Trade-In Value · ${items.length} Devices` : 'Your Trade-In Value'}</p>
         <p class="big-num">${naira(q.value)}</p>
         <p class="small">Estimated. Confirmed when we check ${multi ? 'the devices' : 'the device'} in store.</p>
       </div>` : ''}
@@ -78,7 +78,7 @@ function render(el, app, p, q) {
           <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${naira(it.value)}</span></p>
           <p class="qv-cond">${[rest, answersText(it.answers)].filter(Boolean).join(' · ')}</p>
           ${!multi ? html`<ul class="lines">
-            <li><span>Starting value, perfect condition</span><span>${naira(it.start)}</span></li>
+            <li><span>Starting Value, Perfect Condition</span><span>${naira(it.start)}</span></li>
             ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${lineAmount(amount)}</span></li>`)}
           </ul>` : ''}
         </div>`; })}

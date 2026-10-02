@@ -121,7 +121,7 @@ export function answersText(a) {
   const net = NETWORK.find((x) => x.key === a.network);
   if (net) bits.push(net.label);
   const f = (a.faults || []).map((k) => FAULTS.find((x) => x.key === k)?.label).filter(Boolean);
-  bits.push(f.length ? `Issues: ${f.join(', ')}` : 'No issues');
+  bits.push(f.length ? `Issues: ${f.join(', ')}` : 'No Issues');
   return bits.join(' · ');
 }
 
@@ -134,7 +134,7 @@ export function summaryText(q, link) {
   const device = (it) => {
     const { model, rest } = parts(it.name);
     const a = it.answers || {};
-    const battery = a.batteryLabel ? `Battery ${a.batteryLabel.replace(' and above', '+')}` : a.battery !== null && a.battery !== undefined && a.battery !== '' ? `Battery ${a.battery}%` : '';
+    const battery = a.batteryLabel ? `Battery ${a.batteryLabel.replace(/ and above/i, '+')}` : a.battery !== null && a.battery !== undefined && a.battery !== '' ? `Battery ${a.battery}%` : '';
     const cond = answersText({ ...a, batteryLabel: '', battery: null });
     return [[`${model}${rest[0] ? `, ${rest[0]}` : ''}`, battery].filter(Boolean).join(' '), cond].filter(Boolean);
   };
@@ -170,7 +170,7 @@ export function whatsappMessage(q, link, city) {
   const lines = ['Hi SwapDesk, I’d like to swap.', ''];
   lines.push(summaryText(q, ''));
   if (city) lines.push('', `City: ${city}`);
-  lines.push('', `Full quote: ${link}`);
+  lines.push('', `Full Quote: ${link}`);
   return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
 

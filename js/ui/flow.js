@@ -56,10 +56,10 @@ export function ownDevice(app) {
 
 // Battery health is picked as a range; each range is valued the same way inside the engine.
 export const BATTERY_BANDS = [
-  { key: '90', label: '90% and above', hint: 'Like new', value: 95 },
+  { key: '90', label: '90% and Above', hint: 'Like new', value: 95 },
   { key: '85', label: '85% – 89%', hint: 'No deduction', value: 87 },
   { key: '80', label: '80% – 84%', hint: 'Partial battery deduction applies', value: 82 },
-  { key: '79', label: '79% or less', hint: 'Full battery deduction applies', value: 75 },
+  { key: '79', label: '79% or Less', hint: 'Full battery deduction applies', value: 75 },
 ];
 const ORIGIN_LABEL = {
   'Brand New': ['Brand new, still sealed', 'Never opened or activated.'],
@@ -554,7 +554,7 @@ const GROUP = {
   games: () => ['Games', 'Any game discs included? 1–2 add ₦5,000, 3 or more add ₦10,000'],
   hacked: () => ['Hacked', 'Jailbroken, modded or custom firmware?'],
   // Speakers (Daniel, 2 Oct)
-  perfect: () => ['Faults or damage', 'Not charging, poor sound, cracks or water damage?'],
+  perfect: () => ['Faults or Damage', 'Not charging, poor sound, cracks or water damage?'],
 };
 const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked', 'perfect'];
 
@@ -570,15 +570,15 @@ function conditions(el, app) {
   const touched = new Set(a.touched || []);
   // What each group is set to, shown under its name once it's been filled.
   const now = (k) => {
-    if (k === 'icloud') return a.icloudLocked === true ? (apple ? 'iCloud locked' : 'Account locked') : a.icloudLocked === false ? 'Not locked' : '';
-    if (k === 'battery') return a.batteryUnknown ? 'Not sure' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
+    if (k === 'icloud') return a.icloudLocked === true ? (apple ? 'iCloud Locked' : 'Account Locked') : a.icloudLocked === false ? 'Not Locked' : '';
+    if (k === 'battery') return a.batteryUnknown ? 'Not Sure' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
     if (k === 'network') return NETWORK.find((n) => n.key === a.network)?.label || '';
     if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
     if (k === 'pads') return PADS.find((x) => x.key === a.pads)?.label || '';
     if (k === 'games') return GAMES.find((x) => x.key === a.games)?.label || '';
     if (k === 'perfect') return a.perfect === false ? 'Has a fault' : a.perfect === true ? 'Works perfectly' : '';
     if (k === 'hacked') return a.hacked === true ? 'Hacked' : a.hacked === false ? 'Not hacked' : '';
-    if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything works' : ''); }
+    if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything Works' : ''); }
     return '';
   };
   const r = valueDevice(d, engineAnswers({ ...defaultsFor(a) }, d), app.catalog.settings);
@@ -663,7 +663,7 @@ function question(el, app, params) {
           <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and check <b>Maximum Capacity</b>.') : 'Pick the range that matches your device. If it doesn’t show battery health, choose Not sure.'}</p></div>
           <div class="stack q-opts" role="radiogroup">
             ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key, `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
-            ${opt(a.batteryUnknown, 'data-act="unsure"', 'Not sure', 'We’ll check it in store.')}
+            ${opt(a.batteryUnknown, 'data-act="unsure"', 'Not Sure', 'We’ll check it in store.')}
           </div>`;
       case 'neatness':
         return html`<h2 class="h-title">How does it look?</h2>
@@ -680,7 +680,7 @@ function question(el, app, params) {
             ${q.faults.map((f) => html`<button class="opt" type="button" role="checkbox" aria-checked="${a.faults.includes(f.key) ? 'true' : 'false'}" data-act="fault" data-v="${f.key}">
               <span class="main">${f.label}<span class="sub">${f.hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`)}
             <button class="opt" type="button" role="checkbox" aria-checked="${a.faultsDone && !a.faults.length ? 'true' : 'false'}" data-act="allgood">
-              <span class="main">Everything works</span><span class="tick box" aria-hidden="true"></span></button>
+              <span class="main">Everything Works</span><span class="tick box" aria-hidden="true"></span></button>
           </div>`;
       case 'pads':
         return html`<div class="head-block"><h2 class="h-title">How many controllers?</h2>
@@ -800,7 +800,7 @@ function value(el, app) {
     ${isConsole(d) && s.answers.games && s.answers.games !== 'none' ? html`<p class="small">Games are reviewed in store to confirm they can be swapped.</p>` : ''}
     <div class="card"${s.answers.quick ? raw(' hidden') : ''}>
       <ul class="lines">
-        <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
+        <li><span>Starting Value, Perfect Condition</span><span>${naira(r.start)}</span></li>
         ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmount(l.amount)}</span></li>`)}
         ${r.lines.length ? html`<li class="total"><span>Your Trade-In Value</span><span>${naira(r.value)}</span></li>` : ''}
       </ul>
@@ -912,13 +912,13 @@ function compare(el, app) {
     ${trades.length ? html`${trades.map((t, i) => html`<div class="mine slim${trades.length > 1 ? ' multi' : ''}">
         <div class="mine-top">
           <span class="main"><b>${t.d.model}</b></span>
-          <span class="val">${t.r.accepted ? naira(t.r.value) : 'Not accepted'}</span>
+          <span class="val">${t.r.accepted ? naira(t.r.value) : 'Not Accepted'}</span>
           <button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>
         </div>
-        <p class="mine-cond">${[t.d.storage, t.answers.quick ? 'Good working condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</p>
+        <p class="mine-cond">${[t.d.storage, t.answers.quick ? 'Good Working Condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</p>
         ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${naira(t.r.value)}</summary>
           <ul class="lines">
-            <li><span>Starting value, perfect condition</span><span>${naira(t.r.start)}</span></li>
+            <li><span>Starting Value, Perfect Condition</span><span>${naira(t.r.start)}</span></li>
             ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmount(l.amount)}</span></li>`)}
             <li class="total"><span>Trade-In Value</span><span>${naira(t.r.value)}</span></li>
           </ul>
@@ -1247,7 +1247,7 @@ async function quoteImageFile(q) {
         text(v, CR, cy + 33, bold ? 800 : 500, 26, bold ? '#18577b' : '#4a4f57', 'right');
         cy += lineRow;
       };
-      row('Starting value, perfect condition', naira(it.start));
+      row('Starting Value, Perfect Condition', naira(it.start));
       it.lines.forEach(([l, amt]) => row(l, lineAmount(amt)));
     }
     if (multi) {
