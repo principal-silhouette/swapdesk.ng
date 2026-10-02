@@ -906,21 +906,25 @@ function saved(el, app) {
       <p class="par">Keep every swap rate you checked, or send them to someone on WhatsApp. Quotes are valid for ${CONFIG.quoteValidDays} days.</p>
     </div>
     <div class="stack q-opts">
-      <button class="opt" type="button" data-act="image"><span class="main">Download as Image<span class="sub">Save a picture of your quotes to your Photos.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="walink"><span class="main">Share Link on WhatsApp<span class="sub">Send a link that opens these exact quotes.</span></span>${raw(ICON.chevron)}</button>
-      <button class="opt" type="button" data-act="copy"><span class="main">Copy Link<span class="sub">Paste it anywhere to come back later.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="image"><span class="main">Download Quote as Image<span class="sub">Save it to your Photos.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="walink"><span class="main">Share Quote to WhatsApp<span class="sub">Send the quote with its link.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="tiktok"><span class="main">Share Quote to TikTok<span class="sub">Post the quote image on TikTok.</span></span>${raw(ICON.chevron)}</button>
+      <button class="opt" type="button" data-act="copy"><span class="main">Copy Link<span class="sub">Come back to your quote anytime.</span></span>${raw(ICON.chevron)}</button>
     </div>`, pills(backPill())).toString();
+  // Phones open the share sheet (Save Image, or pick TikTok); computers download the picture.
+  const shareImage = async (b) => {
+    if (ready) { deliverImage(ready, app); return; }
+    b.disabled = true;
+    try { ready = await making; } catch { ready = null; }
+    b.disabled = false;
+    if (!ready) { app.toast('Couldn’t make the image. Try Copy Link instead.'); return; }
+    // The tap that started this has expired; ask for one more so the phone lets us open the share sheet.
+    if (navigator.canShare?.({ files: [ready] })) { app.toast('Image ready. Tap again to share it.'); return; }
+    deliverImage(ready, app);
+  };
   wire(el, app, {
-    image: async (b) => {
-      if (ready) { deliverImage(ready, app); return; }
-      b.disabled = true;
-      try { ready = await making; } catch { ready = null; }
-      b.disabled = false;
-      if (!ready) { app.toast('Couldn’t make the image. Try Share Link instead.'); return; }
-      // The tap that started this has expired; ask for one more so the phone lets us open the share sheet.
-      if (navigator.canShare?.({ files: [ready] })) { app.toast('Image ready. Tap Download as Image again to save it.'); return; }
-      deliverImage(ready, app);
-    },
+    image: (b) => shareImage(b),
+    tiktok: (b) => shareImage(b),
     walink: async () => {
       const { q, link } = await ensureSaved(app);
       location.href = `https://wa.me/?text=${encodeURIComponent(`*My SwapDesk swap quotes*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`)}`;

@@ -141,7 +141,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 }
 @media (min-width: 601px) { .screen-foot { padding-bottom: 16px; } }
 .screen-foot .pills { margin: 0; flex-wrap: nowrap; gap: 12px; }
-.screen-foot .pill { flex: 1 1 0; min-width: 0; padding: 0 14px; font-size: 16px; font-weight: 500; white-space: nowrap; }
+.screen-foot .pill { flex: 1 1 0; min-width: 0; padding: 0 14px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .screen-foot .pill { background: rgba(255, 255, 255, 0.92); }
 .screen-foot .pill.go { font-weight: 600; background: var(--action); }
 .list-meta { margin: 0 0 2px; }
@@ -218,7 +218,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 
 .pills { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 22px 0 6px; }
 .pill {
-  min-width: 132px; height: 50px; padding: 0 26px; border-radius: 30px; font-size: 1em; text-align: center;
+  min-width: 132px; height: 50px; padding: 0 26px; border-radius: 30px; font-size: 1em; text-align: center; font-weight: 600;
   background: transparent; color: var(--action); border: 2px solid lightblue;
   transition: background-color 0.15s ease, transform 0.12s ease-out;
 }
