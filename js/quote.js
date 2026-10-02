@@ -110,7 +110,7 @@ export function answersText(a) {
     // Console
     bits.push(PADS.find((x) => x.key === a.pads)?.label || '');
     const g = GAMES.find((x) => x.key === a.games);
-    if (g) bits.push(g.label);
+    if (g) bits.push(g.key === 'none' ? g.label : `${g.label} (reviewed in store)`);
     bits.push(a.hacked ? 'Hacked' : 'Not hacked');
     return bits.filter(Boolean).join(' · ');
   }

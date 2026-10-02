@@ -548,7 +548,7 @@ const GROUP = {
   faults: () => ['Others', 'Screen, Face ID, cameras & more'],
   // Consoles (Daniel, 2 Oct)
   pads: () => ['Controllers', 'Valued with 1 controller. 2 or more adds to it'],
-  games: () => ['Games', 'Any game discs included?'],
+  games: () => ['Games', 'Any game discs included? 1–2 add ₦5,000, 3 or more add ₦10,000'],
   hacked: () => ['Hacked', 'Jailbroken, modded or custom firmware?'],
 };
 const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked'];
@@ -681,7 +681,8 @@ function question(el, app, params) {
       case 'games':
         return html`<div class="head-block"><h2 class="h-title">Any games included?</h2>
           <p class="par">Game discs you’re trading in with the console.</p></div>
-          <div class="stack q-opts" role="radiogroup">${GAMES.map((g) => opt(a.games === g.key, `data-act="games" data-v="${g.key}"`, g.label, g.hint))}</div>`;
+          <div class="stack q-opts" role="radiogroup">${GAMES.map((g) => opt(a.games === g.key, `data-act="games" data-v="${g.key}"`, g.label, g.hint))}</div>
+          <p class="small">We review the games in store to confirm they can be swapped.</p>`;
       case 'hacked':
         return html`<div class="head-block"><h2 class="h-title">Is it hacked?</h2>
           <p class="par">Jailbroken, modded or running custom firmware.</p></div>
@@ -780,6 +781,7 @@ function value(el, app) {
     </div>
     ${devValue(d, r.value, r.start)}
     <p class="small">Estimated. Confirmed when we check your device in store, and slightly negotiable.</p>
+    ${isConsole(d) && s.answers.games && s.answers.games !== 'none' ? html`<p class="small">Games are reviewed in store to confirm they can be swapped.</p>` : ''}
     <div class="card"${s.answers.quick ? raw(' hidden') : ''}>
       <ul class="lines">
         <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>

@@ -137,6 +137,7 @@ test('console: 1 controller keeps the value, 2+ adds 10,000, games and hacked ar
   const ps4 = { id: 'playstation-4-fu', type: 'Games', model: 'PlayStation 4', storage: '', condition: 'Foreign USED', tradeIn: true, tradeInValue: 100000, deductions: {} };
   assert.equal(valueDevice(ps4, { pads: '1', games: 'none', hacked: false }, settings).value, 100000);
   const two = valueDevice(ps4, { pads: '2', games: 'few', hacked: true }, settings);
-  assert.equal(two.value, 110000);
-  assert.deepEqual(two.lines.map((l) => [l.key, l.amount]), [['pads', -10000], ['games', null], ['hacked', null]]);
+  assert.equal(two.value, 115000);
+  assert.deepEqual(two.lines.map((l) => [l.key, l.amount]), [['pads', -10000], ['games', -5000], ['hacked', null]]);
+  assert.equal(valueDevice(ps4, { pads: '1', games: 'many', hacked: false }, settings).value, 110000);
 });

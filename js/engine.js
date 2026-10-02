@@ -21,6 +21,9 @@ export const DEFAULT_SETTINGS = {
   'compare.maxDevices': 6,
   // Daniel, 2 Oct: consoles are valued with one controller; 2 or more controllers add 10,000.
   'console.extraPad': 10000,
+  // Daniel, 2 Oct: 1–2 games add 5,000; 3 or more add 10,000. Games are reviewed in store.
+  'console.fewGames': 5000,
+  'console.manyGames': 10000,
 };
 
 // Console questions (type Games). Games included and a hacked console are noted and checked in store.
@@ -30,8 +33,8 @@ export const PADS = [
 ];
 export const GAMES = [
   { key: 'none', label: 'No games', hint: 'Just the console and controller.' },
-  { key: 'few', label: '1 – 2 games', hint: 'Discs we check in store.' },
-  { key: 'many', label: '3 games or more', hint: 'Discs we check in store.' },
+  { key: 'few', label: '1 – 2 games', hint: 'Adds ₦5,000.' },
+  { key: 'many', label: '3 games or more', hint: 'Adds ₦10,000.' },
 ];
 export const isConsole = (d) => d?.type === 'Games';
 
@@ -141,7 +144,7 @@ export function valueDevice(device, answers = {}, settings = {}) {
     // A console's only questions: controllers, games included, hacked or not.
     if (answers.pads === '2') lines.push({ key: 'pads', label: '2 or more controllers', amount: -s(settings, 'console.extraPad') });
     const g = GAMES.find((x) => x.key === answers.games);
-    if (g && g.key !== 'none') lines.push({ key: 'games', label: `${g.label} included`, amount: null });
+    if (g && g.key !== 'none') lines.push({ key: 'games', label: `${g.label} included`, amount: -s(settings, g.key === 'many' ? 'console.manyGames' : 'console.fewGames') });
     if (answers.hacked) lines.push({ key: 'hacked', label: 'Hacked / jailbroken', amount: null });
     const total = lines.reduce((a, l) => a + (l.amount || 0), 0);
     const value = Math.max(0, floorTo(start - total, s(settings, 'rounding.quote')));
