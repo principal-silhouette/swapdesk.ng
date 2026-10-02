@@ -1102,7 +1102,7 @@ export function sharePage(el, app, { saved, onBack, quote }) {
   // The quote as a message: WhatsApp keeps its *bold* and _italic_ marks; TikTok DMs get plain text.
   const message = (q, link) => `*Swap Quote*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`;
   // Every image tap also copies a short message with the quote link, to paste under the picture.
-  const linkText = (r) => `Here’s your Swap Quote. You can see the full quote here: ${r.link}`;
+  const linkText = (r) => `You can see the full quote here: ${r.link}`;
   const copyLink = () => {
     try {
       const done = () => app.toast('Quote link copied. Paste it with the image.');
