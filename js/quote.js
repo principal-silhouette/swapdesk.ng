@@ -142,7 +142,7 @@ export function summaryText(q, link) {
     q.compare.forEach((c, i) => {
       const { model, rest } = parts(c.name);
       if (i) out.push('');
-      out.push(`• ${model}${rest[0] ? `, ${rest[0]}` : ''}${rest[1] ? ` ${rest[1]}` : ''}`);
+      out.push(`${q.compare.length > 1 ? '• ' : ''}${model}${rest[0] ? `, ${rest[0]}` : ''}${rest[1] ? ` ${rest[1]}` : ''}`);
       out.push(!items.length ? nairaShort(c.price)
         : c.kind === 'add' ? `${nairaShort(c.amount)} to Swap`
         : c.kind === 'receive' ? `You get ${nairaShort(c.amount)} back`
