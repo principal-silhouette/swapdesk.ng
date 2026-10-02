@@ -414,7 +414,8 @@ function picker(el, app, params) {
           $(`[data-id="${CSS.escape(id)}"]`, el)?.focus({ preventScroll: true });
         } else {
           const cur = ownDevice(app); const nd = app.catalog.byId.get(id);
-          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; if (!s.adding) { s.compare = []; s.city = ''; } }
+          // Changing the trade-in device keeps the swap devices already picked (a new quote from Home clears them).
+          if (!cur || cur.model !== nd.model || cur.storage !== nd.storage) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; }
           const d = app.catalog.byId.get(id);
           Object.assign(st, { type: d.type, brand: d.brand, model: d.model, search: '' });
           app.save();
@@ -785,7 +786,7 @@ function compare(el, app) {
             ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
             <li class="total"><span>Trade-In Value</span><span>${naira(t.r.value)}</span></li>
           </ul>
-          ${t.current ? html`<button class="link" type="button" data-act="edit">Edit answers</button>` : ''}
+          ${t.current ? html`<span class="mine-edits"><button class="link" type="button" data-act="edit">Edit answers</button><button class="link" type="button" data-act="chdev">Change device</button></span>` : ''}
         </details>` : html`<p class="mine-cond">${t.r.reason || ''}</p>`}
       </div>`)}
       ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total Trade-In Value</span><b>${naira(tv)}</b></div>` : ''}
@@ -799,7 +800,14 @@ function compare(el, app) {
   wire(el, app, {
     val: () => app.go('value'),
     edit: () => app.go('q', { i: 0 }),
-    own: () => startFlow(app, 'swap'),
+    // Wrong storage or model: pick again from the same model; the swap devices stay.
+    chdev: () => { s.pick = { ...freshPick(), type: d?.type || '', brand: d?.brand || '', model: d?.model || '' }; app.save(); app.go('pick'); },
+    own: () => {
+      // After the trade-in was removed: value a device but keep the swap devices already picked.
+      if (!s.compare.length) { startFlow(app, 'swap'); return; }
+      Object.assign(s, { mode: 'swap', cash: false, deviceId: '', answers: freshAnswers(), saved: null, pick: freshPick() });
+      app.save(); app.go('pick');
+    },
     rmtrade: (b) => { removeTrade(app, Number(b.dataset.i)); app.refresh(); },
     add: () => { s.add = { ...freshPick(), type: d?.type || '' }; app.go('pick', { purpose: 'add' }); },
     pick: (b) => { s.chosen = b.dataset.id; s.cash = false; app.save(); app.go('finish'); },
