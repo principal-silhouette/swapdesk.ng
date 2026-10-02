@@ -37,6 +37,8 @@ export const GAMES = [
   { key: 'many', label: '3 games or more', hint: 'Adds ₦10,000.' },
 ];
 export const isConsole = (d) => d?.type === 'Games';
+// Speakers (Daniel, 2 Oct): no deductions; we only take them in perfect condition.
+export const isSpeaker = (d) => d?.type === 'Speakers';
 
 export const NEATNESS = [
   { key: 'spotless', label: 'Spotless', hint: 'No marks at all, like it just left the box.' },
@@ -130,6 +132,9 @@ export function valueDevice(device, answers = {}, settings = {}) {
   if (!device) return { accepted: false, reason: 'Pick your device first.', start: 0, lines: [], pending: 0, value: 0 };
   if (answers.icloudLocked) {
     return { accepted: false, reason: 'We can’t accept devices that are iCloud or activation locked. Remove the lock and check again.', start: 0, lines: [], pending: 0, value: 0 };
+  }
+  if (isSpeaker(device) && answers.perfect === false) {
+    return { accepted: false, reason: 'We only swap speakers in perfect condition.', start: 0, lines: [], pending: 0, value: 0 };
   }
   if (!device.tradeIn) {
     return { accepted: false, reason: 'We don’t take this device as a trade-in yet.', start: 0, lines: [], pending: 0, value: 0 };

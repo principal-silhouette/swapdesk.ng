@@ -2,7 +2,7 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, isSpeaker, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
 import { html, raw, naira, lineAmount, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
@@ -17,7 +17,7 @@ const KEY = 'swapdesk.state.v2';
 
 export const freshAnswers = () => ({
   batteryBand: '', origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
-  pads: '', games: '', hacked: null,
+  pads: '', games: '', hacked: null, perfect: null,
 });
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
 
@@ -86,6 +86,7 @@ function defaultRow(rows) {
 function questionsFor(device) {
   // Consoles get their own short check: controllers, games included, hacked or not.
   if (isConsole(device)) return [{ key: 'pads' }, { key: 'games' }, { key: 'hacked' }];
+  if (isSpeaker(device)) return [{ key: 'perfect' }];
   const qs = [{ key: 'icloud' }];
 
   if (applies(device, 'battery')) qs.push({ key: 'battery' });
@@ -106,6 +107,7 @@ function answered(q, a) {
     case 'pads': return !!a.pads;
     case 'games': return !!a.games;
     case 'hacked': return a.hacked === true || a.hacked === false;
+    case 'perfect': return a.perfect === true;
     default: return true;
   }
 }
@@ -118,6 +120,7 @@ export function engineAnswers(a, device) {
     network: device.type === 'Phones' ? a.network : 'factory',
     faults: a.faults,
     ...(isConsole(device) ? { pads: a.pads, games: a.games, hacked: a.hacked === true } : {}),
+    ...(isSpeaker(device) ? { perfect: a.perfect !== false } : {}),
   };
 }
 function currentValue(app) {
@@ -498,7 +501,7 @@ function confirm(el, app) {
   wire(el, app, {
     change: () => app.go('pick'),
     // Consoles skip the phone shortcut and go straight to their three questions.
-    ok: () => (isConsole(d) ? app.go('conds') : app.go('good')),
+    ok: () => (isConsole(d) || isSpeaker(d) ? app.go('conds') : app.go('good')),
   });
 }
 
@@ -550,8 +553,10 @@ const GROUP = {
   pads: () => ['Controllers', 'Valued with 1 controller. 2 or more adds to it'],
   games: () => ['Games', 'Any game discs included? 1–2 add ₦5,000, 3 or more add ₦10,000'],
   hacked: () => ['Hacked', 'Jailbroken, modded or custom firmware?'],
+  // Speakers (Daniel, 2 Oct)
+  perfect: () => ['Faults or damage', 'Not charging, poor sound, cracks or water damage?'],
 };
-const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked'];
+const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked', 'perfect'];
 
 function conditions(el, app) {
   const d = ownDevice(app);
@@ -571,6 +576,7 @@ function conditions(el, app) {
     if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
     if (k === 'pads') return PADS.find((x) => x.key === a.pads)?.label || '';
     if (k === 'games') return GAMES.find((x) => x.key === a.games)?.label || '';
+    if (k === 'perfect') return a.perfect === false ? 'Has a fault' : a.perfect === true ? 'Works perfectly' : '';
     if (k === 'hacked') return a.hacked === true ? 'Hacked' : a.hacked === false ? 'Not hacked' : '';
     if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything works' : ''); }
     return '';
@@ -578,17 +584,18 @@ function conditions(el, app) {
   const r = valueDevice(d, engineAnswers({ ...defaultsFor(a) }, d), app.catalog.settings);
   el.innerHTML = layout(html`
     <div class="head-block">
-      <h2 class="h-title">${isConsole(d) ? 'About your console' : 'Any issues with it?'}</h2>
-      <p class="par">${isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
+      <h2 class="h-title">${isConsole(d) ? 'About your console' : isSpeaker(d) ? 'About your speaker' : 'Any issues with it?'}</h2>
+      <p class="par">${isSpeaker(d) ? `We only swap speakers in perfect condition. Tap below only if something’s wrong with your ${d.model}.` : isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
     </div>
     <div class="stack q-opts conds" role="group">
       ${groups.map((k) => { const [name, hint] = GROUP[k](apple); const on = touched.has(k); return html`
         <button class="opt" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="grp" data-v="${k}">
           <span class="main">${name}<span class="sub">${on && now(k) ? now(k) : hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`; })}
     </div>
-    ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>`
+    ${isSpeaker(d) && a.perfect === false ? html`<div class="stop left"><b>We only swap speakers in perfect condition.</b>Get it fixed first, then come back for your value.</div>`
+      : a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>`
       : r.accepted ? html`<p class="small conds-val">Value so far: <b>${naira(r.value)}</b></p>` : ''}`,
-  pills(backPill(), html`<button class="pill go" type="button" data-act="proceed" ${a.icloudLocked === true ? 'disabled' : ''}>Proceed</button>`)).toString();
+  pills(backPill(), html`<button class="pill go" type="button" data-act="proceed" ${a.icloudLocked === true || (isSpeaker(d) && a.perfect === false) ? 'disabled' : ''}>Proceed</button>`)).toString();
   wire(el, app, {
     grp: (b) => app.go('q', { k: b.dataset.v }),
     proceed: () => {
@@ -611,6 +618,7 @@ function defaultsFor(a) {
     pads: a.pads || '1',
     games: a.games || 'none',
     hacked: a.hacked === true,
+    perfect: a.perfect !== false,
   };
 }
 
@@ -683,6 +691,13 @@ function question(el, app, params) {
           <p class="par">Game discs you’re trading in with the console.</p></div>
           <div class="stack q-opts" role="radiogroup">${GAMES.map((g) => opt(a.games === g.key, `data-act="games" data-v="${g.key}"`, g.label, g.hint))}</div>
           <p class="small">We review the games in store to confirm they can be swapped.</p>`;
+      case 'perfect':
+        return html`<div class="head-block"><h2 class="h-title">Is it in perfect condition?</h2>
+          <p class="par">It charges, pairs, plays clearly at full volume, and has no cracks or water damage.</p></div>
+          <div class="stack q-opts" role="radiogroup">
+            ${opt(a.perfect === true, 'data-act="perfect" data-v="yes"', 'Yes, it works perfectly')}
+            ${opt(a.perfect === false, 'data-act="perfect" data-v="no"', 'No, it has a fault or damage')}</div>
+          ${a.perfect === false ? html`<div class="stop left"><b>We only swap speakers in perfect condition.</b>Get it fixed first, then come back for your value.</div>` : ''}`;
       case 'hacked':
         return html`<div class="head-block"><h2 class="h-title">Is it hacked?</h2>
           <p class="par">Jailbroken, modded or running custom firmware.</p></div>
@@ -742,6 +757,7 @@ function question(el, app, params) {
     pads: (b) => set((x) => { x.pads = b.dataset.v; }, true),
     games: (b) => set((x) => { x.games = b.dataset.v; }, true),
     hacked: (b) => set((x) => { x.hacked = b.dataset.v === 'yes'; }, true),
+    perfect: (b) => set((x) => { x.perfect = b.dataset.v === 'yes'; }, true),
     next,
   });
   el.addEventListener('input', (e) => {
