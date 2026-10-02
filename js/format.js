@@ -4,6 +4,28 @@ const nf = new Intl.NumberFormat('en-NG', { maximumFractionDigits: 0 });
 export const naira = (n) => `₦${nf.format(Math.round(n || 0))}`;
 /** A breakdown line: a deduction (− ₦), an addition (+ ₦, stored as a negative), or checked in store. */
 export const lineAmount = (n) => (n === null || n === undefined ? 'Checked in store' : n < 0 ? `+ ${naira(-n)}` : `− ${naira(n)}`);
+/** Lighter figures for quotes: ₦ 470K, ₦ 1.785M (the full figure if it isn't whole thousands). */
+export const nairaK = (n) => {
+  const v = Math.round(n || 0);
+  if (!v) return '₦ 0';
+  if (v % 100) return naira(v);
+  if (v >= 1e6 && v % 1000 === 0) return `₦ ${(v / 1e6).toFixed(3).replace(/\.?0+$/, '')}M`;
+  return `₦ ${String(v / 1000)}K`; // ₦ 24.5K, ₦ 104.3K
+};
+export const lineAmountK = (n) => (n === null || n === undefined ? 'Checked in store' : n < 0 ? `+ ${nairaK(-n)}` : `− ${nairaK(n)}`);
+/** "Value for Your Phone": the device word from its type, or guessed from its name. */
+export const deviceWord = (typeOrName = '') => {
+  const t = String(typeOrName);
+  const byType = { Phones: 'Phone', Tablets: 'Tablet', Watches: 'Watch', AirPods: 'AirPods', Speakers: 'Speaker', Games: 'Console', Laptops: 'Laptop' };
+  if (byType[t]) return byType[t];
+  if (/watch/i.test(t)) return 'Watch';
+  if (/ipad|\btab\b/i.test(t)) return 'Tablet';
+  if (/airpods|buds/i.test(t)) return 'AirPods';
+  if (/playstation|xbox|nintendo|switch/i.test(t)) return 'Console';
+  if (/jbl|speaker|harman|boombox|charge|flip/i.test(t)) return 'Speaker';
+  if (/macbook|laptop/i.test(t)) return 'Laptop';
+  return 'Phone';
+};
 
 
 

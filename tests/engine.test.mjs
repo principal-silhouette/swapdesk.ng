@@ -82,7 +82,7 @@ test('swap terms: add, receive, even, never negative', () => {
   assert.deepEqual(swapTerms({ price: 500000 }, 392000), { kind: 'add', amount: 108000, price: 500000 });
   assert.deepEqual(swapTerms({ price: 380000 }, 392000), { kind: 'receive', amount: 12000, price: 380000 });
   assert.equal(swapTerms({ price: 392000 }, 392000).kind, 'even');
-  assert.equal(termsLabel(swapTerms({ price: 392000 }, 392000)), 'Even swap');
+  assert.equal(termsLabel(swapTerms({ price: 392000 }, 392000)), 'Even Swap');
   assert.equal(swapTerms({ price: null }, 1).kind, 'unavailable');
 });
 

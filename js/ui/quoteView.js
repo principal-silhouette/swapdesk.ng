@@ -1,7 +1,7 @@
 // A saved quote, read-only, exactly as quoted. Offers today's figures when they differ.
 import { CONFIG } from '../config.js';
 import { valueDevice, termsLabel } from '../engine.js';
-import { html, raw, naira, lineAmount, dateLabel, $ } from '../format.js';
+import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, dateLabel, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays, saveQuote } from '../quote.js';
 import { loadQuoteRemote } from '../data.js';
@@ -74,26 +74,26 @@ function render(el, app, p, q) {
         const [model, rest] = nameParts(c.name);
         return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
           <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
-          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsLabel(c) : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
+          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${nairaK(c.price)}</span><span class="kn"><span class="n">${items.length ? nairaK(c.kind === 'even' ? 0 : c.amount) : nairaK(c.price)}</span><span class="k">${items.length ? termsLabel(c) : 'Price'}</span></span></span>
         </article>`;
       })}</div>` : ''}
     ${items.length ? html`
       ${!q.compare.length ? html`<div class="dev-value qv-total">
         <p class="tiv-label">${multi ? `Total Trade-In Value · ${items.length} Devices` : 'Your Trade-In Value'}</p>
-        <p class="big-num">${naira(q.value)}</p>
+        <p class="big-num">${nairaK(q.value)}</p>
         <p class="small">Estimated. Confirmed when we check ${multi ? 'the devices' : 'the device'} in store.</p>
       </div>` : ''}
       <p class="qv-label">${multi ? 'Your Trade-In Devices' : 'Your Trade-In'}</p>
       <div class="qv-card">
         ${items.map((it) => { const [m, rest] = nameParts(it.name); return html`<div class="qv-dev">
-          <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${naira(it.value)}</span></p>
+          <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${nairaK(it.value)}<small>Value for Your ${deviceWord(it.name)}</small></span></p>
           <p class="qv-cond">${[rest, answersText(it.answers)].filter(Boolean).join(' · ')}</p>
           ${!multi ? html`<ul class="lines">
-            <li><span>Starting Value, Perfect Condition</span><span>${naira(it.start)}</span></li>
-            ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${lineAmount(amount)}</span></li>`)}
+            <li><span>Starting Value, Perfect Condition</span><span>${nairaK(it.start)}</span></li>
+            ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${lineAmountK(amount)}</span></li>`)}
           </ul>` : ''}
         </div>`; })}
-        ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total Trade-In Value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}
+        ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total Trade-In Value</strong></span><span class="qv-val">${nairaK(q.value)}</span></p>` : ''}
       </div>` : ''}
     ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">

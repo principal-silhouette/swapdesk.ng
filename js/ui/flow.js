@@ -4,7 +4,7 @@ import { CONFIG, CITIES } from '../config.js';
 import {
   NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, isSpeaker, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
-import { html, raw, naira, lineAmount, variantName, conditionLabel, $, $$ } from '../format.js';
+import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -900,7 +900,7 @@ function compare(el, app) {
     // Three lines: what it is · price and what it takes to swap · proceed.
     return html`<article class="cmp slim ${t ? t.kind : ''}">
       <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
-      <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${naira(x.price)}</span><span class="kn"><span class="k">${t ? termsLabel(t) : 'Price'}</span> <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span></span></span>
+      <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${nairaK(x.price)}</span><span class="kn"><span class="n">${t ? nairaK(t.kind === 'even' ? 0 : t.amount) : nairaK(x.price)}</span><span class="k">${t ? termsLabel(t) : 'Price'}</span></span></span>
       ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
     </article>`;
@@ -913,20 +913,20 @@ function compare(el, app) {
     ${trades.length ? html`${trades.map((t, i) => html`<div class="mine slim${trades.length > 1 ? ' multi' : ''}">
         <div class="mine-top">
           <span class="main"><b>${t.d.model}</b></span>
-          <span class="val">${t.r.accepted ? naira(t.r.value) : 'Not Accepted'}</span>
+          <span class="val">${t.r.accepted ? nairaK(t.r.value) : 'Not Accepted'}</span>
           <button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>
         </div>
-        <p class="mine-cond">${[t.d.storage, t.answers.quick ? 'Good Working Condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</p>
-        ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${naira(t.r.value)}</summary>
+        <p class="mine-cond"><span class="c">${[t.d.storage, t.answers.quick ? 'Good Working Condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</span>${t.r.accepted ? html`<small class="vx">Value for Your ${deviceWord(t.d.type)}</small>` : ''}</p>
+        ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${nairaK(t.r.value)}</summary>
           <ul class="lines">
-            <li><span>Starting Value, Perfect Condition</span><span>${naira(t.r.start)}</span></li>
-            ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmount(l.amount)}</span></li>`)}
-            <li class="total"><span>Trade-In Value</span><span>${naira(t.r.value)}</span></li>
+            <li><span>Starting Value, Perfect Condition</span><span>${nairaK(t.r.start)}</span></li>
+            ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${lineAmountK(l.amount)}</span></li>`)}
+            <li class="total"><span>Trade-In Value</span><span>${nairaK(t.r.value)}</span></li>
           </ul>
           ${t.current ? html`<span class="mine-edits"><button class="link" type="button" data-act="edit">Edit answers</button><button class="link" type="button" data-act="chdev">Change device</button></span>` : ''}
         </details>` : html`<p class="mine-cond">${t.r.reason || ''}</p>`}
       </div>`)}
-      ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total Trade-In Value</span><b>${naira(tv)}</b></div>` : ''}
+      ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total Trade-In Value</span><b>${nairaK(tv)}</b></div>` : ''}
 `
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
@@ -1107,7 +1107,7 @@ function chosenCard(app) {
   const t = swapTerms(x, total);
   return html`<div class="mine chosen">
     <div class="mine-top"><span class="main"><span class="eyebrow-s">Swapping into</span><b>${x.model}</b><span class="sub">${variantName(x)}</span><button class="link chg" type="button" data-act="change">Change device</button></span>
-    <span class="val"><small>${termsLabel(t)}</small>${naira(t.kind === 'even' ? 0 : t.amount)}</span></div></div>`;
+    <span class="val">${nairaK(t.kind === 'even' ? 0 : t.amount)}<small>${termsLabel(t)}</small></span></div></div>`;
 }
 
 function helpMessage(q, link) {
@@ -1218,10 +1218,10 @@ async function quoteImageFile(q) {
   const lineRow = 48;
   measure.font = font(400, 26);
   const subOf = (it) => { const rest = it.name.split(' · ').slice(1).join(' · '); return multi ? [rest, answersText(it.answers)].filter(Boolean).join(' · ') : rest; };
-  const subLines = items.map((it) => wrap(measure, subOf(it), IW - 80));
-  const nameLines = items.map((it) => { measure.font = font(800, 34); const vW = measure.measureText(naira(it.value)).width; measure.font = font(700, 34); return wrap(measure, it.name.split(' · ')[0], IW - 80 - vW - 30); });
-  const rowH = subLines.map((l, i) => 56 + (nameLines[i].length - 1) * 42 + l.length * 34 + (multi ? 18 : 0));
-  const amtOf = (cmp) => naira(items.length ? (cmp.kind === 'even' ? 0 : cmp.amount) : cmp.price);
+  const subLines = items.map((it) => wrap(measure, subOf(it), IW - 80 - 330));
+  const nameLines = items.map((it) => { measure.font = font(800, 34); const vW = measure.measureText(nairaK(it.value)).width; measure.font = font(700, 34); return wrap(measure, it.name.split(' · ')[0], IW - 80 - vW - 30); });
+  const rowH = subLines.map((l, i) => Math.max(56 + (nameLines[i].length - 1) * 42 + l.length * 34, 92) + (multi ? 18 : 0));
+  const amtOf = (cmp) => nairaK(items.length ? (cmp.kind === 'even' ? 0 : cmp.amount) : cmp.price);
   const swapLines = q.compare.map((cmp) => { measure.font = font(800, 54); const aW = measure.measureText(amtOf(cmp)).width; measure.font = font(700, 36); return wrap(measure, cmp.name.split(' · ')[0], IW - 80 - aW - 36); });
   const swapH = swapLines.map((l) => 176 + (l.length - 1) * 42);
   const breakdown = multi ? 0 : (items[0]?.lines.length || 0) + 1;
@@ -1269,7 +1269,7 @@ async function quoteImageFile(q) {
   const drawTrade = () => {
     if (hero) {
       text(multi ? `TOTAL TRADE-IN VALUE · ${items.length} DEVICES` : 'YOUR TRADE-IN VALUE', W / 2, y + 40, 700, 26, '#18577b', 'center');
-      text(naira(q.value), W / 2, y + 160, 800, 118, '#18577b', 'center');
+      text(nairaK(q.value), W / 2, y + 160, 800, 118, '#18577b', 'center');
       y += H_HERO;
     }
     label(multi ? 'YOUR TRADE-IN DEVICES' : 'YOUR TRADE-IN', y + 36);
@@ -1281,9 +1281,11 @@ async function quoteImageFile(q) {
     items.forEach((it, i) => {
       if (i) { g.fillStyle = '#edf1f5'; g.fillRect(CX, cy - 10, CR - CX, 2); }
       const [nm, ...rest] = it.name.split(' · ');
-      g.font = font(700, 34); const vW = (() => { g.font = font(800, 34); return g.measureText(naira(it.value)).width; })();
       nameLines[i].forEach((ln, k) => text(ln, CX, cy + 38 + k * 42, 700, 32, '#1d1d1f'));
-      text(naira(it.value), CR, cy + 38, 800, 32, '#18577b', 'right');
+      text(nairaK(it.value), CR, cy + 38, 800, 34, '#18577b', 'right');
+      g.letterSpacing = '1.5px';
+      text(`VALUE FOR YOUR ${deviceWord(it.name).toUpperCase()}`, CR, cy + 72, 700, 18, '#5a7fa0', 'right');
+      g.letterSpacing = '0px';
       const sy = (nameLines[i].length - 1) * 42;
       subLines[i].forEach((ln, k) => text(ln, CX, cy + sy + 76 + k * 34, 400, 25, '#6a6a70'));
       cy += rowH[i];
@@ -1297,13 +1299,13 @@ async function quoteImageFile(q) {
         text(v, CR, cy + 33, bold ? 800 : 500, 26, bold ? '#18577b' : '#4a4f57', 'right');
         cy += lineRow;
       };
-      row('Starting Value, Perfect Condition', naira(it.start));
-      it.lines.forEach(([l, amt]) => row(l, lineAmount(amt)));
+      row('Starting Value, Perfect Condition', nairaK(it.start));
+      it.lines.forEach(([l, amt]) => row(l, lineAmountK(amt)));
     }
     if (multi) {
       g.fillStyle = '#e6ebf0'; g.fillRect(CX, cy + 4, CR - CX, 2);
       text('Total Trade-In Value', CX, cy + 52, 700, 30, '#1d1d1f');
-      text(naira(q.value), CR, cy + 52, 800, 32, '#18577b', 'right');
+      text(nairaK(q.value), CR, cy + 52, 800, 32, '#18577b', 'right');
     }
     y += cardH;
   };
@@ -1319,12 +1321,14 @@ async function quoteImageFile(q) {
       const amt = amtOf(cmp);
       swapLines[i].forEach((ln, k) => text(ln, CX, y + 62 + k * 42, 700, 34, '#1d1d1f'));
       text(cmp.dealNote || rest.join(' · '), CX, y + ex + 104, 400, 26, '#4a4f57');
-      if (items.length) text(`Price ${naira(cmp.price)}`, CX, y + ex + 142, 400, 26, '#4a4f57');
+      if (items.length) text(`Price ${nairaK(cmp.price)}`, CX, y + ex + 142, 400, 26, '#4a4f57');
       const mid = y + hh / 2;
+      const col = cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b';
+      // The figure first, then what it means in plain words underneath.
+      text(amt, CR, mid + 14, 800, 54, col, 'right');
       g.letterSpacing = '1.5px';
-      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, mid - 22, 700, 21, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
+      text(items.length ? termsLabel(cmp).toUpperCase() : 'PRICE', CR, mid + 50, 700, 19, col, 'right');
       g.letterSpacing = '0px';
-      text(amt, CR, mid + 38, 800, 54, cmp.kind === 'receive' || cmp.kind === 'even' ? '#0a7d45' : '#18577b', 'right');
       y += hh + GAP;
     });
     y -= GAP;

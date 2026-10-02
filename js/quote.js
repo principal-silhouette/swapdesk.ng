@@ -1,7 +1,7 @@
 // Quotes: build, encode to a link, decode, share and hand off to WhatsApp.
 import { CONFIG } from './config.js';
 import { NEATNESS, NETWORK, FAULTS, PADS, GAMES } from './engine.js';
-import { naira, deviceName } from './format.js';
+import { naira, nairaK, deviceName } from './format.js';
 import { saveQuoteRemote } from './data.js';
 
 export function buildQuote({ device, answers, result, compare, city }) {
@@ -97,12 +97,7 @@ export function termsText(c) {
 }
 
 /** Short naira for messages: ₦ 305K, ₦ 1.785M. Falls back to the full figure if it isn't whole thousands. */
-export function nairaShort(n) {
-  const v = Math.round(n || 0);
-  if (v % 1000) return naira(v);
-  if (v >= 1e6) return `₦ ${(v / 1e6).toFixed(3).replace(/\.?0+$/, '')}M`;
-  return `₦ ${v / 1000}K`;
-}
+export const nairaShort = nairaK;
 
 export function answersText(a) {
   if (!a) return '';

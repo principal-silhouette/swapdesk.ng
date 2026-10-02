@@ -1041,3 +1041,16 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .conds-val { text-align: center; margin-top: 4px; } .conds-val b { color: var(--ink); }
 /* Home: tiny brand line above the headline */
 .home-kicker { margin: 0 0 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5a7fa0; text-align: center; }
+/* Figures first, then what they mean underneath (BALANCE TO SWAP, VALUE FOR YOUR PHONE) */
+.cmp .kn .k { margin-top: 3px; padding-top: 0; font-size: 11px; letter-spacing: 0.06em; }
+.mine-top .val small, .qv-val small { display: block; margin-top: 2px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); text-align: right; white-space: nowrap; }
+.mine-top .val, .qv-val { text-align: right; }
+.mine.chosen .val small { margin-top: 2px; }
+/* Trade-in card: condition on the left, what the figure means on the right, under the amount */
+.mine.slim .mine-cond { display: flex; align-items: baseline; gap: 10px; }
+.mine.slim .mine-cond .c { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mine.slim .mine-how[open] .mine-cond .c, .mine.slim .mine-cond .c { display: block; }
+.mine-cond .vx { flex: none; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.mine.slim .mine-top { padding-right: 34px; }
+/* Swap cards: the condition line wraps instead of running under the figure */
+.cmp.slim .row2 .p { white-space: normal; }
