@@ -207,8 +207,8 @@ function picker(el, app, params) {
   const devices = add ? targets(app) : listRows(app.catalog, 'trade-in');
   const cat = app.catalog;
   const byOrder = (a, b) =>
-    (cat.seriesOrder.get(a.series) ?? 1e9) - (cat.seriesOrder.get(b.series) ?? 1e9) ||
-    (cat.modelOrder.get(a.model) ?? 1e9) - (cat.modelOrder.get(b.model) ?? 1e9) || variantOrder(a, b);
+    (cat.groupOrder.get(a.series) ?? 1e9) - (cat.groupOrder.get(b.series) ?? 1e9) ||
+    (cat.nameOrder.get(a.model) ?? 1e9) - (cat.nameOrder.get(b.model) ?? 1e9) || variantOrder(a, b);
   const types = [...new Set(devices.map((d) => d.type))];
   const max = Number(cat.settings['compare.maxDevices']) || 6;
 

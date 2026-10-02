@@ -30,8 +30,8 @@ const applyFilters = (rows, f) => rows.filter((d) => (!f.type || d.type === f.ty
 
 function groupBySeries(rows, catalog) {
   const sorted = [...rows].sort((a, b) =>
-    (catalog.seriesOrder.get(a.series) ?? 1e9) - (catalog.seriesOrder.get(b.series) ?? 1e9) ||
-    (catalog.modelOrder.get(a.model) ?? 1e9) - (catalog.modelOrder.get(b.model) ?? 1e9) || variantOrder(a, b));
+    (catalog.groupOrder.get(a.series) ?? 1e9) - (catalog.groupOrder.get(b.series) ?? 1e9) ||
+    (catalog.nameOrder.get(a.model) ?? 1e9) - (catalog.nameOrder.get(b.model) ?? 1e9) || variantOrder(a, b));
   const groups = [];
   for (const d of sorted) {
     const g = groups[groups.length - 1];
