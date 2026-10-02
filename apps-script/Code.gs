@@ -224,7 +224,7 @@ function getQuote_(id) {
 
 function describe_(c) {
   var n = '₦' + Utilities.formatString('%,d', c.amount || 0);
-  if (c.kind === 'add') return 'you add ' + n;
+  if (c.kind === 'add') return n + ' to swap';
   if (c.kind === 'receive') return 'we pay ' + n;
   if (c.kind === 'even') return 'even swap';
   return 'full price ₦' + Utilities.formatString('%,d', c.price || 0);

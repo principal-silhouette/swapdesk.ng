@@ -736,7 +736,7 @@ function compare(el, app) {
         <button class="x" type="button" aria-label="Remove" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button></article>`;
     }
     const t = tv === null ? null : swapTerms(x, tv);
-    // Three lines: what it is · price and what you add · proceed.
+    // Three lines: what it is · price and what it takes to swap · proceed.
     return html`<article class="cmp slim ${t ? t.kind : ''}">
       <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
       <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${naira(x.price)}</span><span class="kn"><span class="k">${t ? termsLabel(t) : 'Price'}</span> <span class="n">${t ? naira(t.kind === 'even' ? 0 : t.amount) : naira(x.price)}</span></span></span>
@@ -925,7 +925,7 @@ export function sharePage(el, app, { saved, onBack }) {
   }));
   // Phones open the share sheet (Save Image, or pick TikTok); computers download the picture.
   // The quote as a message: WhatsApp keeps its *bold* and _italic_ marks; TikTok DMs get plain text.
-  const message = (q, link) => `*Swapdesk Quote*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`;
+  const message = (q, link) => `*Swap Quote*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`;
   const shareImage = async (b) => {
     if (ready) { deliverImage(ready, app); return; }
     b.disabled = true;
@@ -1070,7 +1070,7 @@ async function quoteImageFile(q) {
   };
 
   const drawSwaps = () => {
-    label(items.length ? 'WHAT YOU PAY TO SWAP' : 'DEVICES', y + 36);
+    label(items.length ? 'YOUR SWAP OPTIONS' : 'DEVICES', y + 36);
     y += H_LABEL;
     q.compare.forEach((cmp, i) => {
       const hh = swapH[i], ex = hh - 176;

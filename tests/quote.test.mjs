@@ -19,10 +19,11 @@ test('fallback link round-trips a six-device quote', () => {
 
 test('summary and WhatsApp text read cleanly, no minus signs or decimals', () => {
   const t = whatsappMessage(q, 'https://swapdesk.ng/?q=SD-ABC234', 'Port Harcourt');
-  assert.match(t, /Trade-in value: ₦250,000/);
-  assert.match(t, /you add ₦1,750,000/);
+  assert.match(t, /Value: ₦ 250K/);
+  assert.match(t, /₦ 1\.75M to Swap/);
+  assert.doesNotMatch(t, /you add|you pay/i);
   assert.match(t, /\?q=SD-ABC234/);
-  assert.doesNotMatch(t, /-₦|\.00/);
+  assert.doesNotMatch(t, /-₦|\.00\b/);
   const r = summaryText({ ...q, compare: [{ ...q.compare[0], kind: 'receive', amount: 12000 }] }, '');
-  assert.match(r, /we pay you ₦12,000/);
+  assert.match(r, /You get ₦ 12K back/);
 });

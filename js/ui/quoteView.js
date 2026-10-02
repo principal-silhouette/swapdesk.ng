@@ -1,6 +1,6 @@
 // A saved quote, read-only, exactly as quoted. Offers today's figures when they differ.
 import { CONFIG } from '../config.js';
-import { valueDevice } from '../engine.js';
+import { valueDevice, termsLabel } from '../engine.js';
 import { html, raw, naira, dateLabel, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays } from '../quote.js';
@@ -56,13 +56,13 @@ function render(el, app, p, q) {
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
     ${q.compare.length ? html`
-      <p class="qv-label">${items.length ? 'What you pay to swap' : 'Devices'}</p>
+      <p class="qv-label">${items.length ? 'Your swap options' : 'Devices'}</p>
       <div class="cmp-grid">${q.compare.map((c) => {
         const gone = !avail(c.id);
         const [model, rest] = nameParts(c.name);
         return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
           <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
-          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsText(c).replace(/ ₦[\d,]+$/, '') : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
+          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${naira(c.price)}</span><span class="kn"><span class="k">${items.length ? termsLabel(c) : 'Price'}</span> <span class="n">${items.length ? naira(c.kind === 'even' ? 0 : c.amount) : naira(c.price)}</span></span></span>
         </article>`;
       })}</div>` : ''}
     ${items.length ? html`

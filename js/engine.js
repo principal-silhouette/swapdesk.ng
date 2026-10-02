@@ -186,7 +186,7 @@ export function swapTerms(target, tradeValue) {
 }
 
 export function termsLabel(t) {
-  if (t.kind === 'add') return 'You add';
+  if (t.kind === 'add') return 'To swap';
   if (t.kind === 'receive') return 'We pay you';
   if (t.kind === 'even') return 'Even swap';
   return 'Not available';

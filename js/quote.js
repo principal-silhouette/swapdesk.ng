@@ -84,10 +84,18 @@ export async function saveQuote(q, extra = {}) {
 // ---- text ----
 
 export function termsText(c) {
-  if (c.kind === 'add') return `you add ${naira(c.amount)}`;
+  if (c.kind === 'add') return `${naira(c.amount)} to swap`;
   if (c.kind === 'receive') return `we pay you ${naira(c.amount)}`;
   if (c.kind === 'even') return 'even swap';
   return `${naira(c.price)}`;
+}
+
+/** Short naira for messages: ₦ 305K, ₦ 1.785M. Falls back to the full figure if it isn't whole thousands. */
+export function nairaShort(n) {
+  const v = Math.round(n || 0);
+  if (v % 1000) return naira(v);
+  if (v >= 1e6) return `₦ ${(v / 1e6).toFixed(3).replace(/\.?0+$/, '')}M`;
+  return `₦ ${v / 1000}K`;
 }
 
 export function answersText(a) {
@@ -105,23 +113,41 @@ export function answersText(a) {
 }
 
 export function summaryText(q, link) {
-  // WhatsApp text: no indented lines (they wrap badly), *bold* headings, one fact per line.
+  // Message text (WhatsApp keeps the *bold*; TikTok strips it). Only what a customer needs, one idea per line:
+  // the phone and its storage, its condition, then each swap with what it takes to swap, never "you pay".
   const out = [];
-  const nm = (name) => name.replace(/ · /g, ', ');
+  const parts = (name) => { const [m, ...r] = name.split(' · '); return { model: m.replace(/^iPhone\s+/, ''), rest: r }; };
   const items = q.items && q.items.length > 1 ? q.items : q.device ? [{ name: q.device.name, value: q.value, answers: q.answers }] : [];
+  const device = (it) => {
+    const { model, rest } = parts(it.name);
+    const a = it.answers || {};
+    const battery = a.batteryLabel ? `Battery ${a.batteryLabel.replace(' and above', '+')}` : a.battery !== null && a.battery !== undefined && a.battery !== '' ? `Battery ${a.battery}%` : '';
+    const cond = answersText({ ...a, batteryLabel: '', battery: null });
+    return [[`${model}${rest[0] ? `, ${rest[0]}` : ''}`, battery].filter(Boolean).join(' '), cond].filter(Boolean);
+  };
   if (items.length) {
-    out.push(items.length > 1 ? `*Trading in ${items.length} devices*` : '*My device*');
+    const multi = items.length > 1;
+    out.push(multi ? '*My devices:*' : '*My device:*');
     items.forEach((it, i) => {
       if (i) out.push('');
-      out.push(`${items.length > 1 ? `${i + 1}. ` : ''}${nm(it.name)}: *${naira(it.value)}*`);
-      const at = answersText(it.answers);
-      if (at) out.push(`_${at}_`);
+      const [line1, line2] = device(it);
+      out.push(`${multi ? `${i + 1}. ` : ''}${line1}`);
+      if (line2) out.push(line2);
+      out.push(`Value: ${nairaShort(it.value)}`);
     });
-    out.push('', `*${items.length > 1 ? 'Total trade-in value' : 'Trade-in value'}: ${naira(q.value)}*`);
+    if (multi) out.push('', `*Total value: ${nairaShort(q.value)}*`);
   }
   if (q.compare.length) {
     out.push('', items.length ? '*Swap options*' : '*Devices*');
-    q.compare.forEach((c) => out.push(`• ${nm(c.name)}: ${items.length ? termsText(c) : naira(c.price)}`));
+    q.compare.forEach((c, i) => {
+      const { model, rest } = parts(c.name);
+      if (i) out.push('');
+      out.push(`• ${model}${rest[0] ? `, ${rest[0]}` : ''}${rest[1] ? ` ${rest[1]}` : ''}`);
+      out.push(!items.length ? nairaShort(c.price)
+        : c.kind === 'add' ? `${nairaShort(c.amount)} to Swap`
+        : c.kind === 'receive' ? `You get ${nairaShort(c.amount)} back`
+        : c.kind === 'even' ? 'Even swap' : nairaShort(c.price));
+    });
   }
   if (link) out.push('', link);
   return out.join('\n');
