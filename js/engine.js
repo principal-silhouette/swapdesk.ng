@@ -12,7 +12,7 @@ export const DEFAULT_SETTINGS = {
   'neatness.fewSpots': 0.5,
   'neatness.smallDents': 1,
   'neatness.rough': 1.5,
-  'network.chipShare': 0.6,
+  'network.chipShare': 0.7,
   'network.esimShare': 0.4, // eSIM-only (no SIM tray), unlocked; not the iPhone Air, which is always eSIM-only
   'network.lockedShare': 1,
   'trueTone.shareOfScreen': 0.5,

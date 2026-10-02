@@ -25,14 +25,14 @@ const cases = [
   ['battery 79% or less: full new battery', { ...good, battery: 79 }, 352000, [['battery', 40000]]],
   ['a few spots = half body', { ...good, neatness: 'fewSpots' }, 377000, [['body', 15000]]],
   ['pretty rough = 1.5 × body', { ...good, neatness: 'rough' }, 347000, [['body', 45000]]],
-  ['chip unlocked = 60% of network', { ...good, network: 'chip' }, 356000, [['network', 36000]]],
+  ['chip unlocked = 70% of network', { ...good, network: 'chip' }, 350000, [['network', 42000]]],
   ['eSIM only, unlocked = 40% of network', { ...good, network: 'esim' }, 368000, [['network', 24000]]],
   ['locked = full network', { ...good, network: 'locked' }, 332000, [['network', 60000]]],
   ['no True Tone, blank amount = half screen', { ...good, faults: ['trueTone'] }, 332000, [['trueTone', 60000]]],
   ['bad screen covers True Tone', { ...good, faults: ['screen', 'trueTone'] }, 272000, [['screen', 120000]]],
   ['everything wrong',
     { battery: 70, neatness: 'smallDents', network: 'chip', faults: ['screen', 'backGlass', 'faceId'] },
-    392000 - 40000 - 30000 - 36000 - 120000 - 50000 - 80000, null],
+    392000 - 40000 - 30000 - 42000 - 120000 - 50000 - 80000, null],
 ];
 
 for (const [name, answers, expected, lines] of cases) {
