@@ -52,6 +52,7 @@ function render(el, app, p, q) {
     <div class="head-block qv-head">
       <h2 class="h-title">${items.length ? 'Your Swap Quote' : 'Your Comparison'}</h2>
       <p class="par">${p.id ? `${p.id} · ` : ''}${dateLabel(q.created)} · valid for ${CONFIG.quoteValidDays} days</p>
+      <button class="link qv-edit" type="button" data-act="edit">Edit Quote</button>
     </div>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
@@ -103,7 +104,7 @@ function render(el, app, p, q) {
         onBack: () => { el.className = cls0; el.innerHTML = html0; el.onclick = click0; document.getElementById('body')?.scrollTo(0, 0); },
       });
     }
-    if (act === 'today') {
+    if (act === 'today' || act === 'edit') {
       const { freshAnswers } = await import('./flow.js');
       // Put the quote back into the swap flow: every trade-in device with its answers, and the swap devices still on sale.
       const ui = (a = {}) => ({
@@ -122,6 +123,8 @@ function render(el, app, p, q) {
         answers: last ? ui(last.answers) : freshAnswers(),
         compare: q.compare.map((c) => c.id).filter((id) => avail(id)),
         chosen: null, saved: null,
+        // Saving after an edit updates this quote and keeps its link.
+        editing: p.id || '',
       });
       app.save();
       history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');

@@ -182,7 +182,7 @@ function startFlow(app, mode) {
   const s = app.s;
   s.mode = mode;
   // Every start from Home is a new quote: no device, answers or swap choices carried over.
-  Object.assign(s, { deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, cash: false });
+  Object.assign(s, { deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, cash: false, editing: '' });
   s.pick = freshPick();
   app.save();
   app.go('pick');
@@ -191,7 +191,7 @@ function startFlow(app, mode) {
 /** Deep link from the Trade-In Values list (?device=id). */
 function startWith(app, id) {
   const s = app.s;
-  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; s.more = []; s.adding = false; }
+  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; s.more = []; s.adding = false; s.editing = ''; }
   s.mode = 'trade';
   app.save();
   history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
@@ -856,7 +856,8 @@ async function ensureSaved(app, extra = {}, opts = {}) {
   const q = quoteNow(app, opts);
   const sig = JSON.stringify({ ...q, created: 0, ...extra });
   if (s.saved && s.saved.sig === sig) return { q, ...s.saved };
-  const r = await saveQuote(q, extra);
+  // Editing a quote opened from its link updates that quote (same link) instead of making a new one.
+  const r = await saveQuote(q, s.editing ? { ...extra, replaceId: s.editing } : extra);
   s.saved = { sig, link: r.link, id: r.id, saved: r.saved };
   app.save();
   return { q, ...s.saved };
@@ -956,7 +957,20 @@ export function sharePage(el, app, { saved, onBack, quote }) {
   // Phones open the share sheet (Save Image, or pick TikTok); computers download the picture.
   // The quote as a message: WhatsApp keeps its *bold* and _italic_ marks; TikTok DMs get plain text.
   const message = (q, link) => `*Swap Quote*\n\n${summaryText(q, '')}\n\nOpen the full quote: ${link}`;
+  // Every image tap also copies a short message with the quote link, to paste under the picture.
+  const linkText = (r) => `Here’s your Swap Quote. You can see the full quote here: ${r.link}`;
+  const copyLink = () => {
+    try {
+      const done = () => app.toast('Quote link copied. Paste it with the image.');
+      if (info) { navigator.clipboard.writeText(linkText(info)).then(done, () => {}); return; }
+      // The link may still be saving: hand the clipboard a promise so the tap still counts on iPhone.
+      if (window.ClipboardItem && navigator.clipboard?.write) {
+        navigator.clipboard.write([new ClipboardItem({ 'text/plain': saving.then((r) => new Blob([linkText(r)], { type: 'text/plain' })) })]).then(done, () => {});
+      } else saving.then((r) => copy(linkText(r))).then(done, () => {});
+    } catch { /* clipboard not available */ }
+  };
   const shareImage = async (b) => {
+    copyLink();
     if (ready) { deliverImage(ready, app); return; }
     b.disabled = true;
     try { ready = await making; } catch { ready = null; }

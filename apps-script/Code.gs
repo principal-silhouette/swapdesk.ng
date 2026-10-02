@@ -5,6 +5,7 @@
  *   GET  ?action=catalog          → devices, deductions and rules (cached 5 minutes)
  *   GET  ?action=quote&id=SD-XXX  → a saved quote, exactly as the customer saw it
  *   POST {action:"saveQuote", quote:{…}} (Content-Type text/plain) → { ok, id, link }
+ *        quote.replaceId = SD-XXX updates that quote in place (an edited quote keeps its link)
  *
  * Only customer-safe data leaves the sheet. Margins, supply prices, bands and
  * keep rates are never returned.
@@ -183,8 +184,12 @@ function saveQuote_(q) {
     var sh = SpreadsheetApp.getActive().getSheetByName('Quotes');
     var last = Math.max(sh.getLastRow(), QUOTE_FIRST_ROW - 1);
     var ids = last >= QUOTE_FIRST_ROW ? sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 1).getValues().map(function (r) { return r[0]; }) : [];
-    var id;
-    do { id = newId_(); } while (ids.indexOf(id) !== -1);
+    // An edited quote (opened from its link) replaces its original row and keeps its ID, status and notes.
+    var id, existing = -1;
+    var replaceId = String(q.replaceId || '');
+    if (/^SD-[A-Z0-9]{6}$/.test(replaceId)) existing = ids.indexOf(replaceId);
+    if (existing !== -1) id = replaceId;
+    else { do { id = newId_(); } while (ids.indexOf(id) !== -1); }
     clean.id = id;
     var link = SITE + '?q=' + id;
     var a = clean.answers || {};
@@ -199,10 +204,21 @@ function saveQuote_(q) {
       clean.compare.map(function (c) { return c.name + ': ' + describe_(c); }).join('\n'),
       link, 'New', '', '', JSON.stringify(clean)
     ];
-    // First empty row under the header (column B), so the team can sort freely.
-    var gap = -1;
-    for (var i = 0; i < ids.length; i++) { if (!ids[i]) { gap = i; break; } }
-    var target = gap === -1 ? last + 1 : QUOTE_FIRST_ROW + gap;
+    var target;
+    if (existing !== -1) {
+      target = QUOTE_FIRST_ROW + existing;
+      var old = sh.getRange(target, 2, 1, row.length).getValues()[0];
+      row[1] = old[1];                                   // first saved
+      row[16] = old[16]; row[17] = old[17]; row[18] = old[18]; // status and team notes
+      clean.created = old[1] instanceof Date ? old[1].toISOString() : clean.created;
+      clean.edited = new Date().toISOString();
+      row[19] = JSON.stringify(clean);
+    } else {
+      // First empty row under the header (column B), so the team can sort freely.
+      var gap = -1;
+      for (var i = 0; i < ids.length; i++) { if (!ids[i]) { gap = i; break; } }
+      target = gap === -1 ? last + 1 : QUOTE_FIRST_ROW + gap;
+    }
     sh.getRange(target, 2, 1, row.length).setValues([row]);
     return { ok: true, id: id, link: link, created: clean.created };
   } finally {

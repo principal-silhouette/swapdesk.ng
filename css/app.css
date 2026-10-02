@@ -1037,3 +1037,4 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Complete your Swap: change the device being swapped into */
 .mine.chosen .chg { display: block; padding: 0; min-height: 0; margin-top: 6px; font-size: 14.5px; font-weight: 600; color: var(--action); background: none; border: 0; text-align: left; }
 .mine-edits { display: flex; gap: 20px; flex-wrap: wrap; }
+.qv-head .qv-edit { display: block; margin: -4px auto 10px; padding: 0; min-height: 0; font-size: 15px; font-weight: 600; color: var(--action); background: none; border: 0; }
