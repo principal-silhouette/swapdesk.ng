@@ -966,8 +966,11 @@ async function quoteImageFile(q) {
   const PT = top + logoH + GAPLOGO;
 
   const c = document.createElement('canvas');
-  c.width = W; c.height = H;
+  const S = 2; // render at 2× (2160 wide) so WhatsApp HD keeps it sharp
+  c.width = W * S; c.height = H * S;
   const g = c.getContext('2d');
+  g.scale(S, S);
+  g.imageSmoothingQuality = 'high';
   g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
   const [logo, wa, wb] = await Promise.all(['assets/swapdesk-logo.png', 'assets/wave-a.svg', 'assets/wave-b.svg'].map((u) => loadImg(u).catch(() => null)));
   const wave = (img, x, y, w, rot) => {
