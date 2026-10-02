@@ -124,6 +124,7 @@ export function prepare(raw, origin) {
     seriesOrder,
     groupOrder,
     nameOrder,
+    features: raw.features || [],
   };
 }
 

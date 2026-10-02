@@ -112,7 +112,9 @@ function getCatalog_(skipCache) {
   var out = {
     updatedAt: new Date().toISOString(),
     source: 'live',
-    version: 3,
+    version: 4,
+    // clientIds: the site makes the quote ID itself, so the short link is ready the moment it's needed.
+    features: ['clientIds'],
     settings: settings,
     devices: devices
   };
@@ -190,7 +192,8 @@ function saveQuote_(q) {
     var id, hit = null;
     var replaceId = String(q.replaceId || '');
     if (/^SD-[A-Z0-9]{6}$/.test(replaceId)) hit = findQuote_(replaceId);
-    if (hit) id = replaceId;
+    if (hit) id = replaceId;                                   // edit, or a retry of the same save
+    else if (/^SD-[A-Z0-9]{6}$/.test(replaceId)) id = replaceId; // a new quote with the ID the site made
     else { do { id = newId_(); } while (findQuote_(id)); }
     clean.id = id;
     var link = SITE + '?q=' + id;

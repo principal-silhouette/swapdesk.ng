@@ -192,7 +192,7 @@ function startFlow(app, mode) {
   const s = app.s;
   s.mode = mode;
   // Every start from Home is a new quote: no device, answers or swap choices carried over.
-  Object.assign(s, { deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, cash: false, editing: '' });
+  Object.assign(s, { deviceId: '', answers: freshAnswers(), more: [], adding: false, compare: [], city: '', saved: null, cash: false, editing: '', quoteId: '' });
   s.pick = freshPick();
   app.save();
   app.go('pick');
@@ -201,7 +201,7 @@ function startFlow(app, mode) {
 /** Deep link from the Trade-In Values list (?device=id). */
 function startWith(app, id) {
   const s = app.s;
-  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; s.more = []; s.adding = false; s.editing = ''; }
+  if (s.deviceId !== id) { s.deviceId = id; s.answers = freshAnswers(); s.saved = null; s.compare = []; s.city = ''; s.more = []; s.adding = false; s.editing = ''; s.quoteId = ''; }
   s.mode = 'trade';
   app.save();
   history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
@@ -953,8 +953,7 @@ function compare(el, app) {
       b.disabled = true;
       const label = b.innerHTML;
       b.textContent = 'Preparing your quotes…';
-      const { q, link } = await ensureSaved(app);
-      location.href = whatsappURL(helpMessage(q, link));
+      await withLink(app, () => ensureSaved(app), ({ q, link }) => { location.href = whatsappURL(helpMessage(q, link)); });
       setTimeout(() => { b.disabled = false; b.innerHTML = label; }, 1200);
     },
     rm: (b) => {
@@ -990,21 +989,74 @@ function quoteNow(app, { onlyChosen = false } = {}) {
 // One save per quote: taps that arrive while it's saving share that save, so a slow connection
 // can't create duplicate rows or hand out the long link while the short one is on its way.
 const inFlight = new Map();
+const ID_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const newQuoteId = () => { const r = crypto.getRandomValues(new Uint32Array(6)); return `SD-${[...r].map((n) => ID_ABC[n % ID_ABC.length]).join('')}`; };
 async function ensureSaved(app, extra = {}, opts = {}) {
   const s = app.s;
   const q = quoteNow(app, opts);
   const sig = JSON.stringify({ ...q, created: 0, ...extra });
   if (s.saved && s.saved.sig === sig && s.saved.saved) return { q, ...s.saved };
+  // When the script supports it, the quote gets its ID here, so the short link is ready at once and
+  // survives the phone pausing the page (switching to WhatsApp mid-save). The save runs, and retries, behind it.
+  if ((app.catalog.features || []).includes('clientIds')) {
+    s.quoteId = s.editing || s.quoteId || newQuoteId();
+    const id = s.quoteId;
+    const link = `${CONFIG.site}?q=${id}`;
+    backgroundSave(app, q, { ...extra, replaceId: id }, sig, link, id);
+    return { q, sig, link, id, saved: true };
+  }
   if (!inFlight.has(sig)) {
     // Editing a quote opened from its link updates that quote (same link) instead of making a new one.
-    const p = saveQuote(q, s.editing ? { ...extra, replaceId: s.editing } : extra).then((r) => {
-      s.saved = { sig, link: r.link, id: r.id, saved: r.saved };
-      app.save();
-      return s.saved;
-    }).finally(() => inFlight.delete(sig));
+    const once = () => saveQuote(q, s.editing ? { ...extra, replaceId: s.editing } : extra);
+    const p = (async () => {
+      // A few tries (waiting while the page is in the background) before giving up. Only a short link is ever returned.
+      for (let n = 0; n < 4; n++) {
+        if (n) await new Promise((res) => setTimeout(res, 1500 * n));
+        await whenVisible();
+        const r = await once();
+        if (r.saved && r.link) {
+          s.saved = { sig, link: r.link, id: r.id, saved: true };
+          app.save();
+          return s.saved;
+        }
+      }
+      throw new Error('Quote not saved');
+    })().finally(() => inFlight.delete(sig));
     inFlight.set(sig, p);
   }
   return { q, ...(await inFlight.get(sig)) };
+}
+const whenVisible = () => new Promise((res) => {
+  if (document.visibilityState === 'visible') { res(); return; }
+  const f = () => { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', f); res(); } };
+  document.addEventListener('visibilitychange', f);
+});
+const SAVE_FAILED = 'Couldn’t save your Swap. Check your connection and try again.';
+/** Run fn with the saved quote's short link, showing "Saving your Swap…" while it's on its way. */
+async function withLink(app, getSaved, fn) {
+  let slow = setTimeout(() => app.toast('Saving your Swap…'), 300);
+  try { const r = await getSaved(); clearTimeout(slow); slow = null; return await fn(r); }
+  catch { if (slow) clearTimeout(slow); app.toast(SAVE_FAILED); return undefined; }
+}
+function backgroundSave(app, q, extra, sig, link, id) {
+  const s = app.s;
+  if (s.saved && s.saved.sig === sig && s.saved.stored) return;
+  if (inFlight.has(sig)) return;
+  s.saved = { sig, link, id, saved: true, stored: false };
+  app.save();
+  const attempt = (n) => {
+    const p = saveQuote(q, extra).then((r) => {
+      if (r.saved) { if (s.saved?.sig === sig) { s.saved.stored = true; app.save(); } return; }
+      // Failed (often the page was paused): try again when it's back on screen, a few times.
+      if (n < 4) {
+        const again = () => { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', again); setTimeout(() => attempt(n + 1), 800); } };
+        if (document.visibilityState === 'visible') setTimeout(() => attempt(n + 1), 3000 * (n + 1));
+        else document.addEventListener('visibilitychange', again);
+      }
+    }).finally(() => { if (inFlight.get(sig) === p) inFlight.delete(sig); });
+    inFlight.set(sig, p);
+  };
+  attempt(0);
 }
 
 function finish(el, app) {
@@ -1030,8 +1082,7 @@ function finish(el, app) {
     wa: async (b) => {
       b.disabled = true;
       b.textContent = 'Preparing your quote…';
-      const { q, link } = await ensureSaved(app, {}, { onlyChosen: true });
-      location.href = whatsappURL(whatsappMessage(q, link, city?.name));
+      await withLink(app, () => ensureSaved(app, {}, { onlyChosen: true }), ({ q, link }) => { location.href = whatsappURL(whatsappMessage(q, link, city?.name)); });
       setTimeout(() => app.refresh(), 1200);
     },
     save: () => app.go('saved'),
@@ -1075,8 +1126,8 @@ export function sharePage(el, app, { saved, onBack, quote }) {
   let ready = null, info = null;
   // The picture is drawn from the quote straight away; it doesn't wait for the quote to be saved online
   // (that round trip is what made it slow on mobile data). Saving still starts now, for the links.
-  const saving = saved();
-  saving.then((r) => { info = r; }).catch(() => {});
+  let saving = saved();
+  saving.then((r) => { info = r; }).catch(() => { saving = null; });
   const making = (quote ? Promise.resolve(quote()) : saving.then((r) => r.q)).then((q) => quoteImageFile(q));
   making.then((f) => { ready = f; }).catch(() => {});
   const opt = (act, ico, title, sub) => html`<button class="opt" type="button" data-act="${act}"><span class="brand-ico ${act}">${raw(ico)}</span><span class="main"><span class="tt">${title}</span><span class="sub">${sub}</span></span></button>`;
@@ -1106,11 +1157,15 @@ export function sharePage(el, app, { saved, onBack, quote }) {
   const copyLink = () => {
     try {
       const done = () => app.toast('Quote link copied. Paste it with the image.');
+      const failed = () => app.toast(SAVE_FAILED);
       if (info) { navigator.clipboard.writeText(linkText(info)).then(done, () => {}); return; }
-      // The link may still be saving: hand the clipboard a promise so the tap still counts on iPhone.
+      // The link may still be saving (or failed before: try again): hand the clipboard a promise so the tap
+      // still counts on iPhone. Only the short link is ever copied.
+      if (!saving) { saving = saved(); saving.then((r) => { info = r; }).catch(() => { saving = null; }); }
+      app.toast('Saving your Swap…');
       if (window.ClipboardItem && navigator.clipboard?.write) {
-        navigator.clipboard.write([new ClipboardItem({ 'text/plain': saving.then((r) => new Blob([linkText(r)], { type: 'text/plain' })) })]).then(done, () => {});
-      } else saving.then((r) => copy(linkText(r))).then(done, () => {});
+        navigator.clipboard.write([new ClipboardItem({ 'text/plain': saving.then((r) => new Blob([linkText(r)], { type: 'text/plain' })) })]).then(done, failed);
+      } else saving.then((r) => copy(linkText(r))).then(done, failed);
     } catch { /* clipboard not available */ }
   };
   const shareImage = async (b) => {
@@ -1129,17 +1184,11 @@ export function sharePage(el, app, { saved, onBack, quote }) {
     tiktok: async () => {
       // TikTok has no web link for DMs. Phones: the share sheet, where TikTok sends it as a DM (opened straight from
       // the tap, so the phone allows it). Computers: copy the message to paste into the DM.
-      const r = info || await saved();
-      const text = plainText(message(r.q, r.link));
-      if (navigator.share && info) { navigator.share({ text }).catch(() => {}); return; }
-      await copy(text); app.toast('Message copied. Paste it in a TikTok DM.');
+      if (info && navigator.share) { navigator.share({ text: plainText(message(info.q, info.link)) }).catch(() => {}); return; }
+      await withLink(app, saved, async (r) => { await copy(plainText(message(r.q, r.link))); app.toast('Message copied. Paste it in a TikTok DM.'); });
     },
-    walink: async () => {
-      if (!info) app.toast('Getting your quote link…');
-      const { q, link } = await saved();
-      location.href = `https://wa.me/?text=${encodeURIComponent(message(q, link))}`;
-    },
-    copy: async () => { if (!info) app.toast('Getting your quote link…'); const { link } = await saved(); await copy(link); app.toast('Link copied'); },
+    walink: () => withLink(app, saved, ({ q, link }) => { location.href = `https://wa.me/?text=${encodeURIComponent(message(q, link))}`; }),
+    copy: () => withLink(app, saved, async ({ link }) => { await copy(link); app.toast('Link copied'); }),
   };
   el.onclick = (e) => {
     if (e.target.closest('[data-back]')) { if (onBack) onBack(); else app.back(); return; }

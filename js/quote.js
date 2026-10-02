@@ -82,7 +82,8 @@ export async function saveQuote(q, extra = {}) {
     const r = await saveQuoteRemote({ ...q, ...extra });
     return { id: r.id, link: r.link, saved: true };
   } catch {
-    return { id: null, link: localLink(q), saved: false };
+    // Never hand out the long ?s= link: the caller retries or tells the customer to try again.
+    return { id: null, link: null, saved: false };
   }
 }
 
