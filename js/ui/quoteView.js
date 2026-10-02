@@ -56,7 +56,7 @@ function render(el, app, p, q) {
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
     ${q.compare.length ? html`
-      <p class="qv-label">${items.length ? 'Your swap options' : 'Devices'}</p>
+      <p class="qv-label">${items.length ? 'Your Swap Options' : 'Devices'}</p>
       <div class="cmp-grid">${q.compare.map((c) => {
         const gone = !avail(c.id);
         const [model, rest] = nameParts(c.name);
@@ -67,11 +67,11 @@ function render(el, app, p, q) {
       })}</div>` : ''}
     ${items.length ? html`
       ${!q.compare.length ? html`<div class="dev-value qv-total">
-        <p class="tiv-label">${multi ? `Total trade-in value · ${items.length} devices` : 'Your trade-in value'}</p>
+        <p class="tiv-label">${multi ? `Total Trade-In Value · ${items.length} devices` : 'Your Trade-In Value'}</p>
         <p class="big-num">${naira(q.value)}</p>
         <p class="small">Estimated. Confirmed when we check ${multi ? 'the devices' : 'the device'} in store.</p>
       </div>` : ''}
-      <p class="qv-label">${multi ? 'Your trade-in devices' : 'Your trade-in'}</p>
+      <p class="qv-label">${multi ? 'Your Trade-In Devices' : 'Your Trade-In'}</p>
       <div class="qv-card">
         ${items.map((it) => { const [m, rest] = nameParts(it.name); return html`<div class="qv-dev">
           <p class="qv-row"><span class="qv-name"><strong>${m}</strong></span><span class="qv-val">${naira(it.value)}</span></p>
@@ -81,7 +81,7 @@ function render(el, app, p, q) {
             ${(it.lines || []).map(([label, amount]) => html`<li class="${amount === null ? 'pending' : ''}"><span>${label}</span><span>${amount === null ? 'Checked in store' : `− ${naira(amount)}`}</span></li>`)}
           </ul>` : ''}
         </div>`; })}
-        ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total trade-in value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}
+        ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total Trade-In Value</strong></span><span class="qv-val">${naira(q.value)}</span></p>` : ''}
       </div>` : ''}
     ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">

@@ -127,7 +127,7 @@ export function summaryText(q, link) {
   };
   if (items.length) {
     const multi = items.length > 1;
-    out.push(multi ? '*My devices:*' : '*My device:*');
+    out.push(multi ? '*My Devices:*' : '*My Device:*');
     items.forEach((it, i) => {
       if (i) out.push('');
       const [line1, line2] = device(it);
@@ -135,7 +135,7 @@ export function summaryText(q, link) {
       if (line2) out.push(line2);
       out.push(`Value: ${nairaShort(it.value)}`);
     });
-    if (multi) out.push('', `*Total value: ${nairaShort(q.value)}*`);
+    if (multi) out.push('', `*Total Value: ${nairaShort(q.value)}*`);
   }
   if (q.compare.length) {
     out.push('', items.length ? '*Swap Options*' : '*Devices*');

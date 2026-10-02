@@ -649,7 +649,7 @@ function value(el, app) {
       <ul class="lines">
         <li><span>Starting value, perfect condition</span><span>${naira(r.start)}</span></li>
         ${r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
-        ${r.lines.length ? html`<li class="total"><span>Your trade-in value</span><span>${naira(r.value)}</span></li>` : ''}
+        ${r.lines.length ? html`<li class="total"><span>Your Trade-In Value</span><span>${naira(r.value)}</span></li>` : ''}
       </ul>
     </div>
     ${s.answers.quick ? html`<p class="small">Based on your device being in good working condition.</p>` : ''}
@@ -683,7 +683,7 @@ function choose(el, app) {
     </div>
     ${multi ? html`<div class="dev-value">
         <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong title="${t.d.model}">${t.d.model}</strong><span class="ds">${t.d.storage || ''}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
-        <p class="tiv-label">Total trade-in value</p>
+        <p class="tiv-label">Total Trade-In Value</p>
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
     ${trades.length < MAX_TRADE ? html`<button class="btn add trade-add" type="button" data-act="addtrade">${raw(ICON.plus)} Trade In Another Device</button>` : ''}
@@ -760,12 +760,12 @@ function compare(el, app) {
           <ul class="lines">
             <li><span>Starting value, perfect condition</span><span>${naira(t.r.start)}</span></li>
             ${t.r.lines.map((l) => html`<li class="${l.amount === null ? 'pending' : ''}"><span>${l.label}</span><span>${l.amount === null ? 'Checked in store' : `− ${naira(l.amount)}`}</span></li>`)}
-            <li class="total"><span>Trade-in value</span><span>${naira(t.r.value)}</span></li>
+            <li class="total"><span>Trade-In Value</span><span>${naira(t.r.value)}</span></li>
           </ul>
           ${t.current ? html`<button class="link" type="button" data-act="edit">Edit answers</button>` : ''}
         </details>` : html`<p class="mine-cond">${t.r.reason || ''}</p>`}
       </div>`)}
-      ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total trade-in value</span><b>${naira(tv)}</b></div>` : ''}
+      ${trades.length > 1 && tv !== null ? html`<div class="trade-total"><span>Total Trade-In Value</span><b>${naira(tv)}</b></div>` : ''}
 `
       : html`<div class="notice">Add your device to see what each swap costs. <button class="link" type="button" data-act="own">Value my device</button></div>`}
     ${items.length ? html`<div class="cmp-grid">${live.map(card)}${gone.map(card)}</div>` : html`<p class="small">No devices yet. Add the ones you’re considering, including different storage or condition of the same phone.</p>`}
@@ -1063,7 +1063,7 @@ async function quoteImageFile(q) {
     }
     if (multi) {
       g.fillStyle = '#e6ebf0'; g.fillRect(CX, cy + 4, CR - CX, 2);
-      text('Total trade-in value', CX, cy + 52, 700, 30, '#1d1d1f');
+      text('Total Trade-In Value', CX, cy + 52, 700, 30, '#1d1d1f');
       text(naira(q.value), CR, cy + 52, 800, 32, '#18577b', 'right');
     }
     y += cardH;
