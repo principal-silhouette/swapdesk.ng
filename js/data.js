@@ -186,7 +186,19 @@ export async function saveQuoteRemote(quote) {
 
 export async function loadQuoteRemote(id) {
   if (!CONFIG.endpoint) throw new Error('No endpoint');
-  const r = await fetchJSON(`${CONFIG.endpoint}?action=quote&id=${encodeURIComponent(id)}`, 10000);
-  if (!r.ok) throw new Error(r.error || 'Not found');
-  return r.quote;
+  // Google can be slow to wake the script, especially on mobile data: wait up to 25s a try, and try 3 times
+  // before giving up. A quote that truly doesn't exist stops at once.
+  let last;
+  for (let n = 0; n < 3; n++) {
+    try {
+      const r = await fetchJSON(`${CONFIG.endpoint}?action=quote&id=${encodeURIComponent(id)}`, 25000);
+      if (r.ok) return r.quote;
+      const e = new Error(r.error || 'Not found'); e.notFound = true; throw e;
+    } catch (e) {
+      if (e.notFound) throw e;
+      last = e;
+      await new Promise((res) => setTimeout(res, 1200 * (n + 1)));
+    }
+  }
+  throw last || new Error('Could not reach the quote');
 }

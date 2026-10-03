@@ -1054,3 +1054,16 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .mine.slim .mine-top { padding-right: 34px; }
 /* Swap cards: the condition line wraps instead of running under the figure */
 .cmp.slim .row2 .p { white-space: normal; }
+/* Home: quiet "Open Quote" text link between the buttons and the note */
+.home .open-quote { display: block; margin: 0 auto 6px; padding: 0 10px; line-height: 1.6; min-height: 0; background: none; border: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--action); }
+/* Open a Quote page */
+.oq-field { width: var(--col, 100%); max-width: 340px; margin: 18px auto 0; }
+.oq-field input { text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.oq-err { text-align: center; color: #c0392b; min-height: 1.2em; }
+
+.home .home-tail { margin: 0 !important; }
+.home .home-tail .home-note { margin-top: 0 !important; }
+/* Make room for Open Quote on phones: slightly tighter spacing between the home blocks */
+@media (max-width: 600px) { :root { --hg: clamp(18px, 3.9vh, 42px); } }
+.home .home-tail { transform: translateY(calc(-12px - 0.2 * var(--hg))); }
+.home .home-tail .home-note { transform: none; }

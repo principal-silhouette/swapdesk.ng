@@ -180,8 +180,12 @@ function home(el, app) {
       <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
-    <p class="home-note">Get an honest value in minutes, compare up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or send your device in from anywhere.</p>`, '').toString();
+    <div class="home-tail">
+      <button class="open-quote" type="button" data-act="openq">Open Quote</button>
+      <p class="home-note">Get an honest value in minutes, compare up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or send your device in from anywhere.</p>
+    </div>`, '').toString();
   wire(el, app, {
+    openq: () => app.go('openq'),
     prices: () => app.go('prices'),
     tradeList: () => app.go('trade-in'),
     trade: () => app.go('trade-in'),
@@ -541,6 +545,31 @@ function good(el, app) {
   });
 }
 
+
+// ---------- open a saved quote from its code ----------
+
+function openQuote(el, app) {
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">Open a Quote</h2>
+      <p class="par">Type the quote code. It’s under <b>Your Swap Quote</b> on the quote picture, and at the end of the quote link (swapdesk.ng/?q=<b>SD-…</b>).</p>
+    </div>
+    <label class="field oq-field"><span class="visually-hidden">Quote code</span>
+      <input data-code placeholder="SD-XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" enterkeyhint="go"></label>
+    <p class="small oq-err" role="alert"></p>`,
+  pills(backPill(), html`<button class="pill go" type="button" data-act="open">Open</button>`)).toString();
+  const inp = $('[data-code]', el);
+  const open = () => {
+    let v = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.startsWith('SD')) v = v.slice(2);
+    if (v.length !== 6) { $('.oq-err', el).textContent = 'A quote code looks like SD-ABC123: SD- and 6 letters or numbers.'; return; }
+    app.go('quote', { id: `SD-${v}` });
+  };
+  wire(el, app, { open });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+  inp.addEventListener('input', () => { $('.oq-err', el).textContent = ''; });
+  setTimeout(() => inp.focus(), 250);
+}
 
 // ---------- conditions page: pick only the groups that have an issue ----------
 
@@ -1402,6 +1431,7 @@ export const SCREENS = {
   confirm,
   q: question,
   conds: conditions,
+  openq: openQuote,
   value,
   compare,
   finish,

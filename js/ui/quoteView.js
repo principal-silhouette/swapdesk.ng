@@ -20,11 +20,15 @@ export function quoteScreen(el, app, p) {
     let q;
     try {
       q = p.packed ? decodeQuote(p.packed) : await loadQuoteRemote(p.id);
-    } catch {
-      el.innerHTML = html`<h2 class="h-title">We couldn’t open this quote</h2>
-        <p class="par">The link may be incomplete, or we’re offline. Check the link, or start a new quote.</p>
-        <div class="pills"><button class="pill go" type="button" data-act="new">Start a New Quote</button></div>`.toString();
-      el.onclick = (e) => { if (e.target.closest('[data-act="new"]')) app.go('home'); };
+    } catch (err) {
+      const missing = err && err.notFound;
+      el.innerHTML = html`<h2 class="h-title">${missing ? 'We couldn’t find this quote' : 'We couldn’t open this quote'}</h2>
+        <p class="par">${missing ? `Check the code${p.id ? ` (${p.id})` : ''} and try again, or start a new quote.` : 'The connection is slow or offline. Try again in a moment.'}</p>
+        <div class="pills">${missing ? '' : html`<button class="pill go" type="button" data-act="retry">Try Again</button>`}<button class="pill${missing ? ' go' : ''}" type="button" data-act="new">Start a New Quote</button></div>`.toString();
+      el.onclick = (e) => {
+        if (e.target.closest('[data-act="new"]')) app.go('home');
+        if (e.target.closest('[data-act="retry"]')) app.refresh();
+      };
       return;
     }
     render(el, app, p, q);
