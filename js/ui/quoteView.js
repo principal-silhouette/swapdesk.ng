@@ -67,16 +67,6 @@ function render(el, app, p, q) {
     </div>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
-    ${q.compare.length ? html`
-      <p class="qv-label">${items.length ? 'Your Swap Options' : 'Devices'}</p>
-      <div class="cmp-grid">${q.compare.map((c) => {
-        const gone = !avail(c.id);
-        const [model, rest] = nameParts(c.name);
-        return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
-          <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
-          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${nairaK(c.price)}</span><span class="kn"><span class="n">${items.length ? nairaK(c.kind === 'even' ? 0 : c.amount) : nairaK(c.price)}</span><span class="k">${items.length ? termsLabel(c) : 'Price'}</span></span></span>
-        </article>`;
-      })}</div>` : ''}
     ${items.length ? html`
       ${!q.compare.length ? html`<div class="dev-value qv-total">
         <p class="tiv-label">${multi ? `Total Trade-In Value · ${items.length} Devices` : 'Your Trade-In Value'}</p>
@@ -95,6 +85,16 @@ function render(el, app, p, q) {
         </div>`; })}
         ${multi ? html`<p class="qv-row qv-tot"><span class="qv-name"><strong>Total Trade-In Value</strong></span><span class="qv-val">${nairaK(q.value)}</span></p>` : ''}
       </div>` : ''}
+    ${q.compare.length ? html`
+      <p class="qv-label">${items.length ? 'Your Swap Options' : 'Devices'}</p>
+      <div class="cmp-grid">${q.compare.map((c) => {
+        const gone = !avail(c.id);
+        const [model, rest] = nameParts(c.name);
+        return html`<article class="cmp slim ${c.kind}${gone ? ' gone' : ''}">
+          <span class="t"><b>${model}</b>${gone ? raw(' <span class="tag warn">No longer available</span>') : ''}</span>
+          <span class="row2"><span class="p">${c.dealNote || rest}<br>Price ${nairaK(c.price)}</span><span class="kn"><span class="n">${items.length ? nairaK(c.kind === 'even' ? 0 : c.amount) : nairaK(c.price)}</span><span class="k">${items.length ? termsLabel(c) : 'Price'}</span></span></span>
+        </article>`;
+      })}</div>` : ''}
     ${q.city ? html`<p class="small qv-foot">City: ${q.city}</p>` : ''}`;
   el.innerHTML = html`<div class="screen-main">${raw(el.innerHTML)}</div><div class="screen-foot">
       <div class="pills"><button class="pill" type="button" data-act="share">Share Quote</button><button class="pill wa" type="button" data-act="wa">${raw(ICON.whatsapp)}WhatsApp</button></div>

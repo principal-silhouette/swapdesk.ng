@@ -1334,9 +1334,9 @@ async function quoteImageFile(q) {
     y -= GAP;
   };
 
-  // What they pay leads; the trade-in that funds it follows.
+  // The trade-in comes first, then the swap options it pays towards.
   y += 6;
-  if (q.compare.length) { drawSwaps(); if (items.length) { y += 44; drawTrade(); } } else if (items.length) drawTrade();
+  if (items.length) { drawTrade(); if (q.compare.length) { y += 44; drawSwaps(); } } else if (q.compare.length) drawSwaps();
 
   // footer, inside the pop-up
   const fy = PT + PH - H_FOOT;
