@@ -876,6 +876,18 @@ function removeTrade(app, i) {
   app.save();
 }
 
+/**
+ * Swap options, cheapest model first, each model followed by its other configurations
+ * (iPhone 11 64gb, iPhone 11 128gb, then iPhone 11 Pro 64gb, iPhone 11 Pro 256gb…).
+ */
+function cheapestFirstOrder(list) {
+  const low = new Map();
+  for (const x of list) low.set(x.model, Math.min(low.get(x.model) ?? Infinity, x.price || Infinity));
+  return (a, b) => (low.get(a.model) - low.get(b.model)) || (a.model === b.model ? 0 : a.model.localeCompare(b.model))
+    || ((a.price || 0) - (b.price || 0));
+}
+const cheapestFirst = (list) => [...list].sort(cheapestFirstOrder(list));
+
 // ---------- compare swaps ----------
 
 function compare(el, app) {
@@ -888,7 +900,7 @@ function compare(el, app) {
   const tv = totalValue(app);
   const max = Number(cat.settings['compare.maxDevices']) || 6;
   const items = s.compare.map((id) => { const x = cat.byId.get(id); return x && x.price > 0 && x.stock !== 'soldout' ? x : { ...(x || {}), id, gone: true }; });
-  const live = items.filter((x) => !x.gone).sort(compareOrder(cat.modelOrder));
+  const live = cheapestFirst(items.filter((x) => !x.gone));
   const gone = items.filter((x) => x.gone);
 
   const card = (x) => {
@@ -977,7 +989,7 @@ function quoteNow(app, { onlyChosen = false } = {}) {
   const total = totalValue(app);
   const ids = onlyChosen && s.chosen ? [s.chosen] : s.compare;
   const list = s.cash ? [] : ids.map((id) => app.catalog.byId.get(id)).filter(Boolean)
-    .sort(compareOrder(app.catalog.modelOrder))
+    .sort(cheapestFirstOrder(ids.map((id) => app.catalog.byId.get(id)).filter(Boolean)))
     .map((x) => ({ device: x, terms: total !== null ? swapTerms(x, total) : { kind: 'unavailable', amount: 0 } }));
   const q = buildQuote({ device: first ? { ...first.d, condition: '' } : null, answers: first ? engineAnswers(first.answers, first.d) : null, result: first?.r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
   if (trades.length > 1) {
