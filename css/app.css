@@ -1067,3 +1067,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 @media (max-width: 600px) { :root { --hg: clamp(18px, 3.9vh, 42px); } }
 .home .home-tail { transform: translateY(calc(-12px - 0.2 * var(--hg))); }
 .home .home-tail .home-note { transform: none; }
+/* Open Quote sits exactly midway: the same space above it (to the last button) as below it (to the note). */
+.home .open-quote { line-height: 1; padding: 0 10px; margin: 0 auto 16px; }
+.home .home-tail { margin-top: calc(16px - var(--hg)) !important; }
