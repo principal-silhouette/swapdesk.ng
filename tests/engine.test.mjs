@@ -142,3 +142,11 @@ test('console: 1 controller keeps the value, 2+ adds 10,000, games and hacked ar
   assert.deepEqual(two.lines.map((l) => [l.key, l.amount]), [['pads', -10000], ['games', -5000], ['hacked', null]]);
   assert.equal(valueDevice(ps4, { pads: '1', games: 'many', hacked: false }, settings).value, 110000);
 });
+
+test('chip unlocked: at least 30,000 on Face ID phones (X and newer)', () => {
+  const x = { id: 'iphone-x-64gb-fu', type: 'Phones', model: 'iPhone X', tradeIn: true, tradeInValue: 90000, deductions: { network: 30000, faceId: 30000 } };
+  const r = valueDevice(x, { network: 'chip', faults: [] }, { ...settings, 'network.chipShare': 0.7 });
+  assert.equal(r.lines.find((l) => l.key === 'network').amount, 30000);
+  const se = { id: 'iphone-se', type: 'Phones', model: 'iPhone SE', tradeIn: true, tradeInValue: 80000, deductions: { network: 20000, faceId: 'n/a' } };
+  assert.equal(valueDevice(se, { network: 'chip', faults: [] }, { ...settings, 'network.chipShare': 0.7 }).lines[0].amount, 14000);
+});

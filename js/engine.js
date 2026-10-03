@@ -13,6 +13,8 @@ export const DEFAULT_SETTINGS = {
   'neatness.smallDents': 1,
   'neatness.rough': 1.5,
   'network.chipShare': 0.7,
+  // Daniel, 3 Oct: on the X and newer (Face ID phones), chip unlocked never takes less than 30,000.
+  'network.chipMin': 30000,
   'network.esimShare': 0.4, // eSIM-only (no SIM tray), unlocked; not the iPhone Air, which is always eSIM-only
   'network.lockedShare': 1,
   'trueTone.shareOfScreen': 0.5,
@@ -180,7 +182,13 @@ export function valueDevice(device, answers = {}, settings = {}) {
 
   // Network
   if (applies(device, 'network')) {
-    if (answers.network === 'chip') push('network', 'Chip Unlocked', amountFor(device, 'network'), s(settings, 'network.chipShare'));
+    if (answers.network === 'chip') {
+      const net = amountFor(device, 'network');
+      const share = s(settings, 'network.chipShare');
+      if (typeof net === 'number' && typeof amountFor(device, 'faceId') === 'number') {
+        lines.push({ key: 'network', label: 'Chip Unlocked', amount: Math.max(s(settings, 'network.chipMin'), Math.round(net * share)) });
+      } else push('network', 'Chip Unlocked', net, share);
+    }
     if (answers.network === 'esim' && !/\bAir\b/.test(device.model || '')) push('network', 'eSIM Only', amountFor(device, 'network'), s(settings, 'network.esimShare'));
     if (answers.network === 'locked') push('network', 'eSIM Locked', amountFor(device, 'network'), s(settings, 'network.lockedShare'));
     // No network at all costs the same as an eSIM-locked phone: either way it can't be used on a local network.
