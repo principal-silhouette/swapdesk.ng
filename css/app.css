@@ -1040,7 +1040,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .qv-head .qv-edit { display: block; margin: -4px auto 10px; padding: 0; min-height: 0; font-size: 15px; font-weight: 600; color: var(--action); background: none; border: 0; }
 .conds-val { text-align: center; margin-top: 4px; } .conds-val b { color: var(--ink); }
 /* Home: tiny brand line above the headline */
-.home-kicker { margin: 0 0 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5a7fa0; text-align: center; }
+.home-kicker { position: relative; top: -6px; margin: 0 0 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #5a7fa0; text-align: center; }
 /* Figures first, then what they mean underneath (BALANCE TO SWAP, VALUE FOR YOUR PHONE) */
 .cmp .kn .k { margin-top: 3px; padding-top: 0; font-size: 11px; letter-spacing: 0.06em; }
 .mine-top .val small, .qv-val small { display: block; margin-top: 2px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); text-align: right; white-space: nowrap; }
