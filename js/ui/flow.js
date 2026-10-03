@@ -549,7 +549,7 @@ const GROUP = {
   battery: () => ['Battery', 'Health below 85%, or replaced'],
   network: () => ['Network', 'eSIM only, chip or network locked'],
   neatness: () => ['Body Neatness', 'Scratches, dents or chips'],
-  faults: () => ['Others', 'Screen, Face ID, cameras & more'],
+  faults: (apple, d) => ['Others', `Screen, ${applies(d, 'faceId') ? 'Face ID' : applies(d, 'touchId') ? 'Touch ID' : 'speakers'}, cameras & more`],
   // Consoles (Daniel, 2 Oct)
   pads: () => ['Controllers', 'Valued with 1 controller. 2 or more adds to it'],
   games: () => ['Games', 'Any game discs included? 1–2 add ₦5,000, 3 or more add ₦10,000'],
@@ -592,7 +592,7 @@ function conditions(el, app) {
       <p class="par">${isSpeaker(d) ? `We only swap speakers in perfect condition. Tap below only if something’s wrong with your ${d.model}.` : isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
     </div>
     <div class="stack q-opts conds" role="group">
-      ${groups.map((k) => { const [name, hint] = GROUP[k](apple); const on = touched.has(k); return html`
+      ${groups.map((k) => { const [name, hint] = GROUP[k](apple, d); const on = touched.has(k); return html`
         <button class="opt" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="grp" data-v="${k}">
           <span class="main">${name}<span class="sub">${on && now(k) ? now(k) : hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`; })}
     </div>
