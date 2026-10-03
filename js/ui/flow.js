@@ -546,7 +546,7 @@ function good(el, app) {
 
 const GROUP = {
   icloud: (apple) => [apple ? 'iCloud' : 'Account Lock', apple ? 'Is it iCloud locked?' : 'Is it locked to an account?'],
-  battery: () => ['Battery', 'Battery health below 85%'],
+  battery: () => ['Battery', 'Health below 85%, or replaced'],
   network: () => ['Network', 'eSIM only, chip or network locked'],
   neatness: () => ['Body Neatness', 'Scratches, dents or chips'],
   faults: () => ['Others', 'Screen, Face ID, cameras & more'],
@@ -572,14 +572,14 @@ function conditions(el, app) {
   // What each group is set to, shown under its name once it's been filled.
   const now = (k) => {
     if (k === 'icloud') return a.icloudLocked === true ? (apple ? 'iCloud Locked' : 'Account Locked') : a.icloudLocked === false ? 'Not Locked' : '';
-    if (k === 'battery') return a.batteryUnknown ? 'Not Sure' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
+    if (k === 'battery') return (a.faults || []).includes('batteryReplaced') ? 'Replaced Battery' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
     if (k === 'network') return NETWORK.find((n) => n.key === a.network)?.label || '';
     if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
     if (k === 'pads') return PADS.find((x) => x.key === a.pads)?.label || '';
     if (k === 'games') return GAMES.find((x) => x.key === a.games)?.label || '';
     if (k === 'perfect') return a.perfect === false ? 'Has a fault' : a.perfect === true ? 'Works perfectly' : '';
     if (k === 'hacked') return a.hacked === true ? 'Hacked' : a.hacked === false ? 'Not hacked' : '';
-    if (k === 'faults') { const f = (a.faults || []).map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything Works' : ''); }
+    if (k === 'faults') { const f = (a.faults || []).filter((x) => x !== 'batteryReplaced').map((x) => FAULTS.find((y) => y.key === x)?.label).filter(Boolean); return f.length ? f.join(', ') : (a.faultsDone ? 'Everything Works' : ''); }
     return '';
   };
   const r = valueDevice(d, engineAnswers({ ...defaultsFor(a) }, d), app.catalog.settings);
@@ -661,10 +661,10 @@ function question(el, app, params) {
           ${a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>` : ''}`;
       case 'battery':
         return html`<div class="head-block"><h2 class="h-title">What’s the battery health?</h2>
-          <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and check <b>Maximum Capacity</b>.') : 'Pick the range that matches your device. If it doesn’t show battery health, choose Not sure.'}</p></div>
+          <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and check <b>Maximum Capacity</b>.') : 'Pick the range that matches your device.'}</p></div>
           <div class="stack q-opts" role="radiogroup">
-            ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key, `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
-            ${opt(a.batteryUnknown, 'data-act="unsure"', 'Not Sure', 'We’ll check it in store.')}
+            ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key && !a.faults.includes('batteryReplaced'), `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
+            ${faultsFor(d).some((f) => f.key === 'batteryReplaced') ? opt(a.faults.includes('batteryReplaced'), 'data-act="replbat"', FAULTS.find((f) => f.key === 'batteryReplaced').label, FAULTS.find((f) => f.key === 'batteryReplaced').hint) : ''}
           </div>`;
       case 'neatness':
         return html`<h2 class="h-title">How does it look?</h2>
@@ -678,9 +678,9 @@ function question(el, app, params) {
         return html`<h2 class="h-title">Anything not working?</h2>
           <p class="par">Tick everything that applies.</p>
           <div class="stack q-opts" role="group">
-            ${q.faults.map((f) => html`<button class="opt" type="button" role="checkbox" aria-checked="${a.faults.includes(f.key) ? 'true' : 'false'}" data-act="fault" data-v="${f.key}">
+            ${q.faults.filter((f) => f.key !== 'batteryReplaced').map((f) => html`<button class="opt" type="button" role="checkbox" aria-checked="${a.faults.includes(f.key) ? 'true' : 'false'}" data-act="fault" data-v="${f.key}">
               <span class="main">${f.label}<span class="sub">${f.hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`)}
-            <button class="opt" type="button" role="checkbox" aria-checked="${a.faultsDone && !a.faults.length ? 'true' : 'false'}" data-act="allgood">
+            <button class="opt" type="button" role="checkbox" aria-checked="${a.faultsDone && !a.faults.filter((f) => f !== 'batteryReplaced').length ? 'true' : 'false'}" data-act="allgood">
               <span class="main">Everything Works</span><span class="tick box" aria-hidden="true"></span></button>
           </div>`;
       case 'pads':
@@ -744,8 +744,9 @@ function question(el, app, params) {
   wire(el, app, {
     origin: (b) => { s.deviceId = b.dataset.v; set((x) => { x.origin = b.dataset.v; }, true); },
     icloud: (b) => set((x) => { x.icloudLocked = b.dataset.v === 'yes'; }, b.dataset.v === 'no'),
-    unsure: () => set((x) => { x.batteryUnknown = true; x.batteryBand = ''; x.battery = ''; }, true),
-    band: (b) => set((x) => { x.batteryBand = b.dataset.v; x.batteryUnknown = false; }, true),
+    band: (b) => set((x) => { x.batteryBand = b.dataset.v; x.batteryUnknown = false; x.faults = x.faults.filter((f) => f !== 'batteryReplaced'); }, true),
+    // A replaced battery is its own answer on the battery page: no health range, the replaced-battery deduction instead.
+    replbat: () => set((x) => { x.batteryBand = ''; x.batteryUnknown = true; x.battery = ''; if (!x.faults.includes('batteryReplaced')) x.faults = [...x.faults, 'batteryReplaced']; }, true),
     neat: (b) => set((x) => { x.neatness = b.dataset.v; }, true),
     net: (b) => set((x) => { x.network = b.dataset.v; }, true),
     fault: (b) => set((x) => {
@@ -753,7 +754,7 @@ function question(el, app, params) {
       x.faults = x.faults.includes(v) ? x.faults.filter((f) => f !== v) : [...x.faults, v];
       x.faultsDone = x.faults.length > 0;
     }),
-    allgood: () => set((x) => { x.faults = []; x.faultsDone = true; }),
+    allgood: () => set((x) => { x.faults = x.faults.filter((f) => f === 'batteryReplaced'); x.faultsDone = true; }),
     done: () => { a.faultsDone = true; a.touched = [...new Set([...(a.touched || []), 'faults'])]; app.save(); app.back(); },
     pads: (b) => set((x) => { x.pads = b.dataset.v; }, true),
     games: (b) => set((x) => { x.games = b.dataset.v; }, true),
