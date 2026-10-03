@@ -296,7 +296,8 @@ function picker(el, app, params) {
 
     let options;
     if (q) {
-      const found = devices.filter((d) => matches(d, q)).sort(byOrder).slice(0, 60);
+      // Search stays inside what's already picked (Phones, then Apple…), so "12" under Phones doesn't bring up iPads.
+      const found = devices.filter((d) => (!st.type || d.type === st.type) && (!st.brand || d.brand === st.brand) && matches(d, q)).sort(byOrder).slice(0, 60);
       options = found.length ? (add ? found.map((d) => version(d, true)) : byStorage(found).map((d) => storageOpt(d, true))) : html`<p class="empty">No devices match “${q}”.</p>`;
     } else if (lv === 'type') {
       options = types.map((t) => html`<button class="opt" type="button" data-act="type" data-v="${t}"><span class="main">${TYPE_LABEL[t] || t}</span>${raw(ICON.chevron)}</button>`);
