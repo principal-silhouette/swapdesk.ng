@@ -35,7 +35,7 @@ function render(el, app, p, q) {
   const cat = app.catalog;
   const link = p.id ? `${CONFIG.site}?q=${p.id}` : '';
   // An old long-link quote (?s=) gets saved once to give it a short link; the long one is never shared.
-  let short = p.id ? Promise.resolve({ q, link }) : null;
+  let short = p.id ? Promise.resolve({ q, link, id: p.id }) : null;
   const shortLink = (raw = false) => {
     if (!short) {
       short = saveQuote(q).then((r) => { if (!r.saved || !r.link) throw new Error('Quote not saved'); return { q, link: r.link, id: r.id }; });

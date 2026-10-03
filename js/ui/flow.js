@@ -1150,11 +1150,13 @@ export function sharePage(el, app, { saved, onBack, quote }) {
   el.classList.add('choose');
   // Make the picture as soon as the page opens, so the tap can go straight to the share sheet.
   let ready = null, info = null;
-  // The picture is drawn from the quote straight away; it doesn't wait for the quote to be saved online
-  // (that round trip is what made it slow on mobile data). Saving still starts now, for the links.
+  // Saving starts now, for the links and the quote code.
   let saving = saved();
   saving.then((r) => { info = r; }).catch(() => { saving = null; });
-  const making = (quote ? Promise.resolve(quote()) : saving.then((r) => r.q)).then((q) => quoteImageFile(q));
+  // The picture carries the quote code (SD-XXXXXX), so it waits for the code; with the updated script that's instant.
+  // If saving fails, the picture is still made, just without the code.
+  const making = (saving || Promise.reject()).then((r) => quoteImageFile(r.q, r.id))
+    .catch(() => (quote ? quoteImageFile(quote()) : Promise.reject(new Error('No quote'))));
   making.then((f) => { ready = f; }).catch(() => {});
   const opt = (act, ico, title, sub) => html`<button class="opt" type="button" data-act="${act}"><span class="brand-ico ${act}">${raw(ico)}</span><span class="main"><span class="tt">${title}</span><span class="sub">${sub}</span></span></button>`;
   el.innerHTML = layout(html`
@@ -1224,7 +1226,7 @@ export function sharePage(el, app, { saved, onBack, quote }) {
 }
 
 /** Draw the quotes as a shareable picture (no libraries): white card, logo, value and each swap. */
-async function quoteImageFile(q) {
+async function quoteImageFile(q, code = '') {
   // A phone-screen image of the quote in the site's look: logo on white, everything on the blue pop-up,
   // laid out from measured heights and centred so there is no dead space.
   const W = 1080;
@@ -1288,7 +1290,7 @@ async function quoteImageFile(q) {
 
   // header
   text('Your Swap Quote', W / 2, y + 80, 800, 60, '#1d1d1f', 'center');
-  text(`${date} · valid for ${CONFIG.quoteValidDays} days`, W / 2, y + 128, 400, 27, '#6a6a70', 'center');
+  text(`${code ? `${code} · ` : ''}${date} · valid for ${CONFIG.quoteValidDays} days`, W / 2, y + 128, 400, 27, '#6a6a70', 'center');
   y += H_HEAD;
 
   const drawTrade = () => {
