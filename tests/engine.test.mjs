@@ -121,7 +121,9 @@ test('replaced battery = 60% of a new battery, not charged again when battery he
   const r1 = valueDevice(phone, { ...good, faults: ['batteryReplaced'] }, settings);
   assert.deepEqual(r1.lines.map((l) => [l.key, l.amount]), [['batteryReplaced', 24000]]); // 60% of 40,000
   const r2 = valueDevice(phone, { ...good, battery: 80, faults: ['batteryReplaced'] }, settings);
-  assert.deepEqual(r2.lines.map((l) => [l.key, l.amount]), [['battery', 24000]]);
+  assert.deepEqual(r2.lines.map((l) => [l.key, l.amount]), [['batteryReplaced', 24000]]); // 80%+: replaced only
+  const r3 = valueDevice(phone, { ...good, battery: 75, faults: ['batteryReplaced'] }, settings);
+  assert.deepEqual(r3.lines.map((l) => [l.key, l.amount]), [['battery', 40000]]); // under 80%: full battery
   assert.ok(!faultsFor({ deductions: { battery: 'n/a' } }).some((f) => f.key === 'batteryReplaced'));
 });
 
@@ -149,4 +151,16 @@ test('chip unlocked: at least 30,000 on Face ID phones (X and newer)', () => {
   assert.equal(r.lines.find((l) => l.key === 'network').amount, 30000);
   const se = { id: 'iphone-se', type: 'Phones', model: 'iPhone SE', tradeIn: true, tradeInValue: 80000, deductions: { network: 20000, faceId: 'n/a' } };
   assert.equal(valueDevice(se, { network: 'chip', faults: [] }, { ...settings, 'network.chipShare': 0.7 }).lines[0].amount, 14000);
+});
+
+test('replaced battery: 80%+ health charges replaced only; under 80% charges the full battery', async () => {
+  const { valueDevice } = await import('../js/engine.js');
+  const cat = JSON.parse(readFileSync(new URL('../data/catalog-snapshot.json', import.meta.url)));
+  const d = cat.devices.find((x) => x.model === 'iPhone 13 Pro' && x.tradeIn);
+  const base = { icloudLocked: false, neatness: 'spotless', network: 'factory', faults: ['batteryReplaced'] };
+  const keys = (b) => valueDevice(d, { ...base, battery: b }, cat.settings).lines.map((l) => l.key).join(',');
+  assert.equal(keys(95), 'batteryReplaced');
+  assert.equal(keys(82), 'batteryReplaced');
+  assert.equal(keys(75), 'battery');
+  assert.equal(keys(null), 'batteryReplaced');
 });

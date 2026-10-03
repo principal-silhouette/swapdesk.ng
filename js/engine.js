@@ -170,7 +170,8 @@ export function valueDevice(device, answers = {}, settings = {}) {
     const label = answers.batteryLabel ? `Battery Health ${answers.batteryLabel}` : `Battery Health ${battery}%`;
     const full = amountFor(device, 'battery');
     if (battery < s(settings, 'battery.fullBelow')) push('battery', label, full);
-    else push('battery', label, typeof full === 'number' ? Math.ceil((full * s(settings, 'battery.partialShare')) / 1000) * 1000 : full);
+    // A replaced battery still at 80% or more is charged as replaced only (below); under 80% it takes the full battery deduction.
+    else if (!(answers.faults || []).includes('batteryReplaced')) push('battery', label, typeof full === 'number' ? Math.ceil((full * s(settings, 'battery.partialShare')) / 1000) * 1000 : full);
   }
 
   // Body

@@ -572,7 +572,10 @@ function conditions(el, app) {
   // What each group is set to, shown under its name once it's been filled.
   const now = (k) => {
     if (k === 'icloud') return a.icloudLocked === true ? (apple ? 'iCloud Locked' : 'Account Locked') : a.icloudLocked === false ? 'Not Locked' : '';
-    if (k === 'battery') return (a.faults || []).includes('batteryReplaced') ? 'Replaced Battery' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
+    if (k === 'battery') {
+      const band = a.healthHidden ? 'Health Not Showing' : (BATTERY_BANDS.find((b) => b.key === a.batteryBand)?.label || '');
+      return (a.faults || []).includes('batteryReplaced') ? ['Replaced Battery', band].filter(Boolean).join(' · ') : band;
+    }
     if (k === 'network') return NETWORK.find((n) => n.key === a.network)?.label || '';
     if (k === 'neatness') return NEATNESS.find((n) => n.key === a.neatness)?.label || '';
     if (k === 'pads') return PADS.find((x) => x.key === a.pads)?.label || '';
@@ -663,9 +666,13 @@ function question(el, app, params) {
         return html`<div class="head-block"><h2 class="h-title">What’s the battery health?</h2>
           <p class="par">${apple ? raw('Go to <b>Settings › Battery › Battery Health &amp; Charging</b> and check <b>Maximum Capacity</b>.') : 'Pick the range that matches your device.'}</p></div>
           <div class="stack q-opts" role="radiogroup">
-            ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key && !a.faults.includes('batteryReplaced'), `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
-            ${faultsFor(d).some((f) => f.key === 'batteryReplaced') ? opt(a.faults.includes('batteryReplaced'), 'data-act="replbat"', FAULTS.find((f) => f.key === 'batteryReplaced').label, FAULTS.find((f) => f.key === 'batteryReplaced').hint) : ''}
-          </div>`;
+            ${BATTERY_BANDS.map((b) => opt(a.batteryBand === b.key, `data-act="band" data-v="${b.key}"`, b.label, b.hint))}
+            ${a.faults.includes('batteryReplaced') ? opt(a.healthHidden === true, 'data-act="nohealth"', 'Battery Health Not Showing', 'The battery was changed and its health isn’t shown any more.') : ''}
+          </div>
+          ${faultsFor(d).some((f) => f.key === 'batteryReplaced') ? html`<div class="stack q-opts" role="group">
+            <button class="opt" type="button" role="checkbox" aria-checked="${a.faults.includes('batteryReplaced') ? 'true' : 'false'}" data-act="replbat">
+              <span class="main">${FAULTS.find((f) => f.key === 'batteryReplaced').label}<span class="sub">${a.faults.includes('batteryReplaced') ? 'Now pick its battery health above.' : FAULTS.find((f) => f.key === 'batteryReplaced').hint}</span></span><span class="tick box" aria-hidden="true"></span></button>
+          </div>` : ''}`;
       case 'neatness':
         return html`<h2 class="h-title">How does it look?</h2>
           <p class="par">Check the screen, back and frame in good light.</p>
@@ -728,14 +735,14 @@ function question(el, app, params) {
     else if (allAnswered(app)) app.go('value');
     else app.go('q', { i: qs.findIndex((x) => !answered(x, a)) });
   }
-  function set(fn, advance = false) {
+  function set(fn, advance = false, stay = false) {
     fn(a);
     s.saved = null;
     if (hub) a.touched = [...new Set([...(a.touched || []), q.key])];
     app.save();
     haptic();
     // From the conditions page, a single choice goes straight back to it (ticked); Others waits for Done.
-    if (hub && q.key !== 'faults') { app.back(); return; }
+    if (hub && q.key !== 'faults' && !stay) { app.back(); return; }
     if (advance && answered(q, a)) { next(); return; }
     draw();
   }
@@ -744,9 +751,14 @@ function question(el, app, params) {
   wire(el, app, {
     origin: (b) => { s.deviceId = b.dataset.v; set((x) => { x.origin = b.dataset.v; }, true); },
     icloud: (b) => set((x) => { x.icloudLocked = b.dataset.v === 'yes'; }, b.dataset.v === 'no'),
-    band: (b) => set((x) => { x.batteryBand = b.dataset.v; x.batteryUnknown = false; x.faults = x.faults.filter((f) => f !== 'batteryReplaced'); }, true),
-    // A replaced battery is its own answer on the battery page: no health range, the replaced-battery deduction instead.
-    replbat: () => set((x) => { x.batteryBand = ''; x.batteryUnknown = true; x.battery = ''; if (!x.faults.includes('batteryReplaced')) x.faults = [...x.faults, 'batteryReplaced']; }, true),
+    band: (b) => set((x) => { x.batteryBand = b.dataset.v; x.batteryUnknown = false; x.healthHidden = false; }, true),
+    // Replaced Battery is ticked on its own; the health range (or "not showing") is still picked above, and that returns.
+    replbat: () => set((x) => {
+      const on = !x.faults.includes('batteryReplaced');
+      x.faults = on ? [...x.faults, 'batteryReplaced'] : x.faults.filter((f) => f !== 'batteryReplaced');
+      if (!on && x.healthHidden) { x.healthHidden = false; x.batteryUnknown = false; }
+    }, false, true),
+    nohealth: () => set((x) => { x.batteryBand = ''; x.batteryUnknown = true; x.battery = ''; x.healthHidden = true; }, true),
     neat: (b) => set((x) => { x.neatness = b.dataset.v; }, true),
     net: (b) => set((x) => { x.network = b.dataset.v; }, true),
     fault: (b) => set((x) => {
