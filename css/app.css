@@ -1205,6 +1205,9 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .stage-tag .t3 { color: #4DA3FF; }
   .stage-credit, .stage-credit b { color: #BFD3E8; }
   .me-chip { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.28); color: #FFFFFF; box-shadow: none; }
-  /* The pop-up is see-through; on navy it would turn grey, so it keeps its light colour here. */
-  .popup { background: rgba(232, 243, 255, 0.97); border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }
+  /* Still see-through on navy, but frosted more so it stays light and readable. */
+  .popup { background: rgba(232, 243, 255, 0.9); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }
+  /* Bars that stick to the top and bottom of the pop-up take the same frosted colour, so there are no light bands. */
+  .list-top, .pick-search, .series-h { background: rgba(210, 223, 238, 0.97) !important; }
+  .screen-foot { background: linear-gradient(rgba(210, 223, 238, 0), rgba(210, 223, 238, 0.97) 26px); }
 }
