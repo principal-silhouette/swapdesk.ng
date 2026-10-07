@@ -627,7 +627,7 @@ function openQuote(el, app) {
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">Open a Quote</h2>
-      <p class="par">Type the quote code. It’s under <b>Your Swap Quote</b> on the quote picture, and at the end of the quote link (swapdesk.ng/?q=<b>SD-…</b>).</p>
+      <p class="par">Type the quote code. It’s at the top of the quote picture, and at the end of the quote link (swapdesk.ng/?q=<b>SD-…</b>).</p>
     </div>
     <label class="field oq-field"><span class="visually-hidden">Quote code</span>
       <input data-code placeholder="SD-XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" enterkeyhint="go"></label>
