@@ -1189,3 +1189,22 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Storage leads each row; the SIM version sits underneath, lighter. */
 .size .st { display: flex; flex-direction: column; gap: 2px; font-weight: 700; }
 .size .st small { font-size: 13px; font-weight: 500; color: var(--muted, #5b6b7d); }
+
+/* ---------- Dark mode (8 Oct): only the background changes. ----------
+   Navy page, white contour waves, white logo and top buttons. The pop-up and everything in it stay as they are. */
+@media (prefers-color-scheme: dark) {
+  html, body { background: #0E2238; }
+  .wave { filter: brightness(0) invert(1); }
+  .ready .wave { opacity: 0.5; }
+  @keyframes waveIn {
+    from { opacity: 0; clip-path: circle(0% at 70% 40%); }
+    to { opacity: 0.5; clip-path: circle(120% at 70% 40%); }
+  }
+  .stage-logo img, .stage-arrows { filter: brightness(0) invert(1); }
+  .stage-tag .t1, .stage-tag .t2 { color: #F4F8FC; }
+  .stage-tag .t3 { color: #4DA3FF; }
+  .stage-credit, .stage-credit b { color: #BFD3E8; }
+  .me-chip { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.28); color: #FFFFFF; box-shadow: none; }
+  /* The pop-up is see-through; on navy it would turn grey, so it keeps its light colour here. */
+  .popup { background: rgba(232, 243, 255, 0.97); border-color: rgba(255, 255, 255, 0.35); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }
+}
