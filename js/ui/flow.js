@@ -2,9 +2,9 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, FAULTS, SIM, hasSimQuestion, networkOptionsFor, simDeduction, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, SIM, hasSimQuestion, networkOptionsFor, simDeduction, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder, storageRank, conditionRank,
 } from '../engine.js';
-import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, tradeStorage, simParts, variantName, conditionLabel, $, $$ } from '../format.js';
+import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, tradeStorage, simParts, shopStorage, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -277,6 +277,10 @@ function picker(el, app, params) {
     if (d.stock === 'soldout') return html`<div class="cfg out" aria-disabled="true"><span class="main">${top}${line2(raw('<span class="val sold">Sold out</span>'))}</span></div>`;
     return html`<button class="cfg" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}"><span class="main">${top}${line2(html`<span class="val">${naira(d.price)}</span>`)}</span><span class="tick box" aria-hidden="true"></span></button>`;
   };
+  // Largest storage first, then P+eSIM, Dual SIM, eSIM Only, then condition: the same order as the price list.
+  const SIM_ORDER = ['P+eSIM', 'Dual SIM', 'eSIM Only'];
+  const simRank = (d) => { const i = SIM_ORDER.indexOf(simParts(d)[1]); return i < 0 ? 9 : i; };
+  const bySizeSim = (a, b) => storageRank(b.storage) - storageRank(a.storage) || simRank(a) - simRank(b) || conditionRank(a.condition) - conditionRank(b.condition);
   const modelCards = (rows) => {
     const out = []; const at = new Map();
     for (const d of rows) {
@@ -285,7 +289,7 @@ function picker(el, app, params) {
       at.get(d.model).push(d);
     }
     return out.map((g) => (Array.isArray(g)
-      ? html`<div class="mcard${g.some((d) => s.compare.includes(d.id)) ? ' has-sel' : ''}"><p class="mcard-t">${g[0].model}</p>${g.map(cfgRow)}</div>`
+      ? html`<div class="mcard${g.some((d) => s.compare.includes(d.id)) ? ' has-sel' : ''}"><p class="mcard-t">${g[0].model}</p>${[...g].sort(bySizeSim).map(cfgRow)}</div>`
       : g));
   };
 
@@ -1032,7 +1036,7 @@ function compare(el, app) {
     const t = tv === null ? null : swapTerms(x, tv);
     // Three lines: what it is · price and what it takes to swap · proceed.
     return html`<article class="cmp slim ${t ? t.kind : ''}">
-      <span class="t">${x.condition === 'Deal' ? raw('<span class="tag top">One unit</span>') : ''}<b>${x.model}</b>${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
+      <span class="t">${x.condition === 'Deal' ? raw('<span class="tag top">One unit</span>') : ''}<b>${x.model}</b>${x.storage ? html` <span class="s">· ${shopStorage(x)}</span>` : ''}</span>
       <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${nairaK(x.price)}</span><span class="kn"><span class="n">${t ? nairaK(t.kind === 'even' ? 0 : t.amount) : nairaK(x.price)}</span><span class="k">${t ? termsLabel(t) : 'Price'}</span></span></span>
       ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
