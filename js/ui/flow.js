@@ -193,6 +193,20 @@ function home(el, app) {
     trade: () => app.go('trade-in'),
     swap: () => startFlow(app, 'swap'),
   });
+  // The kicker stays put; everything under it moves down until the space under the kicker
+  // matches the space above the credit line (Daniel, 7 Oct). Measured, so it holds on every screen.
+  const even = () => {
+    if (!el.isConnected) { removeEventListener('resize', even); return; }
+    const moving = [...el.querySelectorAll('.home-intro > :not(.home-kicker), .stack.tight, .home-tail')];
+    moving.forEach((n) => { n.style.translate = ''; });
+    const k = $('.home-kicker', el)?.getBoundingClientRect(), h = $('.h-display', el)?.getBoundingClientRect();
+    const n = $('.home-note', el)?.getBoundingClientRect(), c = $('.screen-foot .credit', el)?.getBoundingClientRect();
+    if (!k || !h || !n || !c) return;
+    const shift = Math.max(0, Math.round(((c.top - n.bottom) - (h.top - k.bottom)) / 2));
+    moving.forEach((x) => { x.style.translate = `0 ${shift}px`; });
+  };
+  requestAnimationFrame(() => requestAnimationFrame(even));
+  addEventListener('resize', even);
 }
 
 function startFlow(app, mode) {
