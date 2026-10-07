@@ -2,7 +2,7 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, isSpeaker, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
 import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
@@ -87,6 +87,7 @@ function questionsFor(device) {
   // Consoles get their own short check: controllers, games included, hacked or not.
   if (isConsole(device)) return [{ key: 'pads' }, { key: 'games' }, { key: 'hacked' }];
   if (isSpeaker(device)) return [{ key: 'perfect' }];
+  if (isPerfectOnly(device)) return [{ key: 'icloud' }, { key: 'perfect' }];
   const qs = [{ key: 'icloud' }];
 
   if (applies(device, 'battery')) qs.push({ key: 'battery' });
@@ -120,7 +121,7 @@ export function engineAnswers(a, device) {
     network: device.type === 'Phones' ? a.network : 'factory',
     faults: a.faults,
     ...(isConsole(device) ? { pads: a.pads, games: a.games, hacked: a.hacked === true } : {}),
-    ...(isSpeaker(device) ? { perfect: a.perfect !== false } : {}),
+    ...(isPerfectOnly(device) ? { perfect: a.perfect !== false } : {}),
   };
 }
 function currentValue(app) {
@@ -500,14 +501,14 @@ function confirm(el, app) {
       <p class="big-num">${naira(upTo)}</p>
     </div>
     <p class="congrats">Congratulations!</p>
-    <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. ${isConsole(d) ? 'This is its value with one controller, in good working condition.' : 'This is its value in good working condition.'}</p>
+    <p class="par">You can Trade In your <strong>${name}</strong> for <strong>Cash</strong> or <strong>Swap</strong> to another device. ${isConsole(d) ? 'This is its value with one controller, in good working condition.' : isPerfectOnly(d) ? 'This is its value in perfect condition.' : 'This is its value in good working condition.'}</p>
     ${d.onlyIfBought ? html`<p class="notice-only">We only accept this model as a trade-in if it was bought from us.</p>` : ''}
     </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
     change: () => app.go('pick'),
     // Consoles skip the phone shortcut and go straight to their three questions.
-    ok: () => (isConsole(d) || isSpeaker(d) ? app.go('conds') : app.go('good')),
+    ok: () => (isConsole(d) || isPerfectOnly(d) ? app.go('conds') : app.go('good')),
   });
 }
 
@@ -585,7 +586,7 @@ const GROUP = {
   games: () => ['Games', 'Any game discs included? 1–2 add ₦5,000, 3 or more add ₦10,000'],
   hacked: () => ['Hacked', 'Jailbroken, modded or custom firmware?'],
   // Speakers (Daniel, 2 Oct)
-  perfect: () => ['Faults or Damage', 'Not charging, poor sound, cracks or water damage?'],
+  perfect: (apple, d) => ['Faults or Damage', isSpeaker(d) ? 'Not charging, poor sound, cracks or water damage?' : 'Cracks, dents, replaced parts or anything not working?'],
 };
 const GROUP_ORDER = ['icloud', 'battery', 'network', 'neatness', 'faults', 'pads', 'games', 'hacked', 'perfect'];
 
@@ -619,17 +620,17 @@ function conditions(el, app) {
   el.innerHTML = layout(html`
     <div class="head-block">
       <h2 class="h-title">${isConsole(d) ? 'About your console' : isSpeaker(d) ? 'About your speaker' : 'Any issues with it?'}</h2>
-      <p class="par">${isSpeaker(d) ? `We only swap speakers in perfect condition. Tap below only if something’s wrong with your ${d.model}.` : isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
+      <p class="par">${isPerfectOnly(d) ? `${perfectOnlyText(d)} Tap below only if something’s wrong with your ${d.model}.` : isConsole(d) ? `Tap only what applies to your ${d.model}. Anything you skip counts as 1 controller, no games and not hacked.` : `Tap only what applies to your ${d.model}. Anything you skip counts as fine.`}</p>
     </div>
     <div class="stack q-opts conds" role="group">
       ${groups.map((k) => { const [name, hint] = GROUP[k](apple, d); const on = touched.has(k); return html`
         <button class="opt" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="grp" data-v="${k}">
           <span class="main">${name}<span class="sub">${on && now(k) ? now(k) : hint}</span></span><span class="tick box" aria-hidden="true"></span></button>`; })}
     </div>
-    ${isSpeaker(d) && a.perfect === false ? html`<div class="stop left"><b>We only swap speakers in perfect condition.</b>Get it fixed first, then come back for your value.</div>`
+    ${isPerfectOnly(d) && a.perfect === false ? html`<div class="stop left"><b>${perfectOnlyText(d)}</b>Get it fixed first, then come back for your value.</div>`
       : a.icloudLocked === true ? html`<div class="stop left"><b>We can’t accept locked devices.</b>Sign out of ${apple ? 'iCloud and turn off Find My' : 'your accounts'}, then continue.</div>`
       : r.accepted ? html`<p class="small conds-val">Value so far: <b>${naira(r.value)}</b></p>` : ''}`,
-  pills(backPill(), html`<button class="pill go" type="button" data-act="proceed" ${a.icloudLocked === true || (isSpeaker(d) && a.perfect === false) ? 'disabled' : ''}>Proceed</button>`)).toString();
+  pills(backPill(), html`<button class="pill go" type="button" data-act="proceed" ${a.icloudLocked === true || (isPerfectOnly(d) && a.perfect === false) ? 'disabled' : ''}>Proceed</button>`)).toString();
   wire(el, app, {
     grp: (b) => app.go('q', { k: b.dataset.v }),
     proceed: () => {
@@ -731,11 +732,11 @@ function question(el, app, params) {
           <p class="small">We review the games in store to confirm they can be swapped.</p>`;
       case 'perfect':
         return html`<div class="head-block"><h2 class="h-title">Is it in perfect condition?</h2>
-          <p class="par">It charges, pairs, plays clearly at full volume, and has no cracks or water damage.</p></div>
+          <p class="par">${isSpeaker(d) ? 'It charges, pairs, plays clearly at full volume, and has no cracks or water damage.' : 'Original parts, no cracks, dents or scratches, and everything works.'}</p></div>
           <div class="stack q-opts" role="radiogroup">
             ${opt(a.perfect === true, 'data-act="perfect" data-v="yes"', 'Yes, it works perfectly')}
             ${opt(a.perfect === false, 'data-act="perfect" data-v="no"', 'No, it has a fault or damage')}</div>
-          ${a.perfect === false ? html`<div class="stop left"><b>We only swap speakers in perfect condition.</b>Get it fixed first, then come back for your value.</div>` : ''}`;
+          ${a.perfect === false ? html`<div class="stop left"><b>${perfectOnlyText(d)}</b>Get it fixed first, then come back for your value.</div>` : ''}`;
       case 'hacked':
         return html`<div class="head-block"><h2 class="h-title">Is it hacked?</h2>
           <p class="par">Jailbroken, modded or running custom firmware.</p></div>

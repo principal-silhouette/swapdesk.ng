@@ -41,6 +41,10 @@ export const GAMES = [
 export const isConsole = (d) => d?.type === 'Games';
 // Speakers (Daniel, 2 Oct): no deductions; we only take them in perfect condition.
 export const isSpeaker = (d) => d?.type === 'Speakers';
+// iPhone 18 series (Daniel, 7 Oct): for now we only swap them in perfect condition, so no fault questions.
+export const PERFECT_ONLY_SERIES = ['iPhone 18'];
+export const isPerfectOnly = (d) => isSpeaker(d) || PERFECT_ONLY_SERIES.includes(d?.series);
+export const perfectOnlyText = (d) => (isSpeaker(d) ? 'We only swap speakers in perfect condition.' : `We only swap the ${d?.series} series in perfect condition.`);
 
 export const NEATNESS = [
   { key: 'spotless', label: 'Spotless', hint: 'No marks at all, like it just left the box.' },
@@ -137,8 +141,8 @@ export function valueDevice(device, answers = {}, settings = {}) {
   if (answers.icloudLocked) {
     return { accepted: false, reason: 'We can’t accept devices that are iCloud or activation locked. Remove the lock and check again.', start: 0, lines: [], pending: 0, value: 0 };
   }
-  if (isSpeaker(device) && answers.perfect === false) {
-    return { accepted: false, reason: 'We only swap speakers in perfect condition.', start: 0, lines: [], pending: 0, value: 0 };
+  if (isPerfectOnly(device) && answers.perfect === false) {
+    return { accepted: false, reason: perfectOnlyText(device), start: 0, lines: [], pending: 0, value: 0 };
   }
   if (!device.tradeIn) {
     return { accepted: false, reason: 'We don’t take this device as a trade-in yet.', start: 0, lines: [], pending: 0, value: 0 };
