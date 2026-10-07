@@ -77,6 +77,7 @@ export const CONDITION_ORDER = [
   'Brand New',
   'Active Brand New',
   'Active Brand New (Non LLA)',
+  'Open Box',
   'Foreign USED',
   'Foreign USED (Non LLA)',
   'Nigerian USED',
@@ -239,7 +240,9 @@ export function termsLabel(t) {
 // ---------- ordering ----------
 
 export function storageRank(str = '') {
-  const m = String(str).toLowerCase().match(/(\d+(?:\.\d+)?)\s*(tb|gb|mm)?\s*$/);
+  // Storage can carry a SIM or connectivity label after the size ("256gb eSIM only", "128gb Cellular").
+  const s = String(str).toLowerCase();
+  const m = s.match(/(\d+(?:\.\d+)?)\s*(tb|gb|mm)/) || s.match(/(\d+(?:\.\d+)?)\s*$/);
   if (!m) return 0;
   const n = parseFloat(m[1]);
   return m[2] === 'tb' ? n * 1024 : n;
