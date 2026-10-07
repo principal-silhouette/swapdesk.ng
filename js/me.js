@@ -41,6 +41,20 @@ export const showPhone = (p) => (/^0\d{10}$/.test(p) ? `${p.slice(0, 4)} ${p.sli
 export const firstName = (m) => String(m?.name || '').trim().split(/\s+/)[0] || '';
 
 /** Remember a code made on this phone (newest first, at most 50). */
+/** Quotes made on this phone: only these (or a signed-in owner's) can be edited from a quote link. */
+const MINE = 'swapdesk.mine';
+const mineList = () => { try { return JSON.parse(localStorage.getItem(MINE) || '[]'); } catch { return []; } };
+export function markMine(id) {
+  if (!id) return;
+  try { localStorage.setItem(MINE, JSON.stringify([id, ...mineList().filter((x) => x !== id)].slice(0, 100))); } catch { /* private mode */ }
+}
+export function isMine(id, q = {}) {
+  if (!id) return false;
+  if (mineList().includes(id)) return true;
+  const m = getMe();
+  return !!m && ((m.codes || []).some((c) => c.id === id) || (!!q.phone && normPhone(q.phone) === m.phone));
+}
+
 export function rememberCode(c) {
   const m = getMe();
   if (!m || !c?.id) return;

@@ -12,7 +12,7 @@ import {
 } from '../quote.js';
 import { listScreen, listRows, dealRows } from './lists.js';
 import { quoteScreen } from './quoteView.js';
-import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, saveCustomer, fetchCodes, savePin, signInRemote } from '../me.js';
+import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
 
@@ -1140,6 +1140,7 @@ async function ensureSaved(app, extra = {}, opts = {}) {
   // survives the phone pausing the page (switching to WhatsApp mid-save). The save runs, and retries, behind it.
   if ((app.catalog.features || []).includes('clientIds')) {
     s.quoteId = s.editing || s.quoteId || newQuoteId();
+    markMine(s.quoteId);
     const id = s.quoteId;
     const link = `${CONFIG.site}?q=${id}`;
     rememberCode({ id, label: codeLabel(q), devices: codeDevices(q) });

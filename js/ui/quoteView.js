@@ -5,6 +5,7 @@ import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, dateLabe
 import { ICON } from './icons.js';
 import { decodeQuote, answersText, termsText, whatsappMessage, whatsappURL, share, summaryText, ageDays, saveQuote } from '../quote.js';
 import { loadQuoteRemote } from '../data.js';
+import { isMine } from '../me.js';
 
 /** The battery range a saved battery reading falls in (the flow asks for a range). */
 function bandFor(b) {
@@ -62,12 +63,14 @@ function render(el, app, p, q) {
   const items = q.items && q.items.length > 1 ? q.items
     : q.device ? [{ name: q.device.name, value: q.value, start: q.device.start, answers: q.answers, lines: q.lines || [] }] : [];
   const multi = items.length > 1;
+  // Anyone with the link can view; only the person who made it can edit it (Daniel, 8 Oct).
+  const mine = isMine(p.id, q);
   const nameParts = (n) => { const [m, ...r] = n.split(' · '); return [m, r.join(' · ')]; };
   el.innerHTML = html`
     <div class="head-block qv-head">
       <h2 class="h-title">${items.length ? 'Your Swap Quote' : 'Your Comparison'}</h2>
       <p class="par">${p.id ? `${p.id} · ` : ''}${dateLabel(q.created)} · valid for ${CONFIG.quoteValidDays} days</p>
-      <button class="link qv-edit" type="button" data-act="edit">Edit Quote</button>
+      ${mine ? html`<button class="link qv-edit" type="button" data-act="edit">Edit Quote</button>` : ''}
     </div>
     ${expired ? html`<div class="notice">This quote is more than ${CONFIG.quoteValidDays} days old and has expired. Prices change often. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>`
       : changed ? html`<div class="notice">Prices have changed since this quote. <button class="link" type="button" data-act="today" style="padding:0;min-height:0">See today’s figures</button></div>` : ''}
@@ -143,7 +146,9 @@ function render(el, app, p, q) {
         compare: q.compare.map((c) => c.id).filter((id) => avail(id)),
         chosen: null, saved: null,
         // Saving after an edit updates this quote and keeps its link.
-        editing: p.id || '',
+        // Someone else's quote opens as a new quote of their own; the original stays as it was.
+        editing: mine ? p.id || '' : '',
+        quoteId: mine ? p.id || '' : '',
       });
       app.save();
       history.replaceState({ screen: 'home', params: {}, d: 0 }, '', './');
