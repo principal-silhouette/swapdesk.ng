@@ -12,6 +12,7 @@ import {
 } from '../quote.js';
 import { listScreen, listRows, dealRows } from './lists.js';
 import { quoteScreen } from './quoteView.js';
+import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, saveCustomer, fetchCodes, savePin } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
 
@@ -953,7 +954,12 @@ function choose(el, app) {
     let fs = 14; while (n.scrollWidth > n.clientWidth + 0.5 && fs > 11) { fs -= 0.5; n.style.fontSize = `${fs}px`; }
   }));
   wire(el, app, {
-    swap: () => { s.mode = 'swap'; s.cash = false; app.save(); app.go('compare'); },
+    swap: () => {
+      s.mode = 'swap'; s.cash = false; app.save();
+      // Once per visit, until they sign in: continue as a guest, or sign in to keep their codes (Daniel, 7 Oct).
+      if (!getMe() && !isGuest()) app.go('signin', { next: 'compare' });
+      else app.go('compare');
+    },
     cash: () => { s.cash = true; app.save(); app.go('finish'); },
     addtrade: () => {
       // Park the device just valued, value the next one; its Yes / Proceed lands back here.
@@ -1100,6 +1106,8 @@ function quoteNow(app, { onlyChosen = false } = {}) {
       answers: engineAnswers(t.answers, t.d), lines: t.r.accepted ? t.r.lines.map((l) => [l.label, l.amount]) : [] }));
     q.value = total || 0;
   }
+  const me = getMe();
+  if (me) { q.name = me.name; q.phone = me.phone; }
   return q;
 }
 // One save per quote: taps that arrive while it's saving share that save, so a slow connection
@@ -1118,6 +1126,7 @@ async function ensureSaved(app, extra = {}, opts = {}) {
     s.quoteId = s.editing || s.quoteId || newQuoteId();
     const id = s.quoteId;
     const link = `${CONFIG.site}?q=${id}`;
+    rememberCode({ id, label: codeLabel(q) });
     backgroundSave(app, q, { ...extra, replaceId: id }, sig, link, id);
     return { q, sig, link, id, saved: true };
   }
@@ -1132,6 +1141,7 @@ async function ensureSaved(app, extra = {}, opts = {}) {
         const r = await once();
         if (r.saved && r.link) {
           s.saved = { sig, link: r.link, id: r.id, saved: true };
+          rememberCode({ id: r.id, label: codeLabel(q) });
           app.save();
           return s.saved;
         }
@@ -1178,6 +1188,9 @@ function backgroundSave(app, q, extra, sig, link, id) {
 function finish(el, app) {
   const s = app.s;
   if (!ownDevice(app)) { app.go('home', {}, { replace: true }); return false; }
+  // A signed-in customer's city is filled in from last time.
+  const me = getMe();
+  if (!s.city && me?.city && CITIES.some((c) => c.key === me.city)) s.city = me.city;
   const city = CITIES.find((c) => c.key === s.city);
   el.innerHTML = html`
     <div class="head-block">
@@ -1194,7 +1207,12 @@ function finish(el, app) {
     <button class="btn green fill" type="button" data-act="wa" ${city ? '' : 'disabled'}>${raw(ICON.whatsapp)} ${city ? 'Complete on WhatsApp' : 'Pick your city to continue'}</button>
     ${pills(backPill())}`).toString();
   wire(el, app, {
-    city: (b) => { s.city = b.dataset.v; app.save(); app.refresh(); $('[data-act="wa"]', el.isConnected ? el : document)?.focus?.({ preventScroll: true }); },
+    city: (b) => {
+      s.city = b.dataset.v; app.save();
+      const m = getMe();
+      if (m && m.city !== s.city) saveCustomer(updateMe({ city: s.city }));
+      app.refresh(); $('[data-act="wa"]', el.isConnected ? el : document)?.focus?.({ preventScroll: true });
+    },
     wa: async (b) => {
       b.disabled = true;
       b.textContent = 'Preparing your quote…';
@@ -1483,6 +1501,159 @@ function downloadFile(file, app) {
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
 
+// ---------- sign in: name and WhatsApp number, so every swap code is kept (Daniel, 7 Oct) ----------
+
+/** A short line for a saved code: the trade-in device, then how many swap options. */
+function codeLabel(q) {
+  const dev = q.items && q.items.length > 1 ? `${q.items.length} devices` : q.device?.name.split(' · ')[0] || '';
+  const n = q.compare?.length || 0;
+  const into = n === 1 ? q.compare[0].name.split(' · ')[0] : n ? `${n} swap options` : '';
+  return [dev, into].filter(Boolean).join(' → ') || 'Swap Quote';
+}
+
+function signIn(el, app, params = {}) {
+  const next = params.next || '';
+  const me = getMe();
+  // From the swap flow, first the choice; from the corner (or "Sign In" on that choice), the form.
+  if (next && !params.form && !me) {
+    el.classList.add('choose');
+    el.innerHTML = layout(html`
+      <div class="head-block">
+        <h2 class="h-title">Save Your Swap Codes</h2>
+        <p class="par">Sign in once with your WhatsApp number and every swap code you make is kept for you.</p>
+      </div>
+      <div class="stack nav-stack signin-ask">
+        <button class="btn two" type="button" data-act="guest"><span class="bt">Continue as Guest</span><span class="bs">Codes won’t be saved</span></button>
+        <button class="btn blue two" type="button" data-act="form"><span class="bt">Sign In</span><span class="bs">Save your codes</span></button>
+      </div>`, pills(backPill())).toString();
+    wire(el, app, {
+      guest: () => { setGuest(); app.go(next, {}, { replace: true }); },
+      form: () => app.go('signin', { next, form: 1 }, { replace: true }),
+    });
+    return;
+  }
+  el.classList.add('signin');
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">${me ? 'Your Details' : 'Sign In'}</h2>
+      <p class="par">Your name and WhatsApp number. That’s all.</p>
+    </div>
+    <div class="si-fields">
+      <label class="field si-field"><span class="si-label">Name</span>
+        <input data-name autocomplete="name" autocapitalize="words" maxlength="60" enterkeyhint="next" placeholder="Your name" value="${me?.name || ''}"></label>
+      <label class="field si-field"><span class="si-label">WhatsApp Number</span>
+        <input data-phone type="tel" inputmode="tel" autocomplete="tel" maxlength="20" enterkeyhint="go" placeholder="0803 123 4567" value="${me ? showPhone(me.phone) : ''}"></label>
+      <p class="small oq-err" role="alert"></p>
+      <p class="small si-note">We use your number to keep your swap codes and to reach you about your swap.</p>
+    </div>`,
+  pills(backPill(), html`<button class="pill go" type="button" data-act="submit">${me ? 'Save' : 'Sign In'}</button>`)).toString();
+  const nameIn = $('[data-name]', el), phoneIn = $('[data-phone]', el), err = $('.oq-err', el);
+  const submit = () => {
+    const name = nameIn.value.trim().replace(/\s+/g, ' ');
+    const phone = normPhone(phoneIn.value);
+    if (name.length < 2) { err.textContent = 'Type your name.'; nameIn.focus(); return; }
+    if (!phone) { err.textContent = 'Type your WhatsApp number, e.g. 0803 123 4567.'; phoneIn.focus(); return; }
+    // The same number keeps its codes and PIN; a different number starts fresh.
+    const same = me && me.phone === phone;
+    const m = setMe({ ...(same ? me : {}), name, phone, city: (same ? me.city : '') || app.s.city || '', at: new Date().toISOString() });
+    saveCustomer(m);
+    app.paintChip?.();
+    haptic();
+    app.toast(me ? 'Details saved' : `Welcome, ${firstName(m)}`);
+    app.go(next || 'me', {}, { replace: true });
+  };
+  wire(el, app, { submit });
+  nameIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); phoneIn.focus(); } });
+  phoneIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  [nameIn, phoneIn].forEach((i) => i.addEventListener('input', () => { err.textContent = ''; }));
+  if (!me) setTimeout(() => nameIn.focus(), 250);
+}
+
+/** The customer's corner: their details and every swap code saved under their number. */
+function meScreen(el, app) {
+  let m = getMe();
+  if (!m) { app.go('signin', {}, { replace: true }); return false; }
+  const live = (app.catalog.features || []).includes('customers');
+  // The second time they open their codes, offer a PIN, so it doesn't all come at once (Daniel, 7 Oct).
+  m = updateMe({ views: (m.views || 0) + 1 });
+  const askPin = live && !m.pin && m.views >= 2 && m.views >= (m.pinLater || 0);
+  const city = CITIES.find((c) => c.key === m.city);
+  let codes = (m.codes || []).map((c) => ({ id: c.id, at: c.at, label: c.label }));
+  let state = live ? 'loading' : 'ready';
+  const date = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); };
+  const codesHtml = () => {
+    if (state === 'locked') {
+      return html`<div class="pin-card"><p class="pin-t">Enter Your PIN</p><p class="small">This number has a PIN. Type it to see your swap codes.</p>
+        <input class="pin-in" data-pin type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">
+        <p class="small oq-err" role="alert"></p>
+        <button class="btn blue" type="button" data-act="unlock">Show My Codes</button></div>`;
+    }
+    if (!codes.length) return html`<p class="small codes-empty">${state === 'loading' ? 'Loading your codes…' : 'No swap codes yet. Every quote you save from now on shows up here.'}</p>`;
+    return html`<div class="mcard codes">${codes.map((c) => html`<button class="cfg code-row" type="button" data-act="open" data-v="${c.id}">
+      <span class="main">${c.id}<span class="l2"><span class="sub">${c.label}</span><span class="sub">${date(c.at)}</span></span></span>${raw(ICON.chevron)}</button>`)}</div>`;
+  };
+  const pinCard = () => (askPin && state === 'ready' && !getMe()?.pin ? html`<div class="pin-card" data-pincard>
+      <p class="pin-t">Add a PIN</p><p class="small">4 digits, so only you can open your codes on another phone.</p>
+      <input class="pin-in" data-newpin type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">
+      <p class="small oq-err" role="alert"></p>
+      <button class="btn blue" type="button" data-act="setpin">Add PIN</button>
+      <button class="link" type="button" data-act="later">Not Now</button></div>` : '');
+  const draw = () => {
+    el.innerHTML = layout(html`
+      <div class="head-block">
+        <h2 class="h-title">Hi, ${firstName(m)}</h2>
+        <p class="par">${showPhone(m.phone)}${city ? ` · ${city.name}` : ''} · <button class="link" type="button" data-act="edit">Edit Details</button></p>
+      </div>
+      ${pinCard()}
+      <p class="group-label me-label">My Swap Codes</p>
+      ${codesHtml()}
+      <button class="link signout" type="button" data-act="signout">Sign Out</button>`, pills(backPill())).toString();
+  };
+  el.classList.add('me-pg');
+  draw();
+  const load = () => {
+    if (!live) return;
+    fetchCodes(getMe()).then((r) => {
+      if (r && r.ok) {
+        const local = new Map(codes.map((c) => [c.id, c]));
+        for (const c of r.codes || []) local.set(c.id, { id: c.id, at: c.created, label: c.label || local.get(c.id)?.label || 'Swap Quote' });
+        codes = [...local.values()].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        state = 'ready';
+      } else if (r && r.needPin) state = 'locked';
+      else state = 'ready';
+    }).catch(() => { state = 'ready'; }).finally(() => { if (el.isConnected) draw(); });
+  };
+  load();
+  wire(el, app, {
+    open: (b) => app.go('quote', { id: b.dataset.v }),
+    edit: () => app.go('signin', { form: 1 }),
+    signout: () => { signOut(); app.paintChip?.(); app.toast('Signed out'); app.go('home', {}, { replace: true }); },
+    later: () => { m = updateMe({ pinLater: m.views + 3 }); $('[data-pincard]', el)?.remove(); },
+    setpin: async (b) => {
+      const pin = $('[data-newpin]', el).value.trim();
+      const e = $('[data-pincard] .oq-err', el);
+      if (!/^\d{4}$/.test(pin)) { e.textContent = 'Use 4 digits.'; return; }
+      b.disabled = true;
+      const r = await savePin(getMe(), pin).catch(() => null);
+      b.disabled = false;
+      if (!r || !r.ok) { e.textContent = r?.error || 'Couldn’t save your PIN. Check your connection and try again.'; return; }
+      m = updateMe({ pin });
+      app.toast('PIN added');
+      draw();
+    },
+    unlock: async (b) => {
+      const pin = $('[data-pin]', el).value.trim();
+      const e = $('.pin-card .oq-err', el);
+      if (!/^\d{4}$/.test(pin)) { e.textContent = 'Your PIN is 4 digits.'; return; }
+      b.disabled = true;
+      const r = await fetchCodes({ ...getMe(), pin }).catch(() => null);
+      b.disabled = false;
+      if (r && r.ok) { m = updateMe({ pin }); state = 'loading'; load(); return; }
+      e.textContent = r?.error || (r?.needPin ? 'That PIN doesn’t match.' : 'Couldn’t check your PIN. Try again.');
+    },
+  });
+}
+
 export const SCREENS = {
   home,
   pick: picker,
@@ -1493,6 +1664,8 @@ export const SCREENS = {
   q: question,
   conds: conditions,
   sim: simScreen,
+  signin: signIn,
+  me: meScreen,
   openq: openQuote,
   value,
   compare,

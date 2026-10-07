@@ -6,6 +6,9 @@
  *   GET  ?action=quote&id=SD-XXX  → a saved quote, exactly as the customer saw it
  *   POST {action:"saveQuote", quote:{…}} (Content-Type text/plain) → { ok, id, link }
  *        quote.replaceId = SD-XXX updates that quote in place (an edited quote keeps its link)
+ *   POST {action:"customer", customer:{name, phone, city}} → { ok, hasPin }   (Customers tab)
+ *   POST {action:"myCodes", phone, pin}  → { ok, codes:[{id, created, label}] } or { ok:false, needPin }
+ *   POST {action:"setPin", phone, pin, oldPin} → { ok }
  *
  * Only customer-safe data leaves the sheet. Margins, supply prices, bands and
  * keep rates are never returned.
@@ -40,6 +43,9 @@ function doPost(e) {
   try {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (body.action === 'saveQuote') return json_(saveQuote_(body.quote || {}));
+    if (body.action === 'customer') return json_(customer_(body.customer || {}));
+    if (body.action === 'myCodes') return json_(myCodes_(String(body.phone || ''), String(body.pin || '')));
+    if (body.action === 'setPin') return json_(setPin_(String(body.phone || ''), String(body.pin || ''), String(body.oldPin || '')));
     return json_({ ok: false, error: 'Unknown action' });
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
@@ -114,7 +120,8 @@ function getCatalog_(skipCache) {
     source: 'live',
     version: 4,
     // clientIds: the site makes the quote ID itself, so the short link is ready the moment it's needed.
-    features: ['clientIds'],
+    // customers: sign in with name and WhatsApp number; codes saved under the number (7 Oct).
+    features: ['clientIds', 'customers'],
     settings: settings,
     devices: devices
   };
@@ -178,7 +185,7 @@ function saveQuote_(q) {
     }),
     city: cut_(q.city, 40),
     name: cut_(q.name, 60),
-    phone: cut_(q.phone, 20).replace(/[^\d+ ]/g, '')
+    phone: normPhone_(q.phone)
   };
 
   var lock = LockService.getScriptLock();
@@ -215,6 +222,7 @@ function saveQuote_(q) {
       sh = hit.sheet; target = hit.row;
       var old = sh.getRange(target, 2, 1, row.length).getValues()[0];
       row[1] = old[1];                                   // first saved
+      row[2] = row[2] || old[2]; row[3] = row[3] || old[3]; row[4] = row[4] || old[4]; // keep the customer if an edit has none
       row[16] = old[16]; row[17] = old[17]; row[18] = old[18]; // status and team notes
       clean.created = old[1] instanceof Date ? old[1].toISOString() : clean.created;
       clean.edited = new Date().toISOString();
@@ -225,7 +233,16 @@ function saveQuote_(q) {
       for (var i = 0; i < ids.length; i++) { if (!ids[i]) { gap = i; break; } }
       target = gap === -1 ? last + 1 : QUOTE_FIRST_ROW + gap;
     }
+    sh.getRange(target, 5).setNumberFormat('@'); // phone as text, so the leading 0 stays
     sh.getRange(target, 2, 1, row.length).setValues([row]);
+    if (clean.phone) {
+      try {
+        touchCustomer_(clean.phone, {
+          name: clean.name, city: clean.city, quote: !hit,
+          tradeIn: row[6], swaps: clean.compare.map(function (c) { return c.name; }).join(', ')
+        });
+      } catch (e) { /* the quote is saved either way */ }
+    }
     return { ok: true, id: id, link: link, created: clean.created };
   } finally {
     lock.releaseLock();
@@ -277,6 +294,139 @@ function monthTab_(date) {
   ss.setActiveSheet(sh);
   ss.moveActiveSheet(from.getIndex() + 1);
   return sh;
+}
+
+// ---------- customers (sign in with name and WhatsApp number) ----------
+
+var CUSTOMER_HEAD = ['WhatsApp Number', 'Name', 'City', 'First Seen', 'Last Seen', 'Quotes', 'Last Trade-In', 'Last Swap Options', 'PIN Set', 'PIN (scrambled)'];
+
+/** 07051111266, 2347051111266, +234 705 111 1266 and 7051111266 (a sheet that dropped the 0) are one number. */
+function normPhone_(v) {
+  var raw = String(v === undefined || v === null ? '' : v).trim();
+  var d = raw.replace(/\D/g, '');
+  if (d.indexOf('234') === 0 && d.length === 13) d = '0' + d.slice(3);
+  else if (d.length === 10 && /^[789]/.test(d)) d = '0' + d;
+  if (/^0[789][01]\d{8}$/.test(d)) return d;
+  if (raw.charAt(0) === '+' && d.length >= 8 && d.length <= 15) return '+' + d;
+  return '';
+}
+
+function customersTab_() {
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName('Customers');
+  if (!sh) {
+    sh = ss.insertSheet('Customers');
+    sh.getRange(1, 1, 1, CUSTOMER_HEAD.length).setValues([CUSTOMER_HEAD]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+    sh.getRange('A:A').setNumberFormat('@');
+    sh.hideColumns(10);
+  }
+  return sh;
+}
+
+/** { sheet, row, values } for a number, or null. */
+function findCustomer_(phone) {
+  var sh = customersTab_();
+  var last = sh.getLastRow();
+  if (last < 2) return null;
+  var vals = sh.getRange(2, 1, last - 1, CUSTOMER_HEAD.length).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    if (normPhone_(vals[i][0]) === phone) return { sheet: sh, row: i + 2, values: vals[i] };
+  }
+  return null;
+}
+
+/** Add or update a customer. info: { name, city, quote (true = one more quote), tradeIn, swaps } */
+function touchCustomer_(phone, info) {
+  var c = findCustomer_(phone);
+  var now = new Date();
+  var sh = c ? c.sheet : customersTab_();
+  var v = c ? c.values.slice() : [phone, '', '', now, now, 0, '', '', 'No', ''];
+  // Once a number has a PIN, only someone with the PIN can change its name or city.
+  var mayEdit = !v[9] || info.pinOk;
+  if (info.name && (mayEdit || !v[1])) v[1] = cut_(info.name, 60);
+  if (info.city && (mayEdit || !v[2])) v[2] = cut_(info.city, 40);
+  v[4] = now;
+  if (info.quote) v[5] = Number(v[5] || 0) + 1;
+  if (info.tradeIn) v[6] = cut_(info.tradeIn, 200);
+  if (info.swaps) v[7] = cut_(info.swaps, 500);
+  if (info.pinHash !== undefined) { v[9] = info.pinHash; v[8] = info.pinHash ? 'Yes' : 'No'; }
+  var row = c ? c.row : sh.getLastRow() + 1;
+  sh.getRange(row, 1).setNumberFormat('@');
+  sh.getRange(row, 1, 1, CUSTOMER_HEAD.length).setValues([v]);
+  return v;
+}
+
+function customer_(cu) {
+  var phone = normPhone_(cu.phone);
+  if (!phone) return { ok: false, error: 'Not a phone number' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var c = findCustomer_(phone);
+    var pinOk = !!(c && c.values[9] && cu.pin && pinHash_(phone, String(cu.pin)) === c.values[9]);
+    var v = touchCustomer_(phone, { name: cu.name, city: cu.city, pinOk: pinOk });
+    return { ok: true, hasPin: !!v[9] };
+  } finally { lock.releaseLock(); }
+}
+
+function pinHash_(phone, pin) {
+  var props = PropertiesService.getScriptProperties();
+  var salt = props.getProperty('pinSalt');
+  if (!salt) { salt = Utilities.getUuid(); props.setProperty('pinSalt', salt); }
+  return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + '|' + phone + '|' + pin));
+}
+
+/** Wrong PINs: 5 tries, then a 15-minute wait. */
+function pinOk_(phone, hash, pin) {
+  if (!hash) return { ok: true };
+  var cache = CacheService.getScriptCache();
+  var key = 'pinfail:' + phone;
+  var fails = Number(cache.get(key) || 0);
+  if (fails >= 5) return { ok: false, needPin: true, error: 'Too many tries. Try again in 15 minutes.' };
+  if (!pin) return { ok: false, needPin: true };
+  if (pinHash_(phone, pin) === hash) { cache.remove(key); return { ok: true }; }
+  cache.put(key, String(fails + 1), 900);
+  return { ok: false, needPin: true, error: 'That PIN doesn’t match.' };
+}
+
+function myCodes_(phoneIn, pin) {
+  var phone = normPhone_(phoneIn);
+  if (!phone) return { ok: false, error: 'Not a phone number' };
+  var c = findCustomer_(phone);
+  var check = pinOk_(phone, c ? c.values[9] : '', pin);
+  if (!check.ok) return check;
+  var codes = [];
+  quoteTabs_().forEach(function (sh) {
+    var last = sh.getLastRow();
+    if (last < QUOTE_FIRST_ROW) return;
+    // B id, C date, E phone, H trade-in device, O swap count, P swap options
+    var vals = sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 15).getValues();
+    vals.forEach(function (r) {
+      if (!r[0] || normPhone_(r[3]) !== phone) return;
+      var swaps = String(r[14] || '').split('\n').filter(String).map(function (x) { return x.split(' · ')[0].split(':')[0]; });
+      var dev = String(r[6] || '').split('\n')[0].split(' · ')[0];
+      var into = swaps.length === 1 ? swaps[0] : swaps.length ? swaps.length + ' swap options' : '';
+      codes.push({ id: String(r[0]), created: r[1] instanceof Date ? r[1].toISOString() : String(r[1]), label: [dev, into].filter(String).join(' → ') || 'Swap Quote' });
+    });
+  });
+  codes.sort(function (a, b) { return a.created < b.created ? 1 : -1; });
+  return { ok: true, codes: codes.slice(0, 50), hasPin: !!(c && c.values[9]) };
+}
+
+function setPin_(phoneIn, pin, oldPin) {
+  var phone = normPhone_(phoneIn);
+  if (!phone) return { ok: false, error: 'Not a phone number' };
+  if (!/^\d{4}$/.test(pin)) return { ok: false, error: 'Use 4 digits.' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var c = findCustomer_(phone);
+    var check = pinOk_(phone, c ? c.values[9] : '', oldPin);
+    if (!check.ok) return { ok: false, error: check.error || 'Type your current PIN first.' };
+    touchCustomer_(phone, { pinHash: pinHash_(phone, pin) });
+    return { ok: true };
+  } finally { lock.releaseLock(); }
 }
 
 function describe_(c) {

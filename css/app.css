@@ -1106,3 +1106,38 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .cfg .l2 .sub { margin-top: 0; }
 .cfg .l2 .val { font-size: 15px; }
 .cfg[aria-checked="true"] .l2 .sub { font-weight: 400; }
+
+/* ---------- Sign in (7 Oct) ---------- */
+.screen.welcome { display: flex; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
+.welcome-t { font-size: clamp(2.6rem, 11vw, 3.6rem); margin: 0; }
+.me-chip {
+  position: fixed; z-index: 20; top: calc(env(safe-area-inset-top, 0px) + 28px); right: 16px;
+  height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid #cfe0f3; background: rgba(255, 255, 255, 0.92);
+  color: var(--action); font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em;
+  box-shadow: 0 2px 10px rgba(31, 94, 159, 0.08); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.me-chip:active { transform: scale(0.96); }
+.btn.two { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.btn.two .bt { font-weight: 600; }
+.btn.two .bs { font-size: 12px; font-weight: 500; opacity: 0.75; letter-spacing: 0; }
+.si-fields { width: var(--col); margin: 0 auto; display: grid; gap: 14px; }
+.si-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 0 0 6px 4px; text-align: left; }
+.si-field input { width: 100%; font-size: 17px; }
+.si-fields .small { margin: 0; text-align: center; }
+.si-fields .oq-err:empty { display: none; }
+.si-note { font-size: 12.5px; }
+.me-pg .head-block .link, .me-pg .signout, .pin-card .link { background: none; border: 0; padding: 0; color: var(--action); font: inherit; font-weight: 600; cursor: pointer; }
+.me-label { width: var(--col); margin: 6px auto 8px; text-align: left; }
+.me-pg .mcard.codes, .me-pg .codes-empty, .pin-card { width: var(--col); margin-inline: auto; }
+.code-row .main { font-weight: 600; letter-spacing: 0.01em; }
+.code-row .l2 .sub { font-weight: 400; }
+.code-row .l2 .sub:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code-row .l2 .sub:last-child { flex: none; }
+.code-row svg { flex: none; width: 8px; height: 14px; color: #999; }
+.me-pg .signout { display: block; margin: 18px auto 0; font-size: 15px; }
+.pin-card { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 18px 20px; margin-bottom: 14px; background: var(--white); border: 1px solid #d3e0ec; border-radius: 18px; box-shadow: 0 1px 2px rgba(31, 94, 159, 0.06), 0 4px 14px rgba(31, 94, 159, 0.07); }
+.pin-t { margin: 0; font-size: 17px; font-weight: 600; }
+.pin-card .small { margin: 0; }
+.pin-card .oq-err:empty { display: none; }
+.pin-in { width: 9.5ch; text-align: center; font-size: 24px; letter-spacing: 0.4em; min-height: 50px; background: #eef5ff; border: 1px solid #cfe0f3; border-radius: 14px; }
+.pin-card .btn { width: 100%; min-height: 52px; }

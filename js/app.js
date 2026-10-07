@@ -4,6 +4,7 @@ import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
 import { SCREENS, restoreState, saveState } from './ui/flow.js';
+import { getMe, firstName } from './me.js';
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
@@ -28,7 +29,16 @@ export const app = {
   },
   /** Re-draw the current screen in place (answers changed, prices updated). */
   refresh() { show(app.screen, app.params, 0, true); },
+  /** The corner chip: "Hi, Name" for a signed-in customer, "Sign In" for everyone else. */
+  paintChip() {
+    const chip = document.getElementById('mechip');
+    if (!chip) return;
+    const m = getMe();
+    chip.textContent = m ? `Hi, ${firstName(m)}` : 'Sign In';
+    chip.hidden = false;
+  },
 };
+document.getElementById('mechip')?.addEventListener('click', () => app.go(getMe() ? 'me' : 'signin'));
 
 function urlFor(screen, params) {
   const p = new URLSearchParams();
@@ -143,6 +153,10 @@ async function boot() {
       <div class="pills"><button class="pill go" onclick="location.reload()">Try Again</button></div></div>`;
     return;
   }
+  // The welcome stays up long enough to read, then the site rises in.
+  const wait = 1300 - performance.now();
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  app.paintChip();
   const [screen, params] = fromURL();
   if (screen === 'device') {
     const d = app.catalog.byId.get(params.id);
@@ -156,6 +170,7 @@ async function boot() {
   }
   history.replaceState({ screen, params, d: 0 }, '', location.search ? location.href : './');
   show(screen, params, 0);
+  if (!reducedMotion()) body.firstElementChild?.animate?.([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
   if (CONFIG.gaId) loadAnalytics(CONFIG.gaId);
 }
 
