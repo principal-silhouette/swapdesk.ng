@@ -298,10 +298,12 @@ function picker(el, app, params) {
   // Your own device: model, then storage size. Condition comes later, with the other questions.
   const byStorage = (rows) => {
     const seen = new Map();
-    for (const d of rows) { const k = `${d.model}|${d.storage}`; if (!seen.has(k)) seen.set(k, []); seen.get(k).push(d); }
-    return [...seen.values()].map((g) => ({ ...defaultRow(g), _max: Math.max(...g.map((x) => x.tradeInValue || 0)) }));
+    for (const d of rows) { const k = `${d.model}|${tradeStorage(d.storage)}`; if (!seen.has(k)) seen.set(k, []); seen.get(k).push(d); }
+    // The Physical + eSIM row is the base value; the SIM version question takes its share off.
+    const base = (x) => (/esim\s*only|dual\s*sim|physical\s*sim/i.test(x.storage || '') ? 1 : 0);
+    return [...seen.values()].map((g) => ({ ...defaultRow([...g].sort((a, b) => base(a) - base(b))), _max: Math.max(...g.map((x) => x.tradeInValue || 0)) }));
   };
-  const storageOpt = (d, withModel) => html`<button class="opt ver" type="button" role="radio" aria-checked="${s.deviceId && ownDevice(app)?.model === d.model && ownDevice(app)?.storage === d.storage ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
+  const storageOpt = (d, withModel) => html`<button class="opt ver" type="button" role="radio" aria-checked="${s.deviceId && ownDevice(app)?.model === d.model && tradeStorage(ownDevice(app)?.storage) === tradeStorage(d.storage) ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
       <span class="main">${withModel ? d.model : (tradeStorage(d.storage) || 'Standard')}${withModel && d.storage ? html`<span class="sub">${tradeStorage(d.storage)}</span>` : ''}</span>
       ${raw(ICON.chevron)}</button>`;
 
@@ -357,7 +359,8 @@ function picker(el, app, params) {
         if (!g || g.series !== d.series) { g = { series: d.series, models: [] }; groups.push(g); }
         const n = scoped.filter((x) => x.model === d.model);
         // Summarise what's on offer instead of a count: "256gb · 512gb" or "128gb · Brand New".
-        const sizes = [...new Set(n.map((x) => x.storage).filter(Boolean))];
+        // Your own device: storage only. The SIM version is its own question later.
+        const sizes = [...new Set(n.map((x) => (add ? x.storage : tradeStorage(x.storage))).filter(Boolean))];
         const conds = [...new Set(n.map((x) => x.condition))];
         const summary = sizes.join(' · ') || 'One size';
         g.models.push({ model: d.model, n: n.length, summary, sel: n.some((x) => (add ? s.compare.includes(x.id) : s.deviceId === x.id)) });

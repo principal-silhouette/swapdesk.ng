@@ -114,11 +114,11 @@ export function listScreen(el, app, view, params) {
   const onePerVersion = (list) => {
     const best = new Map();
     for (const d of list) {
-      const k = `${d.model}|${d.storage}`; const cur = best.get(k);
+      const k = `${d.model}|${tradeStorage(d.storage)}`; const cur = best.get(k);
       const rank = (x) => { const i = USED_FIRST.indexOf(x.condition); return i < 0 ? 99 : i; };
       if (!cur || rank(d) < rank(cur)) best.set(k, d);
     }
-    return list.filter((d) => best.get(`${d.model}|${d.storage}`) === d);
+    return list.filter((d) => best.get(`${d.model}|${tradeStorage(d.storage)}`) === d);
   };
   const current = () => (view === 'trade-in'
     ? { rows: onePerVersion(applyFilters(all, { ...f, cond: '' })), deals: [] }
