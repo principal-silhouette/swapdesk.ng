@@ -1538,12 +1538,12 @@ function signIn(el, app, params = {}) {
     el.classList.add('choose');
     el.innerHTML = layout(html`
       <div class="head-block">
-        <h2 class="h-title">Save Your Swap Codes</h2>
-        <p class="par">Sign in once with your WhatsApp number and every swap code you make is kept for you.</p>
+        <h2 class="h-title">Save Your Swap Quotes for Later</h2>
+        <p class="par">Found a rate you like? Don’t lose it. Sign in once and every quote you make waits for you, ready when you are.</p>
       </div>
       <div class="stack nav-stack signin-ask">
-        <button class="btn two" type="button" data-act="guest"><span class="bt">Continue as Guest</span><span class="bs">Codes won’t be saved</span></button>
-        <button class="btn blue two" type="button" data-act="form"><span class="bt">Sign In</span><span class="bs">Save your codes</span></button>
+        <button class="btn two" type="button" data-act="guest"><span class="bt">Continue as Guest</span><span class="bs">Quotes won’t be saved</span></button>
+        <button class="btn blue two" type="button" data-act="form"><span class="bt">Sign In</span><span class="bs">Save your quotes</span></button>
       </div>`, pills(backPill())).toString();
     wire(el, app, {
       guest: () => { setGuest(); app.go(next, {}, { replace: true }); },
@@ -1560,7 +1560,7 @@ function signIn(el, app, params = {}) {
   let cityKey = me?.city || app.s.city || '';
   el.classList.add('signin');
   const title = { in: 'Sign In', up: 'Sign Up', edit: 'Your Details' }[mode];
-  const par = { in: 'Welcome back. Your WhatsApp number and PIN.', up: 'Create your account to keep every swap code.', edit: 'Keep your details up to date.' }[mode];
+  const par = { in: 'Welcome back. Your WhatsApp number and PIN.', up: 'One account, and every swap quote waits for you.', edit: 'Keep your details up to date.' }[mode];
   const pinField = (label) => html`<label class="field si-field"><span class="si-label">${label}</span>
         <input data-signpin type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="${mode === 'up' ? 'new-password' : 'current-password'}" enterkeyhint="go" placeholder="4 digits"></label>`;
   el.innerHTML = layout(html`
