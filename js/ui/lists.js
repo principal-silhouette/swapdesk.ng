@@ -1,7 +1,7 @@
 // Price List and Trade-In Values: standalone lists for resellers and customers, inside the pop-up.
 import { CONFIG } from '../config.js';
 import { conditionRank, matches, variantOrder, storageRank } from '../engine.js';
-import { html, raw, naira, updatedLabel, variantName, $ } from '../format.js';
+import { html, raw, naira, updatedLabel, variantName, tradeStorage, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
 
@@ -161,7 +161,7 @@ export function listScreen(el, app, view, params) {
           const inCmp = !trade && cmp.includes(d.id);
           if (out_(d)) return html`<div class="size out" aria-disabled="true"><span class="st">${d.storage || d.model}</span><span class="sa">Sold out</span></div>`;
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${d.storage}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            <span class="st">${trade ? tradeStorage(d.storage) : d.storage}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
@@ -179,7 +179,7 @@ export function listScreen(el, app, view, params) {
         const key = model;
         const hi = maxOf(list);
         return html`<div class="group"><button class="row model-row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
-            <span class="main"><span class="t">${model}</span><span class="s">${list.sort(byStorage).map((d) => d.storage).join(' · ')}</span></span>
+            <span class="main"><span class="t">${model}</span><span class="s">${list.sort(byStorage).map((d) => tradeStorage(d.storage)).join(' · ')}</span></span>
             <span class="v"><small>up to</small> ${naira(hi)}</span>${raw(ICON.chevron)}</button>
           ${open === key ? sizes(list) : ''}</div>`;
       }
