@@ -19,7 +19,7 @@ var QUOTE_FIRST_ROW = 5;
 
 var SAFE_SETTINGS = [
   'batteryThreshold', 'neatness.spotless', 'neatness.prettyNeat', 'neatness.fewSpots',
-  'neatness.smallDents', 'neatness.rough', 'network.chipShare', 'network.esimShare', 'network.lockedShare',
+  'neatness.smallDents', 'neatness.rough', 'network.chipShare', 'network.esimShare', 'network.lockedShare', 'model.esimOnlyShare', 'model.dualSimShare',
   'trueTone.shareOfScreen', 'rounding.tradeIn', 'rounding.quote', 'compare.maxDevices', 'icloud.locked'
 ];
 var DEDUCTION_KEYS = ['battery', 'body', 'network', 'screen', 'trueTone', 'backGlass', 'faceId',
@@ -104,7 +104,7 @@ function getCatalog_(skipCache) {
       condition: 'Deal', tradeIn: false, swapInto: g[8] === true, price: num_(g[9]), tradeInValue: null,
       deductions: {}, dealNote: String(g[23] || '') });
   }
-  var rules = ss.getSheetByName('Rules').getRange('B5:D23').getValues();
+  var rules = ss.getSheetByName('Rules').getRange('B5:D60').getValues();
   var settings = {};
   rules.forEach(function (row) {
     if (row[0] && SAFE_SETTINGS.indexOf(String(row[0])) !== -1) settings[row[0]] = row[2];
@@ -158,6 +158,7 @@ function saveQuote_(q) {
       battery: q.answers.battery === null || q.answers.battery === '' ? null : int_(q.answers.battery),
       neatness: cut_(q.answers.neatness, 20),
       network: cut_(q.answers.network, 20),
+      sim: cut_(q.answers.sim, 12),
       faults: (q.answers.faults || []).slice(0, 12).map(function (f) { return cut_(f, 20); })
     } : null,
     value: int_(q.value),
@@ -170,7 +171,7 @@ function saveQuote_(q) {
       return {
         id: it.id, name: cut_(it.name, 120), start: int_(it.start), value: int_(it.value),
         answers: { icloudLocked: ia.icloudLocked === true, battery: ia.battery === null || ia.battery === '' || ia.battery === undefined ? null : int_(ia.battery),
-          neatness: cut_(ia.neatness, 20), network: cut_(ia.network, 20), faults: (ia.faults || []).slice(0, 12).map(function (f) { return cut_(f, 20); }),
+          neatness: cut_(ia.neatness, 20), network: cut_(ia.network, 20), sim: cut_(ia.sim, 12), faults: (ia.faults || []).slice(0, 12).map(function (f) { return cut_(f, 20); }),
           batteryLabel: cut_(ia.batteryLabel, 20) },
         lines: (it.lines || []).slice(0, 15).map(function (l) { return [cut_(l[0], 60), l[1] === null ? null : int_(l[1])]; })
       };

@@ -69,3 +69,6 @@ export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 export const deviceName = (d) => (d.condition === 'Deal' ? [d.model, d.storage, 'Deal'].join(' · ') : [d.model, variantName(d)].filter(Boolean).join(' · '));
+
+/** Trade-in storage without the SIM note ("256gb P/eSIM" → "256gb"): the SIM version question covers it. */
+export const tradeStorage = (st = '') => String(st || '').replace(/\s*P\/eSIM\b/i, '').trim();

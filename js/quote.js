@@ -1,14 +1,14 @@
 // Quotes: build, encode to a link, decode, share and hand off to WhatsApp.
 import { CONFIG } from './config.js';
 import { NEATNESS, NETWORK, FAULTS, PADS, GAMES } from './engine.js';
-import { naira, nairaK, deviceName } from './format.js';
+import { naira, nairaK, deviceName, tradeStorage } from './format.js';
 import { saveQuoteRemote } from './data.js';
 
 export function buildQuote({ device, answers, result, compare, city }) {
   return {
     v: 1,
     created: new Date().toISOString(),
-    device: device ? { id: device.id, name: [device.model, device.storage].filter(Boolean).join(' · '), start: result?.start || 0 } : null,
+    device: device ? { id: device.id, name: [device.model, tradeStorage(device.storage)].filter(Boolean).join(' · '), start: result?.start || 0 } : null,
     answers: device ? { ...answers, faults: [...(answers.faults || [])] } : null,
     value: result?.accepted ? result.value : 0,
     lines: result?.accepted ? result.lines.map((l) => [l.label, l.amount]) : [],
@@ -64,12 +64,13 @@ function packAnswers(a) {
   if (!a) return 0;
   const out = [a.icloudLocked ? 1 : 0, a.battery ?? '', a.neatness || '', a.network || '', (a.faults || []).join('.'), a.batteryLabel || ''];
   if (a.pads) out.push(a.pads, a.games || '', a.hacked ? 1 : 0); // consoles
+  if (a.sim && a.sim !== 'both') { while (out.length < 9) out.push(''); out.push(a.sim); } // SIM version, iPhone 14 and up
   return out;
 }
 function unpackAnswers(a) {
   if (!a) return null;
   return { icloudLocked: !!a[0], battery: a[1] === '' ? null : Number(a[1]), neatness: a[2], network: a[3], faults: a[4] ? a[4].split('.') : [], ...(a[5] ? { batteryLabel: a[5] } : {}),
-    ...(a[6] ? { pads: a[6], games: a[7] || '', hacked: !!a[8] } : {}) };
+    ...(a[6] ? { pads: a[6], games: a[7] || '', hacked: !!a[8] } : {}), ...(a[9] ? { sim: a[9] } : {}) };
 }
 
 export function localLink(q) {
@@ -102,6 +103,8 @@ export const nairaShort = nairaK;
 export function answersText(a) {
   if (!a) return '';
   const bits = [];
+  if (a.sim === 'esim') bits.push('eSIM Only');
+  else if (a.sim === 'physical') bits.push('Physical SIM Only');
   if (a.pads) {
     // Console
     bits.push(PADS.find((x) => x.key === a.pads)?.label || '');

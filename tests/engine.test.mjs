@@ -164,3 +164,18 @@ test('replaced battery: 80%+ health charges replaced only; under 80% charges the
   assert.equal(keys(75), 'battery');
   assert.equal(keys(null), 'batteryReplaced');
 });
+
+// SIM version (iPhone 14 and up, not Air): value × (1 − share), to the nearest ₦1,000.
+import { simDeduction, hasSimQuestion, networkOptionsFor } from '../js/engine.js';
+test('SIM version deduction for iPhone 14 and up', () => {
+  const p17 = { model: 'iPhone 17 Pro', storage: '256gb', type: 'Phones', brand: 'Apple', tradeInValue: 1150000 };
+  const st = { 'model.esimOnlyShare': 0.893, 'model.dualSimShare': 0.977 };
+  assert.equal(hasSimQuestion(p17), true);
+  assert.equal(hasSimQuestion({ ...p17, model: 'iPhone Air' }), false);
+  assert.equal(hasSimQuestion({ ...p17, model: 'iPhone 13 Pro' }), false);
+  assert.equal(simDeduction(p17, 'esim', st).amount, 123000);
+  assert.equal(simDeduction(p17, 'physical', st).amount, 26000);
+  assert.equal(simDeduction(p17, 'both', st), null);
+  assert.deepEqual(networkOptionsFor(p17, 'esim').map((n) => n.key), ['esim', 'locked', 'nodata']);
+  assert.deepEqual(networkOptionsFor(p17, 'both').map((n) => n.key), ['factory', 'chip', 'nodata']);
+});

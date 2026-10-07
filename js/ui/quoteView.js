@@ -131,6 +131,7 @@ function render(el, app, p, q) {
         batteryBand: bandFor(a.battery),
         batteryUnknown: a.battery === null || a.battery === undefined,
         neatness: a.neatness || null, network: a.network || null, faults: a.faults || [], faultsDone: true,
+        sim: a.sim || '',
       });
       const known = revalued.filter((it) => it.d);
       const last = known[known.length - 1];

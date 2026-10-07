@@ -2,9 +2,9 @@
 // swap comparison, completing on WhatsApp and saved quotes.
 import { CONFIG, CITIES } from '../config.js';
 import {
-  NEATNESS, NETWORK, FAULTS, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
+  NEATNESS, NETWORK, FAULTS, SIM, hasSimQuestion, networkOptionsFor, simDeduction, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
-import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, variantName, conditionLabel, $, $$ } from '../format.js';
+import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, tradeStorage, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -16,7 +16,7 @@ import { quoteScreen } from './quoteView.js';
 const KEY = 'swapdesk.state.v2';
 
 export const freshAnswers = () => ({
-  batteryBand: '', origin: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
+  batteryBand: '', origin: '', sim: '', icloudLocked: null, battery: '', batteryUnknown: false, neatness: null, network: null, faults: [], faultsDone: false,
   pads: '', games: '', hacked: null, perfect: null,
 });
 const freshPick = () => ({ type: '', brand: '', model: '', search: '' });
@@ -114,6 +114,7 @@ function answered(q, a) {
 }
 export function engineAnswers(a, device) {
   return {
+    sim: hasSimQuestion(device) ? (a.sim || 'both') : '',
     icloudLocked: a.icloudLocked === true,
     battery: a.batteryUnknown || !a.batteryBand ? null : BATTERY_BANDS.find((b) => b.key === a.batteryBand).value,
     batteryLabel: a.batteryBand ? BATTERY_BANDS.find((b) => b.key === a.batteryBand).label : '',
@@ -261,7 +262,7 @@ function picker(el, app, params) {
     return [...seen.values()].map((g) => ({ ...defaultRow(g), _max: Math.max(...g.map((x) => x.tradeInValue || 0)) }));
   };
   const storageOpt = (d, withModel) => html`<button class="opt ver" type="button" role="radio" aria-checked="${s.deviceId && ownDevice(app)?.model === d.model && ownDevice(app)?.storage === d.storage ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
-      <span class="main">${withModel ? d.model : (d.storage || 'Standard')}${withModel && d.storage ? html`<span class="sub">${d.storage}</span>` : ''}</span>
+      <span class="main">${withModel ? d.model : (tradeStorage(d.storage) || 'Standard')}${withModel && d.storage ? html`<span class="sub">${tradeStorage(d.storage)}</span>` : ''}</span>
       ${raw(ICON.chevron)}</button>`;
 
   function draw(typing = false) {
@@ -459,6 +460,8 @@ function picker(el, app, params) {
 function loading(el, app) {
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  // iPhone 14 and up: the SIM version comes first, before any value is shown.
+  if (hasSimQuestion(d) && !app.s.answers.sim) { app.go('sim', {}, { replace: true }); return false; }
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ms = reduce ? 900 : 1900;
   const from = typeof app.s._pickFrac === 'number' ? app.s._pickFrac : 0.75;
@@ -466,7 +469,7 @@ function loading(el, app) {
   // Everything else steps away; the progress bar carries the wait, then the result appears.
   el.innerHTML = layout(html`
     <div class="progress pick-progress load-bar" aria-hidden="true"><i style="transform:scaleX(${from})"></i></div>
-    <p class="visually-hidden" role="status">Calculating your trade-in value for ${d.model} ${d.storage}</p>`, '').toString();
+    <p class="visually-hidden" role="status">Calculating your trade-in value for ${d.model} ${tradeStorage(d.storage)}</p>`, '').toString();
   const bar = $('.load-bar i', el);
   requestAnimationFrame(() => requestAnimationFrame(() => {
     bar.style.transition = `transform ${ms - 200}ms cubic-bezier(0.45, 0.05, 0.25, 1)`;
@@ -478,14 +481,45 @@ function loading(el, app) {
   }, ms);
 }
 
+// ---------- SIM version (iPhone 14 and up), straight after model and storage ----------
+
+function simScreen(el, app) {
+  const d = ownDevice(app);
+  if (!d) { app.go('pick', {}, { replace: true }); return false; }
+  if (!hasSimQuestion(d)) { app.go('loading', {}, { replace: true }); return false; }
+  const a = app.s.answers;
+  el.innerHTML = layout(html`
+    <div class="head-block">
+      <h2 class="h-title">Which SIM version is it?</h2>
+      <p class="par">Check the side of your ${d.model} for a SIM tray.</p>
+    </div>
+    <div class="stack q-opts" role="radiogroup">
+      ${SIM.map((o) => html`<button class="opt" type="button" role="radio" aria-checked="${a.sim === o.key ? 'true' : 'false'}" data-act="sim" data-v="${o.key}">
+        <span class="main">${o.label}<span class="sub">${o.hint}</span></span><span class="tick" aria-hidden="true"></span></button>`)}
+    </div>`, pills(backPill())).toString();
+  wire(el, app, {
+    sim: (b) => {
+      a.sim = b.dataset.v;
+      // A network answer that doesn't fit the new SIM version is cleared (e.g. Chip Unlocked on an eSIM-only phone).
+      if (a.network && !networkOptionsFor(d, a.sim).some((n) => n.key === a.network)) a.network = null;
+      app.s.saved = null; app.save(); haptic();
+      app.go(app.s._simReturn || 'loading', {}, { replace: true });
+      app.s._simReturn = '';
+    },
+  });
+}
+
 // ---------- "Congratulations" (the original result, kept) ----------
 
 function confirm(el, app) {
   CATALOG = app.catalog;
   const d = ownDevice(app);
   if (!d) { app.go('pick', {}, { replace: true }); return false; }
-  const upTo = d.tradeInValue || 0;
-  const name = [d.model, d.storage].filter(Boolean).join(', ');
+  // The SIM version is already known here (iPhone 14 and up), so the value shown already allows for it.
+  const sim = hasSimQuestion(d) ? (app.s.answers.sim || 'both') : '';
+  const simLine = sim ? simDeduction(d, sim, app.catalog.settings) : null;
+  const upTo = Math.max(0, (d.tradeInValue || 0) - (simLine?.amount || 0));
+  const name = [d.model, tradeStorage(d.storage)].filter(Boolean).join(', ');
   el.innerHTML = html`
     <div class="head-block">
       <h2 class="h-title">Your Device</h2>
@@ -493,7 +527,8 @@ function confirm(el, app) {
     </div>
     <div class="stack crumbs">
       <button class="opt crumb" type="button" data-act="change"><span class="main">${d.model}</span><span class="edit">Change</span></button>
-      ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${d.storage}</span><span class="edit">Change</span></button>` : ''}
+      ${d.storage ? html`<button class="opt crumb" type="button" data-act="change"><span class="main">${tradeStorage(d.storage)}</span><span class="edit">Change</span></button>` : ''}
+      ${sim ? html`<button class="opt crumb" type="button" data-act="chsim"><span class="main">${SIM.find((o) => o.key === sim).label}</span><span class="edit">Change</span></button>` : ''}
     </div>
     <div class="result-block">
     <div class="tiv">
@@ -506,6 +541,7 @@ function confirm(el, app) {
     </div>`;
   el.innerHTML = layout(raw(el.innerHTML), pills(backPill(), html`<button class="pill go" type="button" data-act="ok">Confirm</button>`)).toString();
   wire(el, app, {
+    chsim: () => { app.s._simReturn = 'confirm'; app.save(); app.go('sim'); },
     change: () => app.go('pick'),
     // Consoles skip the phone shortcut and go straight to their three questions.
     ok: () => (isConsole(d) || isPerfectOnly(d) ? app.go('conds') : app.go('good')),
@@ -540,7 +576,7 @@ function good(el, app) {
     </div>`, pills(backPill())).toString();
   wire(el, app, {
     yes: () => {
-      Object.assign(app.s.answers, { icloudLocked: false, battery: '', batteryUnknown: true, neatness: 'spotless', network: 'factory', faults: [], faultsDone: true, quick: true });
+      Object.assign(app.s.answers, { icloudLocked: false, battery: '', batteryUnknown: true, neatness: 'spotless', network: app.s.answers.sim === 'esim' ? 'esim' : 'factory', faults: [], faultsDone: true, quick: true });
       app.s.saved = null; app.save(); app.go('choose');
     },
     no: () => { app.s.answers.quick = false; app.save(); app.go('conds'); },
@@ -647,7 +683,7 @@ function defaultsFor(a) {
     icloudLocked: a.icloudLocked === true,
     batteryUnknown: a.batteryBand ? false : true,
     neatness: a.neatness || 'prettyNeat',
-    network: a.network || 'factory',
+    network: a.network || (a.sim === 'esim' ? 'esim' : 'factory'),
     faults: a.faults || [],
     faultsDone: true,
     pads: a.pads || '1',
@@ -711,7 +747,7 @@ function question(el, app, params) {
       case 'network':
         return html`<h2 class="h-title">Is it network locked?</h2>
           <p class="par">How does it take a SIM, and is it locked to a network?</p>
-          <div class="stack q-opts" role="radiogroup">${NETWORK.map((n) => opt(a.network === n.key, `data-act="net" data-v="${n.key}"`, n.label, n.hint))}</div>`;
+          <div class="stack q-opts" role="radiogroup">${networkOptionsFor(d, a.sim).map((n) => opt(a.network === n.key, `data-act="net" data-v="${n.key}"`, n.label, n.hint))}</div>`;
       case 'faults':
         return html`<h2 class="h-title">Anything not working?</h2>
           <p class="par">Tick everything that applies.</p>
@@ -880,7 +916,7 @@ function choose(el, app) {
       <p class="par">${multi ? 'Swap them for something new, or trade them in for cash.' : 'Swap it for something new, or trade it in for cash.'}</p>
     </div>
     ${multi ? html`<div class="dev-value">
-        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong title="${t.d.model}">${t.d.model}</strong><span class="ds">${t.d.storage || ''}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
+        <div class="dev-list">${trades.map((t, i) => html`<p class="dev-line"><strong title="${t.d.model}">${t.d.model}</strong><span class="ds">${tradeStorage(t.d.storage)}</span><span class="dv">${naira(t.r.value)}</span><button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button></p>`)}</div>
         <p class="tiv-label">Total Trade-In Value</p>
         <p class="big-num">${naira(total)}</p>
       </div>` : devValue(d, total)}
@@ -972,7 +1008,7 @@ function compare(el, app) {
           <span class="val">${t.r.accepted ? nairaK(t.r.value) : 'Not Accepted'}</span>
           <button class="x" type="button" aria-label="Remove ${t.d.model}" data-act="rmtrade" data-i="${i}">${raw(ICON.x)}</button>
         </div>
-        <p class="mine-cond"><span class="c">${[t.d.storage, t.answers.quick ? 'Good Working Condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</span>${t.r.accepted ? html`<small class="vx">Value for Your ${deviceWord(t.d.type)}</small>` : ''}</p>
+        <p class="mine-cond"><span class="c">${[tradeStorage(t.d.storage), t.answers.quick ? 'Good Working Condition' : answersText(engineAnswers(t.answers, t.d))].filter(Boolean).join(' · ')}</span>${t.r.accepted ? html`<small class="vx">Value for Your ${deviceWord(t.d.type)}</small>` : ''}</p>
         ${t.r.accepted ? html`<details class="mine-how"><summary>How we got ${nairaK(t.r.value)}</summary>
           <ul class="lines">
             <li><span>Starting Value, Perfect Condition</span><span>${nairaK(t.r.start)}</span></li>
@@ -1037,7 +1073,7 @@ function quoteNow(app, { onlyChosen = false } = {}) {
     .map((x) => ({ device: x, terms: total !== null ? swapTerms(x, total) : { kind: 'unavailable', amount: 0 } }));
   const q = buildQuote({ device: first ? { ...first.d, condition: '' } : null, answers: first ? engineAnswers(first.answers, first.d) : null, result: first?.r, compare: list, city: CITIES.find((c) => c.key === s.city)?.name });
   if (trades.length > 1) {
-    q.items = trades.map((t) => ({ id: t.d.id, name: [t.d.model, t.d.storage].filter(Boolean).join(' · '), start: t.r.start || 0, value: t.r.accepted ? t.r.value : 0,
+    q.items = trades.map((t) => ({ id: t.d.id, name: [t.d.model, tradeStorage(t.d.storage)].filter(Boolean).join(' · '), start: t.r.start || 0, value: t.r.accepted ? t.r.value : 0,
       answers: engineAnswers(t.answers, t.d), lines: t.r.accepted ? t.r.lines.map((l) => [l.label, l.amount]) : [] }));
     q.value = total || 0;
   }
@@ -1150,7 +1186,7 @@ function finish(el, app) {
 /** One format for "your device and its value": name line sitting directly on the big figure. */
 function devValue(d, value, animateFrom) {
   return html`<div class="dev-value">
-    <p class="dev-line"><strong>${d.model}</strong>${d.storage ? ` · ${d.storage}` : ''}</p>
+    <p class="dev-line"><strong>${d.model}</strong>${d.storage ? ` · ${tradeStorage(d.storage)}` : ''}</p>
     <p class="big-num"${animateFrom !== undefined ? raw(` data-value="${animateFrom}"`) : ''}>${naira(animateFrom !== undefined ? animateFrom : value)}</p>
   </div>`;
 }
@@ -1433,6 +1469,7 @@ export const SCREENS = {
   confirm,
   q: question,
   conds: conditions,
+  sim: simScreen,
   openq: openQuote,
   value,
   compare,
