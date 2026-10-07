@@ -1141,3 +1141,21 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .pin-card .oq-err:empty { display: none; }
 .pin-in { width: 9.5ch; text-align: center; font-size: 24px; letter-spacing: 0.4em; min-height: 50px; background: #eef5ff; border: 1px solid #cfe0f3; border-radius: 14px; }
 .pin-card .btn { width: 100%; min-height: 52px; }
+.me-chip.oq-chip { right: auto; left: 16px; }
+.si-switch { margin: 6px 0 0; text-align: center; font-size: 15px; color: var(--ink-2); }
+.si-switch .link, .signin .link { background: none; border: 0; padding: 0; color: var(--action); font: inherit; font-weight: 600; cursor: pointer; }
+.me-pg .me-actions { margin: 4px auto 0; gap: 12px; }
+.me-pg .me-actions .btn { min-height: 56px; }
+.me-tiles { width: var(--btncol); margin: 14px auto 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.me-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 76px; padding: 12px 8px;
+  background: var(--white); border: 1px solid #d3e0ec; border-radius: 16px; color: var(--action); font-size: 14px; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(31, 94, 159, 0.06), 0 4px 14px rgba(31, 94, 159, 0.07); transition: transform 0.12s ease-out, background-color 0.15s ease;
+}
+.me-tile:active { transform: scale(0.97); }
+.me-tile svg { width: 22px; height: 22px; }
+.me-tile span { color: var(--ink); }
+.si-cities { width: 100%; margin: 0; }
+.si-cities .opt { min-height: 46px; padding: 8px 6px; font-size: 15px; }
+.signin .screen-main { justify-content: flex-start; }
+@media (max-width: 400px) { .me-chip { height: 30px; padding: 0 11px; font-size: 12.5px; right: 10px; } .me-chip.oq-chip { left: 10px; right: auto; } }

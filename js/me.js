@@ -66,4 +66,6 @@ async function post(body, ms = 25000) {
 export const saveCustomer = (m) => post({ action: 'customer', customer: { name: m.name, phone: m.phone, pin: m.pin || '', city: CITIES.find((c) => c.key === m.city)?.name || '' } }).catch(() => null);
 /** The codes saved under a number. { ok, codes } or { ok:false, needPin } */
 export const fetchCodes = (m) => post({ action: 'myCodes', phone: m.phone, pin: m.pin || '' });
+/** Sign in on any phone: { ok, name, city } or { needPin } or { notFound }. */
+export const signInRemote = (phone, pin) => post({ action: 'signIn', phone, pin: pin || '' });
 export const savePin = (m, pin) => post({ action: 'setPin', phone: m.phone, pin, oldPin: m.pin || '' });

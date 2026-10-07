@@ -7,6 +7,7 @@
  *   POST {action:"saveQuote", quote:{…}} (Content-Type text/plain) → { ok, id, link }
  *        quote.replaceId = SD-XXX updates that quote in place (an edited quote keeps its link)
  *   POST {action:"customer", customer:{name, phone, city}} → { ok, hasPin }   (Customers tab)
+ *   POST {action:"signIn", phone, pin} → { ok, name, city, hasPin } or { ok:false, needPin | notFound }
  *   POST {action:"myCodes", phone, pin}  → { ok, codes:[{id, created, label}] } or { ok:false, needPin }
  *   POST {action:"setPin", phone, pin, oldPin} → { ok }
  *
@@ -44,6 +45,7 @@ function doPost(e) {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (body.action === 'saveQuote') return json_(saveQuote_(body.quote || {}));
     if (body.action === 'customer') return json_(customer_(body.customer || {}));
+    if (body.action === 'signIn') return json_(signIn_(String(body.phone || ''), String(body.pin || '')));
     if (body.action === 'myCodes') return json_(myCodes_(String(body.phone || ''), String(body.pin || '')));
     if (body.action === 'setPin') return json_(setPin_(String(body.phone || ''), String(body.pin || ''), String(body.oldPin || '')));
     return json_({ ok: false, error: 'Unknown action' });
@@ -388,6 +390,17 @@ function pinOk_(phone, hash, pin) {
   if (pinHash_(phone, pin) === hash) { cache.remove(key); return { ok: true }; }
   cache.put(key, String(fails + 1), 900);
   return { ok: false, needPin: true, error: 'That PIN doesn’t match.' };
+}
+
+/** Sign in on any phone with the WhatsApp number (and the PIN, once the number has one). */
+function signIn_(phoneIn, pin) {
+  var phone = normPhone_(phoneIn);
+  if (!phone) return { ok: false, error: 'Not a phone number' };
+  var c = findCustomer_(phone);
+  if (!c) return { ok: false, notFound: true };
+  var check = pinOk_(phone, c.values[9], pin);
+  if (!check.ok) return check;
+  return { ok: true, name: String(c.values[1] || ''), city: String(c.values[2] || ''), hasPin: !!c.values[9] };
 }
 
 function myCodes_(phoneIn, pin) {

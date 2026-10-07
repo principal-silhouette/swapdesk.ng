@@ -36,9 +36,13 @@ export const app = {
     const m = getMe();
     chip.textContent = m ? `Hi, ${firstName(m)}` : 'Sign In';
     chip.hidden = false;
+    const oq = document.getElementById('oqchip');
+    if (oq) oq.hidden = false;
   },
 };
 document.getElementById('mechip')?.addEventListener('click', () => app.go(getMe() ? 'me' : 'signin'));
+// Open Quote sits top left, balancing the account button top right (Daniel, 7 Oct).
+document.getElementById('oqchip')?.addEventListener('click', () => app.go('openq'));
 
 function urlFor(screen, params) {
   const p = new URLSearchParams();
