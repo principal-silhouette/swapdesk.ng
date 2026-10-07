@@ -152,16 +152,27 @@ export function listScreen(el, app, view, params) {
     const priced = (list) => list.filter((d) => !out_(d) && d[meta.figure] > 0);
     const minOf = (list) => (priced(list).length ? Math.min(...priced(list).map((d) => d[meta.figure])) : 0);
     const maxOf = (list) => (priced(list).length ? Math.max(...priced(list).map((d) => d[meta.figure])) : 0);
+    // Storage first (largest at the top), then the SIM version, so the list reads in order from the left.
+    const SIM_ORDER = ['p/esim', 'dual sim', 'esim only'];
+    const splitSt = (st = '') => { const m = String(st).match(/^\s*(\d+(?:\.\d+)?\s*(?:tb|gb))\s*(.*)$/i); return m ? [m[1], m[2]] : [String(st), '']; };
+    const simLabel = (x) => x.replace(/\bonly\b/i, 'Only');
+    const simRank = (x) => { const i = SIM_ORDER.indexOf(x.toLowerCase()); return i < 0 ? 9 : i; };
+    const bySize = (a, b) => storageRank(b.storage) - storageRank(a.storage) || simRank(splitSt(a.storage)[1]) - simRank(splitSt(b.storage)[1]);
+    const stCell = (d) => {
+      if (trade) return html`<span class="st">${tradeStorage(d.storage)}</span>`;
+      const [size, sim] = splitSt(d.storage);
+      return html`<span class="st">${size || d.model}${sim ? html`<small>${simLabel(sim)}</small>` : ''}</span>`;
+    };
     // Storage sizes inside an opened row: tap one to add it (shop) or value it (trade-in).
     const sizes = (list) => {
       const cmp = app.s.compare;
       return html`<div class="row-more">
         <p class="more-note">${trade ? 'Tap your storage size to check the value of your device.' : 'Tap a storage size to add it to your Swap Comparison.'}</p>
-        <div class="sizes">${list.sort(byStorage).map((d) => {
+        <div class="sizes">${list.sort(bySize).map((d) => {
           const inCmp = !trade && cmp.includes(d.id);
-          if (out_(d)) return html`<div class="size out" aria-disabled="true"><span class="st">${d.storage || d.model}</span><span class="sa">Sold out</span></div>`;
+          if (out_(d)) return html`<div class="size out" aria-disabled="true">${stCell(d)}<span class="sa">Sold out</span></div>`;
           return html`<button class="size${inCmp ? ' in' : ''}" type="button" data-act="${trade ? 'valueThis' : 'addCmp'}" data-id="${d.id}" ${inCmp ? 'aria-pressed="true"' : ''}>
-            <span class="st">${trade ? tradeStorage(d.storage) : d.storage}</span><span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
+            ${stCell(d)}<span class="sp">${fig(d)}</span><span class="sa">${trade ? 'Value' : inCmp ? '✓ Added' : 'Add'}</span></button>`;
         })}</div>
         ${!trade && cmp.length ? html`<button class="btn" type="button" data-act="goCmp">See Comparison (${cmp.length})</button>` : ''}
       </div>`;
@@ -170,7 +181,7 @@ export function listScreen(el, app, view, params) {
       const key = `${model}|${c}`;
       const lo = minOf(list), hi = maxOf(list);
       return html`<button class="row" type="button" aria-expanded="${open === key ? 'true' : 'false'}" data-row="${key}">
-          <span class="main"><span class="t">${condName(c)}</span><span class="s">${uniq(list.sort(byStorage).map((d) => d.storage)).join(' · ')}</span></span>
+          <span class="main"><span class="t">${condName(c)}</span></span>
           <span class="v${lo ? '' : ' out'}">${!lo ? 'Sold out' : priced(list).length > 1 && lo !== hi ? html`<small>from</small> ${naira(lo)}` : naira(lo)}</span>${raw(ICON.chevron)}</button>
         ${open === key ? sizes(list) : ''}`;
     };
@@ -186,7 +197,7 @@ export function listScreen(el, app, view, params) {
       const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => minOf(list.filter((d) => fam(d.condition) === b)) - minOf(list.filter((d) => fam(d.condition) === a)) || conditionRank(a) - conditionRank(b));
       return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => fam(d.condition) === c)))}</div>`;
     };
-    const dealRow = (d) => html`<div class="row deal-row"><span class="main"><span class="t">${d.model}${raw('<span class="tag">One unit</span>')}</span>
+    const dealRow = (d) => html`<div class="row deal-row"><span class="main">${raw('<span class="tag top">One unit</span>')}<span class="t">${d.model}</span>
         <span class="s">${[d.storage, d.dealNote].filter(Boolean).join(' · ')}</span></span><span class="v">${fig(d)}</span>
         <button class="size-add" type="button" data-act="addCmp" data-id="${d.id}">${app.s.compare.includes(d.id) ? '✓ Added' : 'Add'}</button></div>`;
     const out = [];

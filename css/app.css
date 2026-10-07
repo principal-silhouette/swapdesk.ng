@@ -1184,3 +1184,8 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 /* Guest / Sign In: two-line buttons get room to breathe (Daniel, 7 Oct). */
 .choose .nav-stack.signin-ask { gap: 18px; margin-top: 12px !important; }
 .choose .nav-stack.signin-ask .btn { height: 74px !important; min-height: 74px !important; gap: 4px; }
+/* One unit sits above the device name, the same on every page. */
+.tag.top { display: flex; width: max-content; margin: 0 0 6px; vertical-align: 0; }
+/* Storage leads each row; the SIM version sits underneath, lighter. */
+.size .st { display: flex; flex-direction: column; gap: 2px; font-weight: 700; }
+.size .st small { font-size: 13px; font-weight: 500; color: var(--muted, #5b6b7d); }

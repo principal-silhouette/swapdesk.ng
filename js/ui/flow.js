@@ -263,7 +263,7 @@ function picker(el, app, params) {
       return html`<div class="opt ver out" aria-disabled="true"><span class="main">${title}${sub ? html`<span class="sub">${sub}</span>` : ''}</span><span class="val sold">Sold out</span></div>`;
     }
     return html`<button class="opt ver" type="button" role="${add ? 'checkbox' : 'radio'}" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}">
-      <span class="main">${title}${deal ? raw('<span class="tag">One unit</span>') : ''}${sub ? html`<span class="sub">${sub}</span>` : ''}</span>
+      <span class="main">${deal ? raw('<span class="tag top">One unit</span>') : ''}${title}${sub ? html`<span class="sub">${sub}</span>` : ''}</span>
       <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
   };
 
@@ -1033,7 +1033,7 @@ function compare(el, app) {
     const t = tv === null ? null : swapTerms(x, tv);
     // Three lines: what it is · price and what it takes to swap · proceed.
     return html`<article class="cmp slim ${t ? t.kind : ''}">
-      <span class="t"><b>${x.model}</b>${x.condition === 'Deal' ? raw('<span class="tag">One unit</span>') : ''}${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
+      <span class="t">${x.condition === 'Deal' ? raw('<span class="tag top">One unit</span>') : ''}<b>${x.model}</b>${x.storage ? html` <span class="s">· ${x.storage}</span>` : ''}</span>
       <span class="row2"><span class="p">${x.condition === 'Deal' ? (x.dealNote || 'Deal') : conditionLabel(x.condition)}<br>Price ${nairaK(x.price)}</span><span class="kn"><span class="n">${t ? nairaK(t.kind === 'even' ? 0 : t.amount) : nairaK(x.price)}</span><span class="k">${t ? termsLabel(t) : 'Price'}</span></span></span>
       ${t ? html`<button class="pill go cmp-go" type="button" data-act="pick" data-id="${x.id}">Proceed to Swap</button>` : ''}
       <button class="x" type="button" aria-label="Remove ${x.model} ${variantName(x)}" data-act="rm" data-id="${x.id}">${raw(ICON.x)}</button>
