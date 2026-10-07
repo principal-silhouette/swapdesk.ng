@@ -1181,3 +1181,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .mm-sep { height: 1px; margin: 4px 8px; background: #e8eff6; }
 .stage-logo { z-index: 21; }
 .me-pg .me-search { width: var(--col) !important; max-width: none; }
+/* Guest / Sign In: two-line buttons get room to breathe (Daniel, 7 Oct). */
+.choose .nav-stack.signin-ask { gap: 18px; margin-top: 12px !important; }
+.choose .nav-stack.signin-ask .btn { height: 74px !important; min-height: 74px !important; gap: 4px; }
