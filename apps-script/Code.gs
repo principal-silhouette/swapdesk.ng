@@ -255,8 +255,10 @@ function getQuote_(id) {
   if (!/^SD-[A-Z0-9]{6}$/.test(id)) return { ok: false, error: 'Not a quote ID' };
   var hit = findQuote_(id);
   if (!hit) return { ok: false, error: 'Not found' };
-  var data = hit.sheet.getRange(hit.row, 21).getValue();
-  return { ok: true, quote: JSON.parse(data) };
+  var quote = JSON.parse(hit.sheet.getRange(hit.row, 21).getValue());
+  // A quote link can be passed around: never send the customer's name or number with it.
+  delete quote.name; delete quote.phone;
+  return { ok: true, quote: quote };
 }
 
 /** Every quotes tab: the monthly ones ("Quotes Oct 2026") and the original "Quotes" tab if it's still there. */
