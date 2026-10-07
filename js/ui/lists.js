@@ -1,7 +1,7 @@
 // Price List and Trade-In Values: standalone lists for resellers and customers, inside the pop-up.
 import { CONFIG } from '../config.js';
 import { conditionRank, matches, variantOrder, storageRank } from '../engine.js';
-import { html, raw, naira, updatedLabel, variantName, tradeStorage, $ } from '../format.js';
+import { html, raw, naira, updatedLabel, variantName, tradeStorage, simParts, $ } from '../format.js';
 import { ICON } from './icons.js';
 import { copy, share } from '../quote.js';
 
@@ -145,7 +145,7 @@ export function listScreen(el, app, view, params) {
     const trade = view === 'trade-in';
     const out_ = (d) => !trade && d.stock === 'soldout';
     const fig = (d) => (out_(d) ? 'Sold out' : naira(d[meta.figure]));
-    const COND = {};
+    const COND = { Deal: 'Deals' };
     const condName = (c) => COND[c] || c;
     // Most expensive first, everywhere in the list.
     const byStorage = (a, b) => (b[meta.figure] || 0) - (a[meta.figure] || 0) || storageRank(b.storage) - storageRank(a.storage);
@@ -153,15 +153,14 @@ export function listScreen(el, app, view, params) {
     const minOf = (list) => (priced(list).length ? Math.min(...priced(list).map((d) => d[meta.figure])) : 0);
     const maxOf = (list) => (priced(list).length ? Math.max(...priced(list).map((d) => d[meta.figure])) : 0);
     // Storage first (largest at the top), then the SIM version, so the list reads in order from the left.
-    const SIM_ORDER = ['p/esim', 'dual sim', 'esim only'];
-    const splitSt = (st = '') => { const m = String(st).match(/^\s*(\d+(?:\.\d+)?\s*(?:tb|gb))\s*(.*)$/i); return m ? [m[1], m[2]] : [String(st), '']; };
-    const simLabel = (x) => x.replace(/\bonly\b/i, 'Only');
-    const simRank = (x) => { const i = SIM_ORDER.indexOf(x.toLowerCase()); return i < 0 ? 9 : i; };
-    const bySize = (a, b) => storageRank(b.storage) - storageRank(a.storage) || simRank(splitSt(a.storage)[1]) - simRank(splitSt(b.storage)[1]);
+    const SIM_ORDER = ['P+eSIM', 'Dual SIM', 'eSIM Only'];
+    const simRank = (d) => { const i = SIM_ORDER.indexOf(simParts(d)[1]); return i < 0 ? 9 : i; };
+    const bySize = (a, b) => storageRank(b.storage) - storageRank(a.storage) || simRank(a) - simRank(b) || (b[meta.figure] || 0) - (a[meta.figure] || 0);
     const stCell = (d) => {
       if (trade) return html`<span class="st">${tradeStorage(d.storage)}</span>`;
-      const [size, sim] = splitSt(d.storage);
-      return html`<span class="st">${size || d.model}${sim ? html`<small>${simLabel(sim)}</small>` : ''}</span>`;
+      const [size, sim] = simParts(d);
+      const sub = [sim, d.condition === 'Deal' ? d.dealNote : ''].filter(Boolean).join(' · ');
+      return html`<span class="st">${d.condition === 'Deal' ? raw('<span class="tag top">One unit</span>') : ''}${size || d.model}${sub ? html`<small>${sub}</small>` : ''}</span>`;
     };
     // Storage sizes inside an opened row: tap one to add it (shop) or value it (trade-in).
     const sizes = (list) => {
@@ -194,7 +193,9 @@ export function listScreen(el, app, view, params) {
             <span class="v"><small>up to</small> ${naira(hi)}</span>${raw(ICON.chevron)}</button>
           ${open === key ? sizes(list) : ''}</div>`;
       }
-      const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => minOf(list.filter((d) => fam(d.condition) === b)) - minOf(list.filter((d) => fam(d.condition) === a)) || conditionRank(a) - conditionRank(b));
+      // Always the same order: Brand New, Active Brand New, Foreign USED…, then Deals last.
+      const rank = (c) => (c === 'Deal' ? 1e6 : conditionRank(c));
+      const conds = uniq(list.map((d) => fam(d.condition))).sort((a, b) => rank(a) - rank(b));
       return html`<div class="group"><p class="model-h">${model}</p>${conds.map((c) => cond(model, c, list.filter((d) => fam(d.condition) === c)))}</div>`;
     };
     const dealRow = (d) => html`<div class="row deal-row"><span class="main">${raw('<span class="tag top">One unit</span>')}<span class="t">${d.model}</span>
@@ -211,8 +212,7 @@ export function listScreen(el, app, view, params) {
     const soon = trade || f.cond ? [] : (CONFIG.comingSoon || []).filter((c) => (!f.type || c.type === f.type) && (!f.brand || c.brand === f.brand)
       && (!f.search || f.search.toLowerCase().split(/\s+/).every((w) => c.model.toLowerCase().includes(w))));
     if (soon.length) out.push(html`<section class="series"><h2 class="series-h">Coming Soon</h2>${soon.map((c) => html`<div class="group"><div class="row soon-row"><span class="main"><span class="t">${c.model}</span><span class="s">Price and storage sizes coming soon</span></span><span class="soon-tag">Coming Soon</span></div></div>`)}</section>`);
-    if (ds.length) out.push(html`<section class="series"><h2 class="series-h">🔥 Deals</h2><div class="group">${ds.map(dealRow)}</div></section>`);
-    for (const g of groupBySeries(rows, catalog)) {
+    for (const g of groupBySeries([...rows, ...ds], catalog)) {
       const models = uniq(g.rows.map((d) => d.model));
       out.push(html`<section class="series"><h2 class="series-h">${g.series}</h2>${models.map((m) => modelCard(m, g.rows.filter((d) => d.model === m)))}</section>`);
     }

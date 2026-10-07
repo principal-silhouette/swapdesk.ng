@@ -50,7 +50,7 @@ export const PERFECT_ONLY_SERIES = ['iPhone 18'];
 
 /** SIM version (Daniel, 7 Oct): asked first for every iPhone from the 14 series up, not the Air (always eSIM). */
 export const SIM = [
-  { key: 'both', label: 'Physical SIM + eSIM', hint: 'Has a SIM tray and supports eSIM.' },
+  { key: 'both', label: 'Physical + eSIM', hint: 'Has a SIM tray and supports eSIM.' },
   { key: 'physical', label: 'Physical SIM Only', hint: 'Dual physical SIM, no eSIM.' },
   { key: 'esim', label: 'eSIM Only', hint: 'No SIM tray (US models from the iPhone 14).' },
 ];

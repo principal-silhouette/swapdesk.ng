@@ -31,7 +31,24 @@ export const deviceWord = (typeOrName = '') => {
 
 // LLA / Non LLA isn't shown on the site: "(Non LLA)" is folded into its condition.
 export const conditionLabel = (c = '') => c.replace(/ \(Non LLA\)$/, '');
-export const variantName = (d) => [d.storage, conditionLabel(d.condition)].filter(Boolean).join(' · ');
+/**
+ * Storage and SIM version, written the same way everywhere (Daniel, 7 Oct):
+ * "512gb P/eSIM" → ["512gb", "P+eSIM"]. An iPhone with no SIM note is P+eSIM, except the iPhone Air (eSIM Only).
+ */
+export function simParts(d = {}) {
+  const st = String(d.storage || '').trim();
+  const m = st.match(/^(\d+(?:\.\d+)?\s*(?:tb|gb))\s*(.*)$/i);
+  const size = m ? m[1] : st;
+  let sim = (m ? m[2] : '').trim()
+    .replace(/^p\s*[/+]\s*esim$/i, 'P+eSIM').replace(/^esim\s*only$/i, 'eSIM Only').replace(/^dual\s*sim$/i, 'Dual SIM');
+  if (!sim && /^iphone\b/i.test(d.model || '')) {
+    // The iPhone 7, 8 and X came before eSIM: SIM tray only.
+    sim = /\bAir\b/i.test(d.model) ? 'eSIM Only' : /^iphone (7|8|x)\b(?! ?[rs])/i.test(d.model) ? 'Physical SIM' : 'P+eSIM';
+  }
+  return [size, sim];
+}
+export const shopStorage = (d) => simParts(d).filter(Boolean).join(' ');
+export const variantName = (d) => [shopStorage(d), conditionLabel(d.condition)].filter(Boolean).join(' · ');
 
 export function updatedLabel(iso) {
   if (!iso) return '';
@@ -68,7 +85,7 @@ function render(v) {
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
-export const deviceName = (d) => (d.condition === 'Deal' ? [d.model, d.storage, 'Deal'].join(' · ') : [d.model, variantName(d)].filter(Boolean).join(' · '));
+export const deviceName = (d) => (d.condition === 'Deal' ? [d.model, shopStorage(d), 'Deal'].filter(Boolean).join(' · ') : [d.model, variantName(d)].filter(Boolean).join(' · '));
 
 /** Trade-in storage without the SIM note ("256gb P/eSIM" → "256gb"): the SIM version question covers it. */
 export const tradeStorage = (st = '') => String(st || '').replace(/\s*P\/eSIM\b/i, '').trim();

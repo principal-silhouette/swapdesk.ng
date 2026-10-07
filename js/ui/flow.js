@@ -4,7 +4,7 @@ import { CONFIG, CITIES } from '../config.js';
 import {
   NEATNESS, NETWORK, FAULTS, SIM, hasSimQuestion, networkOptionsFor, simDeduction, PADS, GAMES, isConsole, isSpeaker, isPerfectOnly, perfectOnlyText, amountFor, valueDevice, swapTerms, termsLabel, faultsFor, applies, compareOrder, matches, variantOrder,
 } from '../engine.js';
-import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, tradeStorage, variantName, conditionLabel, $, $$ } from '../format.js';
+import { html, raw, naira, nairaK, lineAmount, lineAmountK, deviceWord, tradeStorage, simParts, variantName, conditionLabel, $, $$ } from '../format.js';
 import { ICON, neatnessIllo } from './icons.js';
 import { animateNumber, haptic } from './motion.js';
 import {
@@ -271,8 +271,7 @@ function picker(el, app, params) {
   const cfgRow = (d) => {
     const on = s.compare.includes(d.id);
     // "256gb eSIM only" → "256gb · eSIM Only", with the condition underneath: two short lines a row.
-    const [size, ...note] = String(d.storage || '').split(' ');
-    const top = [size, note.join(' ').replace(/\bonly\b/i, 'Only')].filter(Boolean).join(' · ') || 'Standard';
+    const top = simParts(d).filter(Boolean).join(' · ') || 'Standard';
     // Price sits on the second line, beside the condition, so the first line has the full width.
     const line2 = (v) => html`<span class="l2"><span class="sub">${conditionLabel(d.condition)}</span>${v}</span>`;
     if (d.stock === 'soldout') return html`<div class="cfg out" aria-disabled="true"><span class="main">${top}${line2(raw('<span class="val sold">Sold out</span>'))}</span></div>`;
