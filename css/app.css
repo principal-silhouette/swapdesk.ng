@@ -1211,3 +1211,5 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
   .list-top, .pick-search, .series-h { background: rgba(210, 223, 238, 0.97) !important; }
   .screen-foot { background: linear-gradient(rgba(210, 223, 238, 0), rgba(210, 223, 238, 0.97) 26px); }
 }
+/* Add a Device to Compare: storage leads, like the price list (8 Oct). */
+.cfg .cfg-st { font-weight: 700; }

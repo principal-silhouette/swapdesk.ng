@@ -271,9 +271,10 @@ function picker(el, app, params) {
   const cfgRow = (d) => {
     const on = s.compare.includes(d.id);
     // "256gb eSIM only" → "256gb · eSIM Only", with the condition underneath: two short lines a row.
-    const top = simParts(d).filter(Boolean).join(' · ') || 'Standard';
-    // Price sits on the second line, beside the condition, so the first line has the full width.
-    const line2 = (v) => html`<span class="l2"><span class="sub">${conditionLabel(d.condition)}</span>${v}</span>`;
+    // Same as the price list: storage in bold, then the SIM version and condition in small grey text beside the price.
+    const [size, sim] = simParts(d);
+    const top = html`<b class="cfg-st">${size || 'Standard'}</b>`;
+    const line2 = (v) => html`<span class="l2"><span class="sub">${[sim, conditionLabel(d.condition)].filter(Boolean).join(' · ')}</span>${v}</span>`;
     if (d.stock === 'soldout') return html`<div class="cfg out" aria-disabled="true"><span class="main">${top}${line2(raw('<span class="val sold">Sold out</span>'))}</span></div>`;
     return html`<button class="cfg" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}"><span class="main">${top}${line2(html`<span class="val">${naira(d.price)}</span>`)}</span><span class="tick box" aria-hidden="true"></span></button>`;
   };
