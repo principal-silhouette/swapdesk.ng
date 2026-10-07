@@ -1125,7 +1125,7 @@ async function ensureSaved(app, extra = {}, opts = {}) {
     s.quoteId = s.editing || s.quoteId || newQuoteId();
     const id = s.quoteId;
     const link = `${CONFIG.site}?q=${id}`;
-    rememberCode({ id, label: codeLabel(q) });
+    rememberCode({ id, label: codeLabel(q), devices: codeDevices(q) });
     backgroundSave(app, q, { ...extra, replaceId: id }, sig, link, id);
     return { q, sig, link, id, saved: true };
   }
@@ -1140,7 +1140,7 @@ async function ensureSaved(app, extra = {}, opts = {}) {
         const r = await once();
         if (r.saved && r.link) {
           s.saved = { sig, link: r.link, id: r.id, saved: true };
-          rememberCode({ id: r.id, label: codeLabel(q) });
+          rememberCode({ id: r.id, label: codeLabel(q), devices: codeDevices(q) });
           app.save();
           return s.saved;
         }
@@ -1510,6 +1510,12 @@ function codeLabel(q) {
   return [dev, into].filter(Boolean).join(' → ') || 'Swap Quote';
 }
 
+/** The trade-in devices in a quote, for "My Devices". */
+function codeDevices(q) {
+  if (q.items && q.items.length > 1) return q.items.map((it) => ({ id: it.id, name: it.name, value: it.value }));
+  return q.device ? [{ id: q.device.id, name: q.device.name, value: q.value }] : [];
+}
+
 function signIn(el, app, params = {}) {
   const next = params.next || '';
   const me = getMe();
@@ -1625,7 +1631,7 @@ function signIn(el, app, params = {}) {
 }
 
 /** The customer's own page: the same actions as Home, plus what an account adds, and every swap code. */
-function meScreen(el, app) {
+function meScreen(el, app, params = {}) {
   let m = getMe();
   if (!m) { app.go('signin', {}, { replace: true }); return false; }
   const live = (app.catalog.features || []).includes('customers');
@@ -1633,7 +1639,8 @@ function meScreen(el, app) {
   m = updateMe({ views: (m.views || 0) + 1 });
   let showPin = live && !m.pin && m.views >= 2 && m.views >= (m.pinLater || 0);
   const city = CITIES.find((c) => c.key === m.city);
-  let codes = (m.codes || []).map((c) => ({ id: c.id, at: c.at, label: c.label }));
+  let codes = (m.codes || []).map((c) => ({ id: c.id, at: c.at, label: c.label, devices: c.devices || [] }));
+  let q = '';
   let state = live ? 'loading' : 'ready';
   const date = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); };
   const codesHtml = () => {
@@ -1644,7 +1651,11 @@ function meScreen(el, app) {
         <button class="btn blue" type="button" data-act="unlock">Show My Codes</button></div>`;
     }
     if (!codes.length) return html`<p class="small codes-empty">${state === 'loading' ? 'Loading your codes…' : 'No swap codes yet. Every quote you save from now on shows up here.'}</p>`;
-    return html`<div class="mcard codes">${codes.map((c) => html`<button class="cfg code-row" type="button" data-act="open" data-v="${c.id}">
+    // Search by code, device or date: every word typed has to match.
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const shown = codes.filter((c) => { const t = `${c.id} ${c.label} ${date(c.at)} ${(c.devices || []).map((d) => d.name).join(' ')}`.toLowerCase(); return words.every((w) => t.includes(w)); });
+    if (!shown.length) return html`<p class="small codes-empty">No codes match “${q}”.</p>`;
+    return html`<div class="mcard codes">${shown.map((c) => html`<button class="cfg code-row" type="button" data-act="open" data-v="${c.id}">
       <span class="main">${c.id}<span class="l2"><span class="sub">${c.label}</span><span class="sub">${date(c.at)}</span></span></span>${raw(ICON.chevron)}</button>`)}</div>`;
   };
   const hasPin = () => !!getMe()?.pin;
@@ -1654,6 +1665,15 @@ function meScreen(el, app) {
       <p class="small oq-err" role="alert"></p>
       <button class="btn blue" type="button" data-act="setpin">${hasPin() ? 'Save PIN' : 'Add PIN'}</button>
       <button class="link" type="button" data-act="later">Not Now</button></div>` : '');
+  // My Devices: every device they've traded in, newest value first. Tap one to value it again today.
+  const devicesHtml = () => {
+    const seen = new Map();
+    for (const c of codes) for (const d of c.devices || []) if (d.id && !seen.has(d.id)) seen.set(d.id, { ...d, at: c.at });
+    const list = [...seen.values()].filter((d) => app.catalog.byId.get(d.id));
+    if (!list.length) return html`<p class="small codes-empty">${state === 'loading' ? 'Loading your devices…' : 'Devices you value show up here.'}</p>`;
+    return html`<div class="mcard codes">${list.map((d) => html`<button class="cfg code-row dev-row" type="button" data-act="revalue" data-v="${d.id}">
+      <span class="main">${d.name}<span class="l2"><span class="sub">${d.value ? `Valued ${nairaK(d.value)}` : 'Valued'} · ${date(d.at)}</span><span class="sub go-sub">Value it today</span></span></span>${raw(ICON.chevron)}</button>`)}</div>`;
+  };
   const tile = (act, ico, label) => html`<button class="me-tile" type="button" data-act="${act}">${raw(ico)}<span>${label}</span></button>`;
   const draw = () => {
     el.innerHTML = layout(html`
@@ -1673,12 +1693,24 @@ function meScreen(el, app) {
         ${tile('edit', ICON.edit, 'Edit Details')}
       </div>
       ${pinCard()}
-      <p class="group-label me-label">My Swap Codes</p>
-      ${codesHtml()}
+      <p class="group-label me-label" id="me-devices">My Devices</p>
+      ${devicesHtml()}
+      <p class="group-label me-label" id="me-codes">My Swap Codes</p>
+      ${codes.length > 1 && state !== 'locked' ? html`<label class="field me-search"><span class="visually-hidden">Search your codes</span>${raw(ICON.search)}
+        <input type="search" data-codesearch placeholder="Search code, device or date" value="${q}" autocomplete="off" enterkeyhint="search"></label>` : ''}
+      <div data-codelist>${codesHtml()}</div>
       <button class="link signout" type="button" data-act="signout">Sign Out</button>`, pills(backPill())).toString();
   };
   el.classList.add('me-pg');
   draw();
+  // From the menu: My Swap Codes or My Devices opens the page at that section.
+  if (params.focus) requestAnimationFrame(() => document.getElementById(params.focus === 'devices' ? 'me-devices' : 'me-codes')?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+  el.addEventListener('input', (e) => {
+    if (!e.target.matches('[data-codesearch]')) return;
+    q = e.target.value;
+    const box = $('[data-codelist]', el);
+    if (box) box.innerHTML = codesHtml().toString();
+  });
   const load = () => {
     if (!live) return;
     fetchCodes(getMe()).then((r) => {
@@ -1687,7 +1719,7 @@ function meScreen(el, app) {
         const cur = getMe();
         if (!r.hasPin && cur?.pin) savePin({ ...cur, pin: '' }, cur.pin).catch(() => {});
         const local = new Map(codes.map((c) => [c.id, c]));
-        for (const c of r.codes || []) local.set(c.id, { id: c.id, at: c.created, label: c.label || local.get(c.id)?.label || 'Swap Quote' });
+        for (const c of r.codes || []) local.set(c.id, { id: c.id, at: c.created, label: c.label || local.get(c.id)?.label || 'Swap Quote', devices: c.devices?.length ? c.devices : local.get(c.id)?.devices || [] });
         codes = [...local.values()].sort((a, b) => String(b.at).localeCompare(String(a.at)));
         state = 'ready';
       } else if (r && r.needPin) state = 'locked';
@@ -1706,6 +1738,7 @@ function meScreen(el, app) {
       showPin = true; draw(); $('[data-newpin]', el)?.focus();
     },
     open: (b) => app.go('quote', { id: b.dataset.v }),
+    revalue: (b) => startWith(app, b.dataset.v),
     edit: () => app.go('signin', { form: 1 }),
     signout: () => { signOut(); app.paintChip?.(); app.toast('Signed out'); app.go('home', {}, { replace: true }); },
     later: () => { m = updateMe({ pinLater: m.views + 3 }); showPin = false; $('[data-pincard]', el)?.remove(); },

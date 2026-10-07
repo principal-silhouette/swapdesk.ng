@@ -4,7 +4,8 @@ import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
 import { SCREENS, restoreState, saveState } from './ui/flow.js';
-import { getMe, firstName } from './me.js';
+import { getMe, firstName, showPhone, signOut } from './me.js';
+import { whatsappURL } from './quote.js';
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
@@ -29,20 +30,73 @@ export const app = {
   },
   /** Re-draw the current screen in place (answers changed, prices updated). */
   refresh() { show(app.screen, app.params, 0, true); },
-  /** The corner chip: "Hi, Name" for a signed-in customer, "Sign In" for everyone else. */
+  /**
+   * The corner buttons. Right: "Hi, Name" (opens the account menu) or "Sign In".
+   * Left: Open Quote, or Home while a quote is already open (Daniel, 7 Oct).
+   */
   paintChip() {
     const chip = document.getElementById('mechip');
-    if (!chip) return;
+    const oq = document.getElementById('oqchip');
+    if (!chip || !oq) return;
     const m = getMe();
     chip.textContent = m ? `Hi, ${firstName(m)}` : 'Sign In';
+    chip.setAttribute('aria-haspopup', m ? 'menu' : 'false');
     chip.hidden = false;
-    const oq = document.getElementById('oqchip');
-    if (oq) oq.hidden = false;
+    const onQuote = app.screen === 'quote' || app.screen === 'openq';
+    oq.textContent = onQuote ? 'Home' : 'Open Quote';
+    oq.hidden = false;
   },
 };
-document.getElementById('mechip')?.addEventListener('click', () => app.go(getMe() ? 'me' : 'signin'));
-// Open Quote sits top left, balancing the account button top right (Daniel, 7 Oct).
-document.getElementById('oqchip')?.addEventListener('click', () => app.go('openq'));
+document.getElementById('mechip')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (getMe()) toggleMenu(); else app.go('signin');
+});
+document.getElementById('oqchip')?.addEventListener('click', () => {
+  closeMenu();
+  if (app.screen === 'quote' || app.screen === 'openq') app.go(getMe() ? 'me' : 'home');
+  else app.go('openq');
+});
+
+// ---------- the account menu under "Hi, Name" ----------
+const menu = document.getElementById('memenu');
+function closeMenu() {
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  document.getElementById('mechip')?.setAttribute('aria-expanded', 'false');
+}
+function toggleMenu() {
+  if (!menu) return;
+  if (!menu.hidden) { closeMenu(); return; }
+  const m = getMe();
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const item = (act, label, extra = '') => `<button class="mm-item${extra}" type="button" role="menuitem" data-mm="${act}">${label}</button>`;
+  menu.innerHTML = `<div class="mm-head"><b>${esc(m.name || '')}</b><span>${esc(showPhone(m.phone))}</span></div>
+    ${item('me', 'My Account')}${item('codes', 'My Swap Codes')}${item('devices', 'My Devices')}
+    <div class="mm-sep"></div>
+    ${item('swap', 'Calculate My Swap Rate')}${item('trade', 'Check My Trade-In Value')}${item('prices', 'Check for Prices')}${item('openq', 'Open a Quote')}${item('chat', 'Chat With Us')}
+    <div class="mm-sep"></div>
+    ${item('signout', 'Sign Out', ' danger')}`;
+  menu.hidden = false;
+  document.getElementById('mechip')?.setAttribute('aria-expanded', 'true');
+  menu.querySelector('.mm-item')?.focus({ preventScroll: true });
+}
+menu?.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-mm]');
+  if (!b) return;
+  const act = b.dataset.mm;
+  closeMenu();
+  const m = getMe();
+  if (act === 'me') app.go('me');
+  else if (act === 'codes' || act === 'devices') app.go('me', { focus: act });
+  else if (act === 'swap') SCREENS.startFlow(app, 'swap');
+  else if (act === 'trade') app.go('trade-in');
+  else if (act === 'prices') app.go('prices');
+  else if (act === 'openq') app.go('openq');
+  else if (act === 'chat') location.href = whatsappURL(`Hi SwapDesk, this is ${m?.name || ''} (${showPhone(m?.phone || '')}).`);
+  else if (act === 'signout') { signOut(); app.paintChip(); toast('Signed out'); app.go('home', {}, { replace: true }); }
+});
+document.addEventListener('click', (e) => { if (menu && !menu.hidden && !e.target.closest('#memenu')) closeMenu(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
 function urlFor(screen, params) {
   const p = new URLSearchParams();
@@ -76,6 +130,7 @@ function show(screen, params, dir, inPlace = false) {
   const fn = SCREENS[screen] || SCREENS.home;
   app.screen = screen;
   app.params = params;
+  closeMenu();
   const y = body.scrollTop;
   const el = document.createElement('div');
   el.className = 'screen';
@@ -84,6 +139,7 @@ function show(screen, params, dir, inPlace = false) {
   if (ok === false) return;
   body.replaceChildren(el);
   current = el;
+  if (!document.getElementById('mechip')?.hidden) app.paintChip();
   requestAnimationFrame(markOverflow);
   if (inPlace) { body.scrollTop = y; return; }
   body.scrollTop = 0;

@@ -413,14 +413,21 @@ function myCodes_(phoneIn, pin) {
   quoteTabs_().forEach(function (sh) {
     var last = sh.getLastRow();
     if (last < QUOTE_FIRST_ROW) return;
-    // B id, C date, E phone, H trade-in device, O swap count, P swap options
-    var vals = sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 15).getValues();
+    // B id, C date, E phone, H trade-in device, O swap count, P swap options, U the quote itself
+    var vals = sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 20).getValues();
     vals.forEach(function (r) {
       if (!r[0] || normPhone_(r[3]) !== phone) return;
+      // The trade-in devices, for "My Devices".
+      var devices = [];
+      try {
+        var qq = JSON.parse(r[19]);
+        if (qq.items && qq.items.length > 1) devices = qq.items.map(function (it) { return { id: it.id, name: it.name, value: it.value }; });
+        else if (qq.device) devices = [{ id: qq.device.id, name: qq.device.name, value: qq.value }];
+      } catch (e) { /* older row */ }
       var swaps = String(r[14] || '').split('\n').filter(String).map(function (x) { return x.split(' · ')[0].split(':')[0]; });
       var dev = String(r[6] || '').split('\n')[0].split(' · ')[0];
       var into = swaps.length === 1 ? swaps[0] : swaps.length ? swaps.length + ' swap options' : '';
-      codes.push({ id: String(r[0]), created: r[1] instanceof Date ? r[1].toISOString() : String(r[1]), label: [dev, into].filter(String).join(' → ') || 'Swap Quote' });
+      codes.push({ id: String(r[0]), created: r[1] instanceof Date ? r[1].toISOString() : String(r[1]), label: [dev, into].filter(String).join(' → ') || 'Swap Quote', devices: devices });
     });
   });
   codes.sort(function (a, b) { return a.created < b.created ? 1 : -1; });
