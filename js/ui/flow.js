@@ -253,6 +253,29 @@ function picker(el, app, params) {
       <span class="val">${add ? '' : raw('<small>Up to</small>')}${add ? naira(d.price) : naira(d.tradeInValue)}</span>${add ? raw('<span class="tick box" aria-hidden="true"></span>') : ''}</button>`;
   };
 
+  // Swap devices: one card per model, each storage and condition a compact row with its own tick (Daniel, 7 Oct).
+  const cfgRow = (d) => {
+    const on = s.compare.includes(d.id);
+    // "256gb eSIM only" → "256gb · eSIM Only", with the condition underneath: two short lines a row.
+    const [size, ...note] = String(d.storage || '').split(' ');
+    const top = [size, note.join(' ').replace(/\bonly\b/i, 'Only')].filter(Boolean).join(' · ') || 'Standard';
+    // Price sits on the second line, beside the condition, so the first line has the full width.
+    const line2 = (v) => html`<span class="l2"><span class="sub">${conditionLabel(d.condition)}</span>${v}</span>`;
+    if (d.stock === 'soldout') return html`<div class="cfg out" aria-disabled="true"><span class="main">${top}${line2(raw('<span class="val sold">Sold out</span>'))}</span></div>`;
+    return html`<button class="cfg" type="button" role="checkbox" aria-checked="${on ? 'true' : 'false'}" data-act="version" data-id="${d.id}"><span class="main">${top}${line2(html`<span class="val">${naira(d.price)}</span>`)}</span><span class="tick box" aria-hidden="true"></span></button>`;
+  };
+  const modelCards = (rows) => {
+    const out = []; const at = new Map();
+    for (const d of rows) {
+      if (d.condition === 'Deal') { out.push(version(d, true)); continue; }
+      if (!at.has(d.model)) { at.set(d.model, []); out.push(at.get(d.model)); }
+      at.get(d.model).push(d);
+    }
+    return out.map((g) => (Array.isArray(g)
+      ? html`<div class="mcard${g.some((d) => s.compare.includes(d.id)) ? ' has-sel' : ''}"><p class="mcard-t">${g[0].model}</p>${g.map(cfgRow)}</div>`
+      : g));
+  };
+
   el.classList.add('picking');
   CATALOG = app.catalog;
   // Your own device: model, then storage size. Condition comes later, with the other questions.
@@ -300,7 +323,7 @@ function picker(el, app, params) {
     if (q) {
       // Search stays inside what's already picked (Phones, then Apple…), so "12" under Phones doesn't bring up iPads.
       const found = devices.filter((d) => (!st.type || d.type === st.type) && (!st.brand || d.brand === st.brand) && matches(d, q)).sort(byOrder).slice(0, 60);
-      options = found.length ? (add ? found.map((d) => version(d, true)) : byStorage(found).map((d) => storageOpt(d, true))) : html`<p class="empty">No devices match “${q}”.</p>`;
+      options = found.length ? (add ? modelCards(found) : byStorage(found).map((d) => storageOpt(d, true))) : html`<p class="empty">No devices match “${q}”.</p>`;
     } else if (lv === 'type') {
       options = types.map((t) => html`<button class="opt" type="button" data-act="type" data-v="${t}"><span class="main">${TYPE_LABEL[t] || t}</span>${raw(ICON.chevron)}</button>`);
     } else if (lv === 'brand') {
@@ -327,7 +350,7 @@ function picker(el, app, params) {
           <span class="main">${m.model}<span class="sub">${m.summary}</span></span>${raw(ICON.chevron)}</button>`)}`);
     } else {
       const vs = devices.filter((d) => d.model === st.model).sort(variantOrder);
-      options = add ? vs.map((d) => version(d, false)) : byStorage(vs).map((d) => storageOpt(d, false));
+      options = add ? modelCards(vs) : byStorage(vs).map((d) => storageOpt(d, false));
     }
 
     // Progress through picking your device: type → brand → model → storage (then Calculating).

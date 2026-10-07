@@ -132,11 +132,15 @@ export function prepare(raw, origin) {
  * Load the catalogue. Resolves with the best copy available now, then calls
  * onUpdate(catalog) if a fresher one arrives in the background.
  */
+const newer = (a, b) => (Date.parse(a?.updatedAt) || 0) > (Date.parse(b?.updatedAt) || 0);
+
 export async function loadCatalog(onUpdate) {
   const cached = store.get();
   const cachedOk = cached && valid(cached.catalog);
+  // With a saved copy on screen there's no rush: give Google up to 30s, so a slow wake-up still refreshes the
+  // saved copy. (A 6s limit here left phones on a days-old price list whenever the script was slow.)
   const live = CONFIG.endpoint
-    ? fetchJSON(`${CONFIG.endpoint}?action=catalog`).then((c) => {
+    ? fetchJSON(`${CONFIG.endpoint}?action=catalog`, cachedOk ? 30000 : 6000).then((c) => {
       if (!valid(c)) throw new Error('Bad catalogue');
       store.set(c);
       return prepare(c, 'live');
@@ -145,14 +149,18 @@ export async function loadCatalog(onUpdate) {
 
   if (cachedOk) {
     const fresh = Date.now() - cached.savedAt < FRESH_MS;
+    let shown = cached.catalog;
     if (!fresh) {
+      // A stale saved copy can be older than the snapshot bundled with the site: use whichever is newer.
+      const snap = await fetchJSON(CONFIG.snapshot, 4000).catch(() => null);
+      if (snap && valid(snap) && newer(snap, shown)) shown = snap;
       live.then((c) => {
-        if (c.updatedAt !== cached.catalog.updatedAt) onUpdate?.(c);
+        if (c.updatedAt !== shown.updatedAt) onUpdate?.(c);
       }).catch(() => {});
     } else {
       live.catch(() => {});
     }
-    return prepare(cached.catalog, fresh ? 'live' : 'cache');
+    return prepare(shown, fresh ? 'live' : shown === cached.catalog ? 'cache' : 'snapshot');
   }
 
   try {
