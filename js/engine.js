@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS = {
   // Daniel, 7 Oct: one trade-in value per model and storage (Physical SIM + eSIM); the SIM version takes a share off.
   // eSIM only sells ~10.7% below, Physical SIM only ~2.3% below (Rules D31, D32).
   'model.esimOnlyShare': 0.893,
-  'model.dualSimShare': 0.977,
+  'model.dualSimShare': 0.97,
   'trueTone.shareOfScreen': 0.5,
   'rounding.tradeIn': 2000,
   'rounding.quote': 1000,
