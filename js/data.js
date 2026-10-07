@@ -93,10 +93,18 @@ function listOrders(devices, seriesOrder, modelOrder) {
   return { groupOrder, nameOrder };
 }
 
+const SMALL = new Set(['and', 'with', 'of', 'on', 'in', 'a', 'an', 'the', 'or', 'for', 'to']);
+const titleNote = (t) => String(t).replace(/[A-Za-z][\w'’-]*/g, (w, at) => {
+  if (/[A-Z]/.test(w.slice(1)) || /^[a-z]+[A-Z]/.test(w)) return w; // ID, iPhone, eSIM stay as written
+  return at > 0 && SMALL.has(w.toLowerCase()) ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1);
+});
+
 export function prepare(raw, origin) {
   const devices = raw.devices.map((d, i) => {
     const series = d.brand === 'Samsung' ? samsungFamily(d.model) || d.series : d.series;
     const x = { ...d, series, _i: i };
+    // Deal notes in Title Case: "75% battery health, cracked back" → "75% Battery Health, Cracked Back".
+    if (x.dealNote) x.dealNote = titleNote(x.dealNote);
     x._search = searchText(x);
     return x;
   });
