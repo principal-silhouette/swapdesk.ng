@@ -1215,3 +1215,10 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .cfg .cfg-st { font-weight: 700; }
 /* Opening a quote link: the blue bar in the usual place, the words under it (8 Oct). */
 .qv-opening { margin: 0 !important; text-align: center; }
+/* Account menu (8 Oct): wide buttons for the main actions, tiles for the rest, like the account page. */
+.me-menu { width: min(320px, calc(100vw - 24px)); padding: 10px; }
+.mm-wide { display: grid; gap: 8px; margin: 2px 0 10px; }
+.mm-btn { min-height: 48px !important; padding: 10px 14px !important; font-size: 15px !important; border-radius: 12px !important; }
+.mm-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mm-tile { min-height: 70px !important; font-size: 13.5px !important; }
+.mm-out { text-align: center !important; margin-top: 8px; font-weight: 600 !important; }

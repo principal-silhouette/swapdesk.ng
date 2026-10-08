@@ -6,6 +6,7 @@ import { spring, reducedMotion } from './ui/motion.js';
 import { SCREENS, restoreState, saveState } from './ui/flow.js';
 import { getMe, firstName, showPhone, signOut } from './me.js';
 import { whatsappURL } from './quote.js';
+import { ICON } from './ui/icons.js';
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
@@ -69,16 +70,18 @@ function toggleMenu() {
   if (!menu.hidden) { closeMenu(); return; }
   const m = getMe();
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const item = (act, label, extra = '') => `<button class="mm-item${extra}" type="button" role="menuitem" data-mm="${act}">${label}</button>`;
+  // Same mix as the account page: the three main actions as wide buttons, everything else as tiles (8 Oct).
+  const wide = (act, label, cls) => `<button class="btn mm-btn ${cls}" type="button" role="menuitem" data-mm="${act}">${label}</button>`;
+  const tile = (act, ico, label) => `<button class="me-tile mm-tile" type="button" role="menuitem" data-mm="${act}">${ico}<span>${label}</span></button>`;
+  const USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>';
   menu.innerHTML = `<div class="mm-head"><b>${esc(m.name || '')}</b><span>${esc(showPhone(m.phone))}</span></div>
-    ${item('me', 'My Account')}${item('codes', 'My Swap Codes')}${item('devices', 'My Devices')}
-    <div class="mm-sep"></div>
-    ${item('swap', 'Calculate My Swap Rate')}${item('trade', 'Check My Trade-In Value')}${item('prices', 'Check for Prices')}${item('openq', 'Open a Quote')}${item('chat', 'Chat With Us')}
-    <div class="mm-sep"></div>
-    ${item('signout', 'Sign Out', ' danger')}`;
+    <div class="mm-wide">${wide('prices', 'Check for Prices', 'green')}${wide('trade', 'Check My Trade-In Value', '')}${wide('swap', 'Calculate My Swap Rate', 'blue')}</div>
+    <div class="mm-tiles">${tile('me', USER, 'My Account')}${tile('codes', ICON.copy, 'My Swap Codes')}${tile('devices', ICON.Phones, 'My Devices')}
+      ${tile('openq', ICON.search, 'Open a Quote')}${tile('chat', ICON.whatsapp, 'Chat With Us')}${tile('edit', ICON.edit, 'Edit Details')}</div>
+    <button class="mm-item danger mm-out" type="button" role="menuitem" data-mm="signout">Sign Out</button>`;
   menu.hidden = false;
   document.getElementById('mechip')?.setAttribute('aria-expanded', 'true');
-  menu.querySelector('.mm-item')?.focus({ preventScroll: true });
+  menu.querySelector('[data-mm]')?.focus({ preventScroll: true });
 }
 menu?.addEventListener('click', (e) => {
   const b = e.target.closest('[data-mm]');
@@ -92,6 +95,7 @@ menu?.addEventListener('click', (e) => {
   else if (act === 'trade') app.go('trade-in');
   else if (act === 'prices') app.go('prices');
   else if (act === 'openq') app.go('openq');
+  else if (act === 'edit') app.go('signin', { form: 1 });
   else if (act === 'chat') location.href = whatsappURL(`Hi SwapDesk, this is ${m?.name || ''} (${showPhone(m?.phone || '')}).`);
   else if (act === 'signout') { signOut(); app.paintChip(); toast('Signed out'); app.go('home', {}, { replace: true }); }
 });

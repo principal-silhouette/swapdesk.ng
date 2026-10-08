@@ -42,7 +42,16 @@ h2 { font-size: 22px; letter-spacing: -0.03em; margin: 4px 0 12px; }
 h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 22px 0 8px; font-weight: 700; }
 .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 @media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, 1fr); } }
-.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; text-align: left; box-shadow: 0 1px 2px rgba(31, 94, 159, 0.06), 0 4px 14px rgba(31, 94, 159, 0.07); }
+button.tile { width: 100%; color: var(--ink); }
+button.tile:active, .wbtn:active { transform: scale(0.98); }
+.tile .go { display: block; margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--blue); }
+/* Same buttons as the customer site: wide, rounded, blue outline or filled (8 Oct). */
+.wide { display: grid; gap: 10px; margin-bottom: 14px; }
+@media (min-width: 640px) { .wide { grid-template-columns: 1fr 1fr; } }
+.wbtn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--blue); background: var(--panel); color: var(--blue); font-weight: 600; font-size: 16px; text-decoration: none; }
+.wbtn.blue { background: var(--blue); color: #fff; }
+.wbtn.green { border-color: #25D366; color: var(--good); }
 .tile b { display: block; font-size: 26px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .tile span { font-size: 13px; color: var(--muted); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
@@ -79,8 +88,8 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: 
 .status.Lost { background: var(--soft); color: var(--muted); }
 textarea.notes { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; font-size: 13.5px; resize: vertical; }
 .empty { padding: 22px 14px; text-align: center; color: var(--muted); }
-.btn { border: 0; border-radius: 14px; padding: 13px 16px; font-weight: 700; background: var(--blue); color: #fff; width: 100%; }
-.btn.sm { width: auto; padding: 8px 14px; border-radius: 999px; font-size: 13px; }
+.btn { border: 1px solid var(--blue); border-radius: 12px; padding: 13px 16px; font-weight: 700; background: var(--blue); color: #fff; width: 100%; }
+.btn.sm { width: auto; padding: 9px 14px; border-radius: 10px; font-size: 13px; }
 .btn.line { background: none; border: 1px solid var(--line); color: var(--blue); }
 .btn[disabled] { opacity: 0.55; }
 .form { display: grid; gap: 10px; padding: 14px; }
@@ -182,15 +191,19 @@ function overview() {
   const max = Math.max(1, ...days.map((x) => x.n)), bw = 100 / days.length;
   const bars = days.map((x, i) => `<rect x="${i * bw + bw * 0.15}" y="${100 - (x.n / max) * 92}" width="${bw * 0.7}" height="${(x.n / max) * 92}" rx="0.8" fill="var(--blue)"><title>${x.d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${x.n}</title></rect>`).join('');
   return `<h2>Overview</h2>
+    <div class="wide">
+      <button class="wbtn blue" type="button" data-go="deals">Add a Deal</button>
+      <button class="wbtn" type="button" data-go="quotes" data-filter="To Call">Quotes to Call${waiting ? ` (${waiting})` : ''}</button>
+    </div>
     <div class="tiles">
-      <div class="tile"><b>${today}</b><span>Quotes today</span></div>
-      <div class="tile"><b>${since(7)}</b><span>Quotes this week</span></div>
-      <div class="tile"><b>${since(30)}</b><span>Quotes in 30 days</span></div>
-      <div class="tile"><b>${q.length}</b><span>Quotes in total</span></div>
-      <div class="tile"><b>${data.customers.length}</b><span>Accounts${newAcc ? ` · ${newAcc} new this week` : ''}</span></div>
-      <div class="tile"><b>${q.length ? Math.round((signed / q.length) * 100) : 0}%</b><span>Quotes from signed-in customers</span></div>
-      <div class="tile"><b>${waiting}</b><span>New quotes with a number to call</span></div>
-      <div class="tile"><b>${open}</b><span>Deals on the site</span></div>
+      <button class="tile" type="button" data-go="quotes" data-filter="All"><b>${today}</b><span>Quotes today</span></button>
+      <button class="tile" type="button" data-go="quotes" data-filter="All"><b>${since(7)}</b><span>Quotes this week</span></button>
+      <button class="tile" type="button" data-go="quotes" data-filter="All"><b>${since(30)}</b><span>Quotes in 30 days</span></button>
+      <button class="tile" type="button" data-go="quotes" data-filter="All"><b>${q.length}</b><span>Quotes in total</span></button>
+      <button class="tile" type="button" data-go="accounts"><b>${data.customers.length}</b><span>Accounts${newAcc ? ` · ${newAcc} new this week` : ''}</span></button>
+      <button class="tile" type="button" data-go="quotes" data-filter="With Number"><b>${q.length ? Math.round((signed / q.length) * 100) : 0}%</b><span>Quotes from signed-in customers</span></button>
+      <button class="tile" type="button" data-go="quotes" data-filter="To Call"><b>${waiting}</b><span>New quotes with a number to call</span></button>
+      <button class="tile" type="button" data-go="deals"><b>${open}</b><span>Deals on the site</span></button>
     </div>
     <h3>Quotes per day, last 30 days</h3>
     <div class="chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${bars}</svg>
@@ -244,11 +257,11 @@ function quoteCard(x) {
 }
 function quotes() {
   const s = qSearch.trim().toLowerCase();
-  const list = data.quotes.filter((x) => (qFilter === 'All' || (qFilter === 'With Number' ? x.phone : x.status === qFilter)) &&
+  const list = data.quotes.filter((x) => (qFilter === 'All' || (qFilter === 'With Number' ? x.phone : qFilter === 'To Call' ? x.phone && x.status === 'New' : x.status === qFilter)) &&
     (!s || [x.id, x.name, x.phone, x.city, ...x.trades.map((t) => t.name), ...x.swaps.map((w) => w.name)].join(' ').toLowerCase().includes(s)));
   return `<h2>Quotes</h2>
     <input class="search" id="qs" type="search" placeholder="Search code, name, number or phone model" value="${esc(qSearch)}">
-    <div class="chips">${['All', 'With Number', ...STATUSES].map((f) => `<button class="chip" type="button" data-qf="${f}" aria-pressed="${f === qFilter}">${f}</button>`).join('')}</div>
+    <div class="chips">${['All', 'To Call', 'With Number', ...STATUSES].map((f) => `<button class="chip" type="button" data-qf="${f}" aria-pressed="${f === qFilter}">${f}</button>`).join('')}</div>
     <p class="muted">${list.length} ${list.length === 1 ? 'quote' : 'quotes'}${list.length > 100 ? ', showing the latest 100' : ''}</p>
     <div class="card" id="qlist">${list.slice(0, 100).map(quoteCard).join('') || '<p class="empty">No quotes match.</p>'}</div>`;
 }
@@ -298,6 +311,8 @@ function render() {
 document.addEventListener('click', async (e) => {
   const t = e.target.closest('[data-tab]');
   if (t) { tab = t.dataset.tab; render(); scrollTo(0, 0); return; }
+  const g = e.target.closest('[data-go]');
+  if (g) { tab = g.dataset.go; if (g.dataset.filter) qFilter = g.dataset.filter; render(); scrollTo(0, 0); if (tab === 'deals') setTimeout(() => $('#dm')?.focus(), 50); return; }
   const f = e.target.closest('[data-qf]');
   if (f) { qFilter = f.dataset.qf; render(); return; }
   const st = e.target.closest('[data-act="status"]');
