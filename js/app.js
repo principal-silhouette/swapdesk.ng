@@ -4,7 +4,7 @@ import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
 import { SCREENS, restoreState, saveState } from './ui/flow.js';
-import { getMe, firstName, showPhone, signOut } from './me.js';
+import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
 
@@ -210,6 +210,8 @@ async function boot() {
       app.catalog = fresh;
       if (['home', 'prices', 'trade-in'].includes(app.screen)) app.refresh();
     });
+    // Signed in: fetch their codes in the background, so My Account opens with everything already there.
+    if (getMe() && (app.catalog.features || []).includes('customers')) setTimeout(() => syncCodes().catch(() => {}), 1500);
   } catch (err) {
     console.warn(err);
     body.innerHTML = `<div class="screen"><h2 class="h-title">We couldn’t load prices.</h2>

@@ -80,6 +80,32 @@ async function post(body, ms = 25000) {
 export const saveCustomer = (m) => post({ action: 'customer', customer: { name: m.name, phone: m.phone, pin: m.pin || '', city: CITIES.find((c) => c.key === m.city)?.name || '' } }).catch(() => null);
 /** The codes saved under a number. { ok, codes } or { ok:false, needPin } */
 export const fetchCodes = (m) => post({ action: 'myCodes', phone: m.phone, pin: m.pin || '' });
+/**
+ * Fetch the account's codes and keep them on the phone, so My Devices and My Swap Codes open instantly next time.
+ * One retry if the sheet is slow to wake up. Resolves to the server reply (or null).
+ */
+let syncing = null;
+export function syncCodes() {
+  const m = getMe();
+  if (!m) return Promise.resolve(null);
+  if (syncing) return syncing;
+  const once = () => fetchCodes(getMe() || m);
+  syncing = once().catch(() => new Promise((res) => setTimeout(res, 1500)).then(once)).then((r) => {
+    if (r && r.ok) {
+      const cur = getMe();
+      if (cur) {
+        const local = new Map((cur.codes || []).map((c) => [c.id, c]));
+        for (const c of r.codes || []) {
+          const old = local.get(c.id);
+          local.set(c.id, { id: c.id, at: c.created || old?.at, label: c.label || old?.label || 'Swap Quote', devices: c.devices?.length ? c.devices : old?.devices || [] });
+        }
+        setMe({ ...cur, codes: [...local.values()].sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 50) });
+      }
+    }
+    return r;
+  }).finally(() => { syncing = null; });
+  return syncing;
+}
 /** Sign in on any phone: { ok, name, city } or { needPin } or { notFound }. */
 export const signInRemote = (phone, pin) => post({ action: 'signIn', phone, pin: pin || '' });
 export const savePin = (m, pin) => post({ action: 'setPin', phone: m.phone, pin, oldPin: m.pin || '' });

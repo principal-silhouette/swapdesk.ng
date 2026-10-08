@@ -12,7 +12,7 @@ import {
 } from '../quote.js';
 import { listScreen, listRows, dealRows } from './lists.js';
 import { quoteScreen } from './quoteView.js';
-import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, savePin, signInRemote } from '../me.js';
+import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, syncCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
 
@@ -1681,6 +1681,7 @@ function meScreen(el, app, params = {}) {
         <p class="small oq-err" role="alert"></p>
         <button class="btn blue" type="button" data-act="unlock">Show My Codes</button></div>`;
     }
+    if (!codes.length && state === 'error') return html`<p class="small codes-empty">We couldn’t load your codes just now. <button class="link" type="button" data-act="retry">Try Again</button></p>`;
     if (!codes.length) return html`<p class="small codes-empty">${state === 'loading' ? 'Loading your codes…' : 'No swap codes yet. Every quote you save from now on shows up here.'}</p>`;
     // Search by code, device or date: every word typed has to match.
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -1701,6 +1702,7 @@ function meScreen(el, app, params = {}) {
     const seen = new Map();
     for (const c of codes) for (const d of c.devices || []) if (d.id && !seen.has(d.id)) seen.set(d.id, { ...d, at: c.at });
     const list = [...seen.values()].filter((d) => app.catalog.byId.get(d.id));
+    if (!list.length && state === 'error') return html`<p class="small codes-empty">We couldn’t load your devices just now. <button class="link" type="button" data-act="retry">Try Again</button></p>`;
     if (!list.length) return html`<p class="small codes-empty">${state === 'loading' ? 'Loading your devices…' : 'Devices you value show up here.'}</p>`;
     return html`<div class="mcard codes">${list.map((d) => html`<button class="cfg code-row dev-row" type="button" data-act="revalue" data-v="${d.id}">
       <span class="main">${d.name}<span class="l2"><span class="sub">${d.value ? `Valued ${nairaK(d.value)}` : 'Valued'} · ${date(d.at)}</span><span class="sub go-sub">Value it today</span></span></span>${raw(ICON.chevron)}</button>`)}</div>`;
@@ -1744,18 +1746,17 @@ function meScreen(el, app, params = {}) {
   });
   const load = () => {
     if (!live) return;
-    fetchCodes(getMe()).then((r) => {
+    // Codes saved on this phone show straight away; the sheet fills in the rest (and is kept for next time).
+    syncCodes().then((r) => {
       if (r && r.ok) {
         // A PIN made at Sign Up before the sheet could store it goes up now.
         const cur = getMe();
         if (!r.hasPin && cur?.pin) savePin({ ...cur, pin: '' }, cur.pin).catch(() => {});
-        const local = new Map(codes.map((c) => [c.id, c]));
-        for (const c of r.codes || []) local.set(c.id, { id: c.id, at: c.created, label: c.label || local.get(c.id)?.label || 'Swap Quote', devices: c.devices?.length ? c.devices : local.get(c.id)?.devices || [] });
-        codes = [...local.values()].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+        codes = (cur?.codes || []).map((c) => ({ id: c.id, at: c.at, label: c.label, devices: c.devices || [] }));
         state = 'ready';
       } else if (r && r.needPin) state = 'locked';
-      else state = 'ready';
-    }).catch(() => { state = 'ready'; }).finally(() => { if (el.isConnected) draw(); });
+      else state = codes.length ? 'ready' : 'error';
+    }).catch(() => { state = codes.length ? 'ready' : 'error'; }).finally(() => { if (el.isConnected) draw(); });
   };
   load();
   wire(el, app, {
@@ -1763,6 +1764,7 @@ function meScreen(el, app, params = {}) {
     trade: () => app.go('trade-in'),
     swap: () => startFlow(app, 'swap'),
     openq: () => app.go('openq'),
+    retry: () => { state = 'loading'; draw(); load(); },
     chat: () => { location.href = whatsappURL(`Hi SwapDesk, this is ${m.name} (${showPhone(m.phone)}).`); },
     pin: () => {
       if (!live) { app.toast('PINs are switching on soon.'); return; }
