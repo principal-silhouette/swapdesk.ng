@@ -1396,19 +1396,28 @@ async function quoteImageFile(q, code = '') {
   const g = c.getContext('2d');
   g.scale(S, S);
   g.imageSmoothingQuality = 'high';
-  g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+  // Dark mode phones get the dark background: navy, white waves and logo. The pop-up stays the same (8 Oct).
+  const dark = !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  g.fillStyle = dark ? '#0E2238' : '#ffffff'; g.fillRect(0, 0, W, H);
+  // Recolour an image to white (canvas filters don't work in Safari, so paint white through its shape).
+  const white = (img, w, h) => {
+    const o = document.createElement('canvas'); o.width = Math.round(w * S); o.height = Math.round(h * S);
+    const x = o.getContext('2d'); x.drawImage(img, 0, 0, o.width, o.height);
+    x.globalCompositeOperation = 'source-in'; x.fillStyle = '#ffffff'; x.fillRect(0, 0, o.width, o.height);
+    return o;
+  };
   const [logo, wa, wb] = await Promise.all(['assets/swapdesk-logo.png', 'assets/wave-a.svg', 'assets/wave-b.svg'].map((u) => loadImg(u).catch(() => null)));
   const wave = (img, x, y, w, rot) => {
     if (!img) return;
     const h = w * (img.height / img.width || 1.1);
-    g.save(); g.globalAlpha = 0.5; g.translate(x + w / 2, y + h / 2); g.rotate(rot * Math.PI / 180); g.drawImage(img, -w / 2, -h / 2, w, h); g.restore();
+    g.save(); g.globalAlpha = 0.5; g.translate(x + w / 2, y + h / 2); g.rotate(rot * Math.PI / 180); g.drawImage(dark ? white(img, w, h) : img, -w / 2, -h / 2, w, h); g.restore();
   };
   wave(wa, W - 560, -280, 1100, -18);
   wave(wb, -740, H - 1150, 1250, 28);
-  if (logo) { const lw = logoH * logo.width / logo.height; g.drawImage(logo, (W - lw) / 2, top, lw, logoH); }
+  if (logo) { const lw = logoH * logo.width / logo.height; g.drawImage(dark ? white(logo, lw, logoH) : logo, (W - lw) / 2, top, lw, logoH); }
 
   // ---- pop-up ----
-  g.save(); g.shadowColor = 'rgba(24, 87, 123, 0.16)'; g.shadowBlur = 60; g.shadowOffsetY = 18;
+  g.save(); g.shadowColor = dark ? 'rgba(0, 0, 0, 0.45)' : 'rgba(24, 87, 123, 0.16)'; g.shadowBlur = 60; g.shadowOffsetY = 18;
   g.fillStyle = '#e6f1fd'; roundRect(g, PX, PT, PW, PH, 56); g.fill(); g.restore();
   g.strokeStyle = '#ffffff'; g.lineWidth = 3; roundRect(g, PX, PT, PW, PH, 56); g.stroke();
   g.fillStyle = 'rgba(0,0,0,0.13)'; roundRect(g, W / 2 - 36, PT + 20, 72, 9, 4.5); g.fill();
