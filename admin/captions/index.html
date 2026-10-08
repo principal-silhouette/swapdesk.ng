@@ -206,6 +206,8 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
 <section class="step" aria-labelledby="h2s">
   <div class="sh"><span class="sn">2</span><h2 id="h2s">Captions Per Device</h2></div>
   <div class="perrow" id="per" role="group" aria-label="Captions per device"></div>
+  <p class="sub" style="margin-top:14px"><b>Top caption language</b>: how much pidgin the on-screen top caption uses. The text caption stays in English.</p>
+  <div class="perrow" id="pid" role="group" aria-label="Pidgin level"></div>
 </section>
 
 <section class="step" aria-labelledby="h3s">
@@ -401,7 +403,37 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 1, h: 'Shebi you sabi iPhone? Oya name all {n}', s: 'Nobody will get all {n}, I am sure' },
       { p: 0, h: 'Two of these look exactly alike. Which two?', s: 'Comment before you scroll' },
       { p: 0, h: 'You say you know iPhones. Prove it', s: '{n} phones. One chance. Go' },
-      { p: 0, h: 'Quick one: name these {n} phones in 10 seconds', s: 'Timer starts now' }
+      { p: 0, h: 'Quick one: name these {n} phones in 10 seconds', s: 'Timer starts now' },
+      { p: 0, h: 'Name these {n} iPhones. Winner gets bragging rights', s: 'Comment your answers, no cheating' },
+      { p: 0, h: 'Which one of these {n} is the newest?', s: 'Do not scroll until you commit to an answer' },
+      { p: 0, h: 'iPhone {ks}: which is which? Ten seconds, go', s: 'Comment your score out of {n}' },
+      { p: 0, h: 'If you can tell these {n} apart without squinting, you are a real one', s: 'Drop your answers' },
+      { p: 0, h: 'We are about to find out who really knows iPhones', s: '{n} phones. Name them all' },
+      { p: 0, h: 'My friend said all iPhones look the same. Please prove him wrong', s: 'Name these {n} for me' },
+      { p: 0, h: 'Easy one: name these {n} iPhones', s: 'It is not easy. Do not lie' },
+      { p: 0, h: 'Be honest, can you tell iPhone {ks} apart?', s: 'Comment what you see' },
+      { p: 0, h: 'Real ones can name these {n} just by looking at the camera', s: 'Look well, then answer' },
+      { p: 0, h: 'Group chat quiz: name these {n} iPhones', s: 'Send it to the friend who thinks he knows' },
+      { p: 0, h: 'Pop quiz time. {n} iPhones, no hints', s: 'Comment your answers below' },
+      { p: 0, h: 'Nobody is leaving this video until they name all {n} iPhones', s: 'Comment your answers' },
+      { p: 1, h: 'Una think say you sabi iPhone? Name these {n} make I see', s: 'No use Google o' },
+      { p: 1, h: 'Oya, who dey here wey sabi iPhone well well? Name all {n}', s: 'Nobody should cheat o' },
+      { p: 1, h: 'See {n} iPhones. Wetin be their names?', s: 'Make we see who sabi' },
+      { p: 1, h: 'E go hard to name all {n} of these. Try am', s: 'Comment your answers' },
+      { p: 1, h: 'Oya name all {n} iPhones. Who sabi go know', s: 'No Google o, na correct eye we dey look' },
+      { p: 1, h: 'Shebi you be iPhone doctor? Name these {n}', s: 'Make we see your result for comments' },
+      { p: 1, h: 'Which one be which? iPhone {ks}, make we hear', s: 'Anybody wey get all {n} correct na big man' },
+      { p: 1, h: 'You say you sabi iPhone? Oya prove am', s: '{n} phones, one chance. Comot your answer' },
+      { p: 1, h: 'Abeg who fit name these {n} phones without cheating?', s: 'Comment your own, make we see' },
+      { p: 1, h: 'See {n} iPhones oh. Wetin be the oldest, wetin be the newest?', s: 'No cheat, na you and your eye' },
+      { p: 1, h: 'My guy, if you fit tell iPhone {ks} apart, you don mature', s: 'Comment your answers' },
+      { p: 1, h: 'Na only real iPhone person go get all {n} correct', s: 'Oya try am for comments' },
+      { p: 1, h: 'Name these {n} iPhones for 10 seconds. Time don start', s: 'No dull yourself, answer sharp sharp' },
+      { p: 1, h: 'Una dey talk say una sabi iPhone. Oya list these {n}', s: 'Make we check who dey lie' },
+      { p: 1, h: 'Quick one: which one be which for iPhone {ks}?', s: 'Anybody wey miss one, no vex' },
+      { p: 1, h: 'Na who go get all {n} correct? Comment your answers', s: 'I dey wait for you' },
+      { p: 1, h: 'This one hard o. Name these {n} iPhones', s: 'Even iPhone doctor go sweat' },
+      { p: 1, h: 'Abeg no cheat. Name these {n} iPhones by yourself', s: 'Come back and tell us your score' }
     ]
   };
 
@@ -415,7 +447,39 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: 'Whoever said you cannot have everything has never held {aT}', s: 'Okay maybe not everything, but a lot', needT: 1 },
       { p: 1, h: 'Slow and steady wins the race. Not when the race is you opening camera on {S}', s: 'Pass me that phone make I show you {T}', needS: 1 },
       { p: 0, h: 'Old is gold, but not when it is 11pm and your {S} is on 4%', s: 'Come and see {aT}', needS: 1 },
-      { p: 0, h: 'A stitch in time saves nine. A swap in time saves your pocket', s: 'Come and see {aT}', needT: 1 }
+      { p: 0, h: 'A stitch in time saves nine. A swap in time saves your pocket', s: 'Come and see {aT}', needT: 1 },
+      { p: 0, h: 'A bird in the hand is worth two in the bush, but not when the bird is your {S}', s: 'Come and swap it for {aT}', needS: 1 },
+      { p: 0, h: 'The early bird catches the worm. The late one is still charging {S} at 2pm', s: 'Come early and swap to {aT}', needS: 1 },
+      { p: 0, h: 'Rome was not built in a day. Your {S} also did not become slow in one day', s: 'Let us fix that with {aT}', needS: 1 },
+      { p: 0, h: 'Too many cooks spoil the broth. Too many apps spoil {S}', s: 'Give it a rest. Swap to {aT}', needS: 1 },
+      { p: 0, h: 'Charity begins at home. Start by swapping your own {S}', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'Do not count your chickens before they hatch. Do not count on your {S} battery before 5pm either', s: 'Swap to {aT}', needS: 1 },
+      { p: 0, h: 'You cannot eat your cake and have it. But you can swap your {S} and have {aT}', s: 'Come and do the maths with us', needS: 1 },
+      { p: 0, h: 'Every day for the thief, one day for the owner. Every day for {S}, one day for the swap', s: 'Today is the day. See {aT}', needS: 1 },
+      { p: 0, h: 'When the music changes, the dance changes. {aT} is the new music', s: 'Come and dance', needT: 1 },
+      { p: 0, h: 'The best time to swap your {S} was last year. The second best time is today', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'A good name is better than riches. A good phone is better than a good excuse', s: 'Come and see {aT}', needT: 1 },
+      { p: 0, h: 'Where there is a will, there is a way. And where there is your {S}, there is a power bank in the bag', s: 'Swap to {aT} and free your bag', needS: 1 },
+      { p: 1, h: 'Slow slow catch monkey, but your {S} is just slow', s: 'Come swap am for {T}', needS: 1 },
+      { p: 1, h: 'Wahala for who no change phone. Your {S} dey show you pepper', s: 'Come see {T}', needS: 1 },
+      { p: 1, h: 'Na the person wey dey carry {S} go talk say phone no matter', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'Patience dey pay, but your {S} no get patience for you', s: 'Oya swap am for {T}', needS: 1 },
+      { p: 1, h: 'Who feel am, know am. Make you feel {T} first', s: 'Come and see it', needT: 1 },
+      { p: 1, h: 'Money no dey buy happiness? Collect {T} first, then come tell me', s: 'Make you see am with your eye', needT: 1 },
+      { p: 1, h: 'Cheap dey cost. That your {S} na the proof', s: 'Come swap am for {T}', needS: 1 },
+      { p: 1, h: 'Wetin dey for {S} wey you no wan leave am? E don tire', s: 'Oya collect {T}', needS: 1 },
+      { p: 1, h: 'Na who wear the shoe know where e dey pinch. Na your {S} dey pinch you', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'Wahala no dey finish for {S}. Na so e be', s: 'Come swap am for {T}', needS: 1 },
+      { p: 1, h: 'If bird no fly, e no go chop. If you no swap {S}, e no go better', s: 'Oya fly go {T}', needS: 1 },
+      { p: 1, h: 'One hand no fit tie bundle. Your {S} and charger dey try but e no reach', s: 'Make you collect {T}', needS: 1 },
+      { p: 1, h: 'Better phone na better life o. Your {S} don tire', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'Dem say patience dey pay, but your {S} battery no hear that one', s: 'Oya swap am for {T}', needS: 1 },
+      { p: 1, h: 'No be by force to use {S} till e die', s: 'Come collect {T}, e go sweet you', needS: 1 },
+      { p: 1, h: 'Old na gold, but e no be 11pm with {S} on 4%', s: 'Come see {T}', needS: 1 },
+      { p: 1, h: 'Time no dey wait anybody. Your {S} no go wait you too', s: 'Oya collect {T}', needS: 1 },
+      { p: 1, h: 'Na your own wahala o. Your {S} dey beg you every day', s: 'Make you do the swap for {T}', needS: 1 },
+      { p: 1, h: 'Wise man no dey wait till phone die before e change am', s: 'Collect {T} while your {S} still dey breathe', needS: 1 },
+      { p: 1, h: 'Wetin man go do na so e go see. Swap your {S} and see', s: 'Collect {T}', needS: 1 }
     ]
   };
 
@@ -428,7 +492,35 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: '{B} and a dream. Let us see how far it goes', s: 'Spoiler: it goes to {aT}' },
       { p: 0, h: 'My budget is {B}, my {SA} is tired, and my patience is finished', s: 'Come collect this one' },
       { p: 0, h: 'Customer: "my budget is {B}"', s: 'Me: "come, I have {aT}"' },
-      { p: 0, h: 'I am not broke, I am budgeting. Budget is {B}', s: 'Come collect this one' }
+      { p: 0, h: 'I am not broke, I am budgeting. Budget is {B}', s: 'Come collect this one' },
+      { p: 0, h: '{B} budget, one old {SA}, and a big dream', s: 'Come and see what is possible' },
+      { p: 0, h: 'Customer: "I have {B} and a tired {SA}"', s: 'Me: "come, sit down, I have {aT}"' },
+      { p: 0, h: 'I walked in with {B} and my {SA}. They said "relax, we have options"', s: '{N} options, to be exact' },
+      { p: 0, h: 'Is {B} enough to swap my {SA}? Asking for myself', s: 'See {aT}' },
+      { p: 0, h: 'My {SA} and my {B} walked into a phone shop', s: 'They left with {aT}' },
+      { p: 0, h: 'Student budget: {B} and an old {SA}', s: 'Come collect this one' },
+      { p: 0, h: '{B} is what I have and my {SA} is what I am tired of', s: 'Come, we have {N} options' },
+      { p: 0, h: 'I told my {SA}: "{B} is all we have for the upgrade"', s: 'It said "that is enough, let us go"' },
+      { p: 0, h: 'Plan: {B} plus my old {SA}. Result: {aT}', s: 'Come and check yours too' },
+      { p: 0, h: 'Me to my account balance: "just {B} for the upgrade, please"', s: 'Balance: "we can manage"' },
+      { p: 0, h: 'Not every upgrade needs a big budget. {B} and an old {SA} is a start', s: 'See {aT}' },
+      { p: 1, h: 'Abeg {B} dey my hand and my {SA} don tire. Wetin I fit carry?', s: 'Come see {N} options' },
+      { p: 1, h: 'I get {B} and one old {SA}. Make una help me', s: 'Oya come and see {T}' },
+      { p: 1, h: 'Na {B} I get o. My {SA} no fit carry me again', s: 'Come collect {T}' },
+      { p: 1, h: '{B} for hand and {SA} wey don tire. Which one I go collect?', s: '{N} options dey wait for you' },
+      { p: 1, h: 'I want swap my {SA} but my budget na {B}', s: 'Oya come collect this one' },
+      { p: 1, h: 'Abeg {B} be my budget o. Wetin you fit give me for my {SA}?', s: 'Come, we get {N} options' },
+      { p: 1, h: '{B} dey my hand, my {SA} don tire. Wetin go work?', s: 'We get {N} options for you' },
+      { p: 1, h: 'Oga, my {SA} don tire and na {B} I get', s: 'Come collect {T}' },
+      { p: 1, h: 'I no get plenty money o. {B} only, plus my {SA}', s: 'Come see {T}' },
+      { p: 1, h: 'Budget na {B}. {SA} don see things. Abeg help me', s: 'Oya come collect am' },
+      { p: 1, h: 'Customer: "abeg my budget na {B}"', s: 'Me: "come, e dey, collect {T}"' },
+      { p: 1, h: '{B} and one old {SA}. Wetin you fit do?', s: 'Plenty. Just come' },
+      { p: 1, h: 'No be everybody get big money. {B} and old {SA} fit still carry you go', s: 'See {T}' },
+      { p: 1, h: 'Na {B} I carry come o, with my {SA}. Wetin dey?', s: '{N} options dey wait' },
+      { p: 1, h: 'My pocket say {B}. My {SA} say "abeg change me"', s: 'Oya come collect this one' },
+      { p: 1, h: 'If your budget na {B} and you get old {SA}, no worry', s: 'Come, we don arrange {N} options' },
+      { p: 1, h: 'Small money, big dream. {B} and {SA}', s: 'Oya come collect {T}' }
     ]
   };
 
@@ -443,7 +535,39 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 1, h: 'You go really talk why you never change that your {S}', s: 'Come and see {T}, it is {P}', needS: 1, needT: 1 },
       { p: 0, h: 'Fine girl, your {S} has done enough. Let it retire', s: 'Swap it for {aT}', needS: 1 },
       { p: 0, h: 'Sweet boy, your {S} has survived more drops than your last three relationships', s: 'Let it rest. Swap for {aT}', needS: 1 },
-      { p: 0, h: 'If your {S} could talk, it would beg you to swap', s: 'It has been through enough', needS: 1 }
+      { p: 0, h: 'If your {S} could talk, it would beg you to swap', s: 'It has been through enough', needS: 1 },
+      { p: 0, h: 'Your {S} has been asking for retirement since last year', s: 'Give it what it wants. Swap for {aT}', needS: 1 },
+      { p: 0, h: 'Your {S} is the reason you say "I will send it later" when someone asks for a video', s: 'Come and fix that. See {aT}', needS: 1 },
+      { p: 0, h: 'Fine girl, your {S} cannot carry that your beauty anymore', s: 'Swap it for {aT}', needS: 1 },
+      { p: 0, h: 'Sweet boy, even your {S} is tired of explaining itself', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'The way you protect your {S} like a newborn baby', s: 'Let it go. {aT} is waiting', needS: 1 },
+      { p: 0, h: 'You: "my phone is fine". Your {S}: "please help me"', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'Whoever told you the {S} is still okay is not your friend', s: 'A real friend will show you {aT}', needS: 1 },
+      { p: 0, h: 'Your friends are tired of saying "send it on WhatsApp, the quality is bad"', s: 'Time to swap your {S} for {aT}', needS: 1 },
+      { p: 0, h: 'Your {S} turns every night photo into a mystery', s: 'Come swap it for {aT}', needS: 1 },
+      { p: 0, h: 'That {S} has served you well. Time to say thank you and swap', s: '{aT} is waiting', needS: 1 },
+      { p: 0, h: 'Fine boy, put the {S} down. We have talked about this', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'Nobody is judging your {S}. We are only judging how long you have kept it', s: 'Come and swap for {aT}', needS: 1 },
+      { p: 0, h: 'Imagine paying for data and your {S} cannot hold five apps', s: 'Swap it for {aT}', needS: 1 },
+      { p: 1, h: 'Oga, your {S} don do. Make we retire am', s: 'Come and see {T}', needS: 1 },
+      { p: 1, h: 'Fine girl, wetin dey hold you for that your {S}?', s: 'Come and see {T}, it is {P}', needS: 1, needT: 1 },
+      { p: 1, h: 'Sweet boy, that your {S} dey beg for rest. Abeg help am', s: 'Swap am for {T}', needS: 1 },
+      { p: 1, h: 'Why you dey hold {S} like say na family property?', s: 'Come swap am for {T}', needS: 1 },
+      { p: 1, h: 'Your {S} don see pepper. Make e rest', s: '{T} dey wait for you', needS: 1 },
+      { p: 1, h: 'Sweet boy, your {S} dey shame your fine face', s: 'Collect {T} abeg', needS: 1 },
+      { p: 1, h: 'Fine girl, that your {S} no fit carry your beauty again', s: 'Come swap am for {T}', needS: 1 },
+      { p: 1, h: 'Wetin you still dey do with {S} sef?', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'Oga, your {S} don retire since. Why you dey force am?', s: 'Make you swap am for {T}', needS: 1 },
+      { p: 1, h: 'Fine girl, that your {S} never tire you?', s: 'Come collect {T}, e go sweet you', needS: 1 },
+      { p: 1, h: 'Try change that your {S} make you sef see your true colors', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'You go soon talk why you never change that your {S}', s: 'Come see {T}, e dey for {P}', needS: 1, needT: 1 },
+      { p: 1, h: 'Your friends don dey hide from group photo because of that your {S}', s: 'Oya swap am for {T}', needS: 1 },
+      { p: 1, h: 'My guy, na {S} you still dey use?', s: 'E don do. Come collect {T}', needS: 1 },
+      { p: 1, h: 'Your {S} dey beg you for rest. Make you hear am', s: 'Collect {T}', needS: 1 },
+      { p: 1, h: 'Everybody don swap o, na only your {S} remain', s: 'Come collect {T}', needS: 1 },
+      { p: 1, h: 'Una see this one wey still dey use {S}?', s: 'Make we help am swap for {T}', needS: 1 },
+      { p: 1, h: 'Phone wey dey hang when you dey type "I dey come". Na your {S} be that', s: 'Oya swap am for {T}', needS: 1 },
+      { p: 1, h: 'Sweet boy, your {S} don see pepper. Abeg let am rest', s: 'Collect {T}', needS: 1 }
     ]
   };
 
@@ -454,7 +578,30 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: 'You are about to pay {PA} for the {A}?', s: 'See this {T} for {PT} first', cmp: 1 },
       { p: 0, h: 'The market is not serious. {A} is {PA} and {T} is {PT}', s: '{F}', cmp: 1, needF: 1 },
       { p: 0, h: 'Why are you buying {A} when {T} is just {D} more?', s: '{F}', cmp: 1, needF: 1 },
-      { p: 1, h: 'Leave that {A}. Come collect {T} for {PT}', s: 'Swap accepted', cmp: 1 }
+      { p: 1, h: 'Leave that {A}. Come collect {T} for {PT}', s: 'Swap accepted', cmp: 1 },
+      { p: 0, h: 'The {A} is {PA}. The {T} is {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'Before you hand over {PA} for the {A}, look at this {T} for {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'Do the maths: {A} {PA}, {T} {PT}', s: 'Then decide', cmp: 1 },
+      { p: 0, h: 'Somebody told me the {A} is the better buy. Then I saw the {T} at {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'Same shop, same week: {A} for {PA} or {T} for {PT}', s: 'Your money, your choice', cmp: 1 },
+      { p: 0, h: 'Only {D} separates the {A} from the {T}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'Is {D} more really too much for the {T}?', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'The {A} is {PA}. Add {D} and the {T} is yours', s: 'Think about it', cmp: 1 },
+      { p: 1, h: 'Abeg why you wan buy {A} for {PA}? See {T} for {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Wahala dey o. {A} na {PA}, {T} na {PT}', s: 'Make you do the maths', cmp: 1 },
+      { p: 1, h: 'Make you no rush {A} oh. Check {T} first', s: '{PT}. Swap accepted', cmp: 1 },
+      { p: 1, h: 'You go buy {A} for {PA} ke? See {T} for {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Pay {PA} for {A} ke? Wetin do this {T}', s: 'See am for {PT}', cmp: 1 },
+      { p: 1, h: 'Pay {PA} for {A} ke? Just add {D} collect {T}', s: 'Swap accepted', cmp: 1 },
+      { p: 1, h: 'That money you want use buy {A}, better add {D} collect {T}', s: 'Abeg no argue', cmp: 1 },
+      { p: 1, h: 'Oga, {A} na {PA}, {T} na {PT}. You fit do maths?', s: 'Abeg think well', cmp: 1 },
+      { p: 1, h: 'See as {A} and {T} dey close. {PA} and {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Na only {D} dey between {A} and {T} o', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Abeg no waste money for {A}. {T} dey for {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Why you wan carry {A} when {T} dey for just {D} more?', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'You buy {A} {PA} ke? When {T} dey', s: 'See am for {PT}', cmp: 1 },
+      { p: 1, h: 'Which one go pain you pass: {A} for {PA} or {T} for {PT}?', s: 'Think am well o', cmp: 1 },
+      { p: 1, h: 'Make you no rush buy {A} o. See {T} for {PT} first', s: '{F}', cmp: 1, needF: 1 }
     ]
   };
 
@@ -468,7 +615,46 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 1, h: 'Na who never use {T} go talk say {A} better pass', s: 'Defend your own in the comments', type: 'teams' },
       { p: 0, h: 'Is the {T} really better than the {A}?', s: 'Convince me in the comments', type: 'teams' },
       { p: 0, h: 'Touch ID will always have a place in my heart', s: 'Or is it just me?', type: 'touchid' },
-      { p: 0, h: 'Hot take: the camera is the only thing that matters in a phone', s: 'Defend it in the comments', type: 'teams' }
+      { p: 0, h: 'Hot take: the camera is the only thing that matters in a phone', s: 'Defend it in the comments', type: 'teams' },
+      { p: 0, h: 'Team {A} or Team {T}? No fence sitting', s: 'Drop your side in the comments', type: 'teams' },
+      { p: 0, h: 'If both were the same price, which one are you picking: {A} or {T}?', s: 'Tell me why', type: 'teams' },
+      { p: 0, h: '{A} lovers and {T} lovers, come and fight', s: 'Only respectful insults allowed', type: 'teams' },
+      { p: 0, h: 'Which one is the better buy: {A} or {T}?', s: 'Convince me in the comments', type: 'teams' },
+      { p: 0, h: 'My friend says {A}. I say {T}. Who is right?', s: 'Settle it in the comments', type: 'teams' },
+      { p: 0, h: 'Be honest: would you still pick the {A} over the {T}?', s: 'Comment your answer', type: 'teams' },
+      { p: 0, h: 'Upgrade or stay? {A} to {T}', s: 'Tell me if it is worth it', type: 'teams' },
+      { p: 0, h: 'Hot take: the {T} is worth the upgrade from the {A}', s: '{F}', type: 'teams', needF: 1 },
+      { p: 1, h: 'Who dey for {A} and who dey for {T}? Make we hear am', s: 'Fight for the comments', type: 'teams' },
+      { p: 1, h: 'Na {A} you go carry or na {T}? No lie o', s: 'Drop your own for comments', type: 'teams' },
+      { p: 1, h: 'Wetin you go pick: {A} or {T}?', s: 'Comment and defend yourself', type: 'teams' },
+      { p: 0, h: 'Dynamic Island: useful or just a fancy notch?', s: 'Pick a side in the comments', type: 'notch' },
+      { p: 0, h: 'Would you go back to the notch after using the Dynamic Island?', s: 'Be honest in the comments', type: 'notch' },
+      { p: 0, h: 'Round edges felt softer. Flat edges feel sharper. Which side are you on?', s: 'iPhone 11 vs iPhone 12, go', type: 'edges' },
+      { p: 0, h: 'Small phones are not dead. The iPhone 13 mini is proof', s: 'Agree or disagree?', type: 'mini' },
+      { p: 0, h: 'Who still wants a small phone? iPhone 13 mini fans, come forward', s: 'Comment below', type: 'mini' },
+      { p: 0, h: 'USB-C finally arrived on the iPhone 15. Was it worth the wait?', s: 'Tell me your side', type: 'usbc' },
+      { p: 0, h: 'How many Lightning cables are still in your house?', s: 'iPhone 14 vs iPhone 15, pick a side', type: 'usbc' },
+      { p: 0, h: 'Touch ID or Face ID? Choose and defend it', s: 'Comment your side', type: 'touchid' },
+      { p: 0, h: 'Who still misses the home button?', s: 'Raise your hand in the comments', type: 'touchid' },
+      { p: 1, h: 'Team {A} or Team {T}? Make una talk true', s: 'Defend your side for comments', type: 'teams' },
+      { p: 1, h: 'Which one you go carry: {A} or {T}?', s: 'No sit for fence o', type: 'teams' },
+      { p: 1, h: 'Na {A} dey rule or na {T}? Make we hear am', s: 'Fight for the comments', type: 'teams' },
+      { p: 1, h: 'My friend say {A}, I say {T}. Who dey correct?', s: 'Settle am for comments', type: 'teams' },
+      { p: 1, h: 'If money no be problem, na {A} or {T} you go pick?', s: 'Tell us why', type: 'teams' },
+      { p: 1, h: 'Abeg judge us: {A} or {T}?', s: 'Comment your own', type: 'teams' },
+      { p: 1, h: '{A} people and {T} people, una don gather. Fight!', s: 'No insult o, na gist we dey do', type: 'teams' },
+      { p: 1, h: 'The two dey sweet. But which one sweet pass: {A} or {T}?', s: '{F}', type: 'teams', needF: 1 },
+      { p: 1, h: 'Upgrade from {A} to {T}: e worth am abi e no worth am?', s: 'Comment your own', type: 'teams' },
+      { p: 1, h: 'Who still dey hold {A}? Tell us why you never move to {T}', s: 'We dey wait', type: 'teams' },
+      { p: 1, h: 'Notch or Dynamic Island? Which one you dey for?', s: 'Pick side for comments', type: 'notch' },
+      { p: 1, h: 'Who still dey use notch after Dynamic Island come?', s: 'Raise your hand for comments', type: 'notch' },
+      { p: 1, h: 'Round edge or flat edge? Which one sweet pass?', s: 'iPhone 11 vs iPhone 12, comment your side', type: 'edges' },
+      { p: 1, h: 'Small phone still dey sweet. iPhone 13 mini dey prove am', s: 'Who agree?', type: 'mini' },
+      { p: 1, h: 'Anybody still dey love small phone? iPhone 13 mini people, come out', s: 'Comment below', type: 'mini' },
+      { p: 1, h: 'Lightning or USB-C? Your charger drawer sabi the answer', s: 'iPhone 14 vs iPhone 15, pick side', type: 'usbc' },
+      { p: 1, h: 'How many Lightning cable still dey your house?', s: 'iPhone 14 vs iPhone 15, pick side', type: 'usbc' },
+      { p: 1, h: 'Touch ID or Face ID? Which one you dey for?', s: 'Defend your side', type: 'touchid' },
+      { p: 1, h: 'Who still dey miss home button? Raise hand', s: 'Comment below', type: 'touchid' }
     ]
   };
 
@@ -481,7 +667,33 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: 'POV: you moved from {S} to {T} and found out your camera roll has colours', s: 'Welcome' },
       { p: 1, h: 'POV: you finally swap that your {S}', s: 'Nobody believed you go do am' },
       { p: 0, h: 'POV: your old {S} is looking at you from the drawer after the swap', s: 'It knew this day would come' },
-      { p: 0, h: 'POV: you walked in with a cracked {S} and walked out with {aT}', s: 'Your pocket feels different already' }
+      { p: 0, h: 'POV: you walked in with a cracked {S} and walked out with {aT}', s: 'Your pocket feels different already' },
+      { p: 0, h: 'POV: you finally stopped saying "my phone is still okay"', s: 'You swapped your {S} for {aT} and you are not looking back' },
+      { p: 0, h: 'POV: you were scared your {S} was worth nothing, then they told you the swap price', s: 'Check the swap list below' },
+      { p: 0, h: 'POV: your {S} storage is full again and you are deleting memories for one video', s: 'This is your sign to swap' },
+      { p: 0, h: 'POV: you open the camera on {aT} for the first time', s: 'And you wonder why you waited so long' },
+      { p: 0, h: 'POV: you are holding {aT} and your {S} is in the other pocket, feeling betrayed', s: 'It will heal' },
+      { p: 0, h: 'POV: you finally said yes to the swap', s: 'Your {S} did not even put up a fight' },
+      { p: 0, h: 'POV: you posted a story from {aT} and everybody asked which phone it is', s: 'Smile and say nothing' },
+      { p: 0, h: 'POV: you walked into the shop with {S} and a plan', s: 'You walked out with {aT}' },
+      { p: 0, h: 'POV: you are the friend nobody wants to take pictures with', s: 'Swap your {S} and flip the story' },
+      { p: 0, h: 'POV: you gave your {S} one last chance', s: 'It said no. Swap to {aT}' },
+      { p: 1, h: 'POV: you carry {T} go outside and your guys dey look you', s: 'Just smile, no talk' },
+      { p: 1, h: 'POV: na today you dey swap that your {S}', s: 'E don do. Oya come' },
+      { p: 1, h: 'POV: your {S} dey look you for pocket like "so na so?"', s: 'It had a good run' },
+      { p: 1, h: 'POV: you don change from {S} to {T}', s: 'Now you are the one taking the group photo' },
+      { p: 1, h: 'POV: na today you collect {T}', s: 'Your {S} dey look you from pocket' },
+      { p: 1, h: 'POV: your {S} dey look you as you dey collect {T}', s: 'E sabi say this day go reach' },
+      { p: 1, h: 'POV: you dey take photo with {T} and your friends dey beg you to take theirs', s: 'Wahala for who no change' },
+      { p: 1, h: 'POV: you open camera for {T} first time', s: 'You go ask yourself why you wait so long' },
+      { p: 1, h: 'POV: your {S} don retire and you no even cry', s: 'Na {T} you carry go house' },
+      { p: 1, h: 'POV: you don swap that your {S} finally', s: 'See as e dey sweet you' },
+      { p: 1, h: 'POV: the guy for shop say "oya your swap price don come out"', s: 'Your {S} fit carry you reach {T}' },
+      { p: 1, h: 'POV: you walk go shop with {S}, you come out with {T}', s: 'No be small thing' },
+      { p: 1, h: 'POV: you don tire to dey say "I go change am next month"', s: 'This na your sign' },
+      { p: 1, h: 'POV: you finally upgrade and na only your old {S} dey sad', s: 'E go survive' },
+      { p: 1, h: 'POV: your friends dey ask which phone be this', s: 'You just dey smile with {T}' },
+      { p: 1, h: 'POV: your {S} don full again and you dey delete picture for one video', s: 'Oya swap am today' }
     ]
   };
 
@@ -493,7 +705,30 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: 'This {T} has been looking fine and waiting for you to stop dodging', s: '{P}. Swaps accepted' },
       { p: 0, h: 'We have {T} {ST}. {P}. No long talk', s: 'Swap your old phone, we will do the maths' },
       { p: 0, h: '{T} {ST}. {P}', s: 'Swap or cash, we do not judge' },
-      { p: 0, h: 'Looking for {T}? Found one. {P}', s: 'Swaps accepted' }
+      { p: 0, h: 'Looking for {T}? Found one. {P}', s: 'Swaps accepted' },
+      { p: 0, h: '{T} {ST}. {P}. Come and see it', s: 'Swaps accepted' },
+      { p: 0, h: 'New stock: {T} {ST}', s: '{P}. Swap or cash' },
+      { p: 0, h: 'Small update: {T} {ST} is available', s: '{P}. Swaps accepted' },
+      { p: 0, h: 'Anybody looking for {aT}? We have it', s: '{ST}, {P}' },
+      { p: 0, h: 'Your next phone just landed: {T} {ST}', s: '{P}. Swaps accepted' },
+      { p: 0, h: 'In stock: {T} {ST}. {P}', s: 'Swap your old phone, we will do the maths' },
+      { p: 0, h: 'Look at this {T} for {P}', s: '{ST}. Swaps accepted' },
+      { p: 0, h: 'If you were waiting for a sign, here is {aT}', s: '{ST}, {P}. Swaps accepted' },
+      { p: 1, h: 'Oya come, {T} {ST} don land. {P}', s: 'Swap your old phone, we go do the maths' },
+      { p: 1, h: 'See {T} wey dey wait for you. {P}', s: '{ST}. Swaps accepted' },
+      { p: 1, h: 'Who wan carry {T}? {ST}, {P}', s: 'Swap or cash' },
+      { p: 1, h: 'Oya rush come collect this sweet {T}', s: '{ST}, {P} only' },
+      { p: 1, h: 'We don drop {T} {ST} for {P} only', s: 'Swap accepted' },
+      { p: 1, h: 'Another one don drop oh. {ST} {T} for {P}', s: 'Oya come collect' },
+      { p: 1, h: 'See this sweet {T} wey dey go for {P}', s: '{ST}. We dey accept swap' },
+      { p: 1, h: 'Abeg {T} {ST} don land. {P}', s: 'Swap your old phone, we go do the maths' },
+      { p: 1, h: '{T} {ST} dey. {P}', s: 'Swap or cash, no wahala' },
+      { p: 1, h: 'Who wan collect {T}? {P}, {ST}', s: 'Swap dey' },
+      { p: 1, h: 'Una dey look for {T}? E don land. {P}', s: '{ST}. Oya come' },
+      { p: 1, h: 'Sweet {T} {ST} for {P}. No long talk', s: 'Swap your old phone, we go do the maths' },
+      { p: 1, h: 'This {T} dey wait for you oh. {P}', s: '{ST}. Swaps accepted' },
+      { p: 1, h: 'E don land! {T} {ST} for {P}', s: 'Oya come collect' },
+      { p: 1, h: 'Oga come see {T} {ST}', s: '{P}. Swap dey' }
     ]
   };
 
@@ -523,11 +758,12 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
   function pickTemplate(r, list, pidginP, ok, used) {
     var usable = list.filter(ok);
     if (!usable.length) throw new Error('infeasible');
-    if (used) { var fresh = usable.filter(function (x) { return !used['t:' + x.h]; }); if (fresh.length) usable = fresh; }
+    // choose the language first, then prefer a hook not used yet inside that language
     var pid = usable.filter(function (x) { return x.p; });
     var eng = usable.filter(function (x) { return !x.p; });
     var wantP = r() < pidginP;
     var from = wantP && pid.length ? pid : (eng.length ? eng : usable);
+    if (used) { var fr = from.filter(function (x) { return !used['t:' + x.h]; }); if (fr.length) from = fr; }
     var chosen = pick(r, from);
     if (used) used['t:' + chosen.h] = 1;
     return chosen;
@@ -787,7 +1023,7 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       n: opts.n || 10,
       seed: opts.seed === undefined ? 1 : opts.seed,
       patterns: opts.patterns && opts.patterns.length ? opts.patterns : Object.keys(PATTERN_LABEL),
-      pidgin: opts.pidgin === undefined ? 0.3 : opts.pidgin,
+      pidgin: opts.pidgin === undefined ? 0.85 : opts.pidgin,
       whatsapp: opts.whatsapp || 'auto'
     };
     var r = mulberry32(o.seed);
@@ -1037,7 +1273,68 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, t: 'DEAL_CATCH', h: 'Yes, this {M} has a catch. No, I will not hide it', s: '{C}', needC: 1 },
       { p: 0, t: 'DEAL_PLAIN', h: 'One {M} {ST} just came in. {DEAL}', s: '{C}', needC: 1 },
       { p: 0, t: 'DEAL_PLAIN', h: 'Just one {M}. {DEAL}', s: 'First come, first served' },
-      { p: 0, t: 'DEAL_PLAIN', h: '{M} {ST} is in. {DEAL}', s: 'Swaps accepted' }
+      { p: 0, t: 'DEAL_PLAIN', h: '{M} {ST} is in. {DEAL}', s: 'Swaps accepted' },
+      { p: 0, t: 'DEAL_GAP', h: 'This {M} is {SAVE} cheaper than {STDL}. Here is why', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Saving {SAVE} on this {M}? Here it is', s: '{STDL} is {STD}. This one is {DEAL}', needSave: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Right now: {M} at {DEAL}', s: '{STDL} price is {STD}', needSave: 1 },
+      { p: 0, t: 'DEAL_GAP', h: '{SAVE} off the usual {STDL} price. Read the catch first', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Why pay {STD} when this {M} is {DEAL}?', s: 'The catch: {C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Imagine finding this {M} for {DEAL} when {STDL} is {STD}', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Price check: {M}. {STDL} {STD}, this one {DEAL}', s: '{SAVE} difference. {C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'This {M} is {DEAL}. Brand new is {BN}', s: 'Read the catch: {C}', needBN: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Wahala for {STDL} price o. This {M} is {SAVE} cheaper', s: 'The catch: {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'See {M} for {DEAL} while {STDL} dey {STD}', s: 'Check the catch: {C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'How much do you think this {M} {ST} costs?', s: 'Hint: {STDL} is {STD}', needSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Guess the price of this {M}. Closest answer wins respect', s: 'Hint: {C}', needC: 1, noSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'I will not tell you the price. You guess it: {M} {ST}', s: 'Hint: it is cheaper than the usual {STDL} price', needSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Price is right: {M} {ST}', s: 'Hint: {C}', needC: 1, noSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Be honest, how much for this {M}?', s: 'Hint: {STDL} is {STD}', needSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Guess the price of this {M} {ST} and see if you are close', s: 'Comment your number', reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Oya guess the price of this {M} {ST}', s: 'Hint: {STDL} na {STD}', needSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Wetin be the price of this {M}? Guess am', s: 'Comment your number', reveal: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Before you ask, here is what is different about this {M}', s: '{C}. Price: {DEAL}', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'The honest details on this {M}: {C}', s: '{DEAL}. Swaps accepted', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Know what you are buying: {M}', s: '{C}. {DEAL}', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Why is this {M} {SAVE} cheaper? One reason', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'No surprises on this {M}. Here is what is different', s: '{C}', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Read this before you message us about the {M}: {C}', s: '{DEAL}. Swaps accepted', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'Make I tell you wetin different about this {M}', s: '{C}. Price na {DEAL}', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'No wahala, I go tell you the catch for this {M}', s: '{C}', needC: 1 },
+      { p: 0, t: 'DEAL_PLAIN', h: 'New in: {M} {ST}. {DEAL}', s: '{C}', needC: 1 },
+      { p: 0, t: 'DEAL_PLAIN', h: 'Just landed: {M} {ST} at {DEAL}', s: 'Swaps accepted' },
+      { p: 0, t: 'DEAL_PLAIN', h: 'One {M} available right now. {DEAL}', s: 'First come, first served' },
+      { p: 0, t: 'DEAL_PLAIN', h: '{M} {ST}. {DEAL}. One unit', s: 'Swaps accepted' },
+      { p: 0, t: 'DEAL_PLAIN', h: 'Quick one: {M} {ST} is available', s: '{DEAL}. {C}', needC: 1 },
+      { p: 0, t: 'DEAL_PLAIN', h: 'We just listed this {M}. {DEAL}', s: 'Swaps accepted' },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Oya {M} {ST} don land. {DEAL}', s: 'Swaps accepted' },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Who wan collect {M}? {DEAL}, one unit', s: '{C}', needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'See {M} wey cheap pass {STDL} price by {SAVE}', s: 'Check the catch: {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: '{STDL} {M} na {STD}. This one na {DEAL}', s: '{C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Abeg {M} for {DEAL}, e don drop by {SAVE}', s: 'Check the catch: {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Why you go spend {STD} when this {M} dey for {DEAL}?', s: 'The catch: {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Money wey you go save for this {M} na {SAVE}', s: '{STDL} na {STD}, this one na {DEAL}', needSave: 1 },
+      { p: 1, t: 'DEAL_GAP', h: '{SAVE} dey your pocket if you collect this {M}', s: 'Check the catch first: {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Brand new {M} na {BN}. This one dey for {DEAL}', s: 'Read the catch: {C}', needBN: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Oya see price: {M}. {STDL} na {STD}, this one na {DEAL}', s: '{SAVE} difference. {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Wetin you think be the price of this {M} {ST}?', s: 'Hint: {STDL} na {STD}', needSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Guess price of this {M}. Closest person go win my respect', s: 'Hint: {C}', needC: 1, noSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'I no go tell you the price o. Guess am: {M} {ST}', s: 'Hint: e cheap pass {STDL} price', needSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'How much you think this {M} dey go for?', s: 'Comment your number', reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Na who fit guess the price of this {M} {ST}?', s: 'Hint: {C}', needC: 1, noSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_GUESS', h: 'Price na guess game today: {M} {ST}', s: 'Hint: {STDL} na {STD}', needSave: 1, reveal: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'Make I tell you the catch before you ask: {M}', s: '{C}. Price na {DEAL}', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'No hide-hide for this {M}. Na this dey different', s: '{C}', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'Read the catch first before you fall in love with this {M}', s: '{C}. Then see price: {DEAL}', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'Wetin different for this {M}? Na this: {C}', s: '{DEAL}. Swap dey', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'This {M} get small story o', s: '{C}. Price na {DEAL}', needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'Why this {M} cheap by {SAVE}? Make I explain', s: '{C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_CATCH', h: 'No wahala, na the catch be this for the {M}', s: '{C}. {DEAL}', needC: 1 },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Na one {M} {ST} we get o. {DEAL}', s: 'First come, first collect' },
+      { p: 1, t: 'DEAL_PLAIN', h: 'See {M} {ST} for {DEAL}', s: '{C}', needC: 1 },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Another one don land: {M} {ST} for {DEAL}', s: 'Swap dey' },
+      { p: 1, t: 'DEAL_PLAIN', h: 'We don drop this {M} for {DEAL} only', s: 'Swap accepted' },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Abeg who go collect this {M}? {DEAL}', s: '{C}', needC: 1 },
+      { p: 1, t: 'DEAL_PLAIN', h: 'Just one {M} dey. {DEAL}, na first come', s: 'Swap dey' }
     ]
   };
 
@@ -1052,10 +1349,11 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
     if (std.active !== null) cmp.push('Active ' + naira(std.active));
     if (std.bn !== null) cmp.push('Brand New ' + naira(std.bn));
     var cmpLine = cmp.length ? 'Standard: ' + cmp.join(', ') + (hasSave ? '\nThis one is ' + naira(std.save) + ' less than ' + std.primaryLabel : '') : '';
-    var body = deal.model + ' ' + deal.storage + ': ' + naira(deal.price) + '.' + (catchTxt ? ' What is different: ' + catchTxt + '.' : '');
+    var body, tail;
+    body = deal.model + ' ' + deal.storage + ': ' + naira(deal.price) + '.' + (catchTxt ? ' What is different: ' + catchTxt + '.' : '');
     if (hasSave) body += ' ' + std.primaryLabel + ' is ' + naira(std[std.primary]) + ', so that is ' + naira(std.save) + ' less.';
     if (hasBN && std.primary !== 'bn') body += ' Brand new is ' + naira(std.bn) + '.';
-    var tail = 'Just one unit. Swaps accepted.' + (o.whatsapp === 'never' ? '' : ' WhatsApp ' + WHATSAPP);
+    tail = 'Just one unit. Swaps accepted.' + (o.whatsapp === 'never' ? '' : ' WhatsApp ' + WHATSAPP);
     return { hasSave: hasSave, hasBN: hasBN, catchTxt: catchTxt, head: head, cmpLine: cmpLine, body: body, tail: tail };
   }
   function dealTarget(deal) {
@@ -1073,7 +1371,7 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
   }
 
   // post built from the generic patterns, then rewritten so it states the deal price, the catch and the standard price
-  function dealify(post, deal, o) {
+  function dealify(post, deal, o, r) {
     var std = deal.std, dp = dealParts(deal, std, o);
     post.bottom = [dp.head].concat(dp.cmpLine ? [dp.cmpLine] : [], post.swapLines || []).join('\n');
     post.text = [post.obs, post.bait, dp.body + ' ' + dp.tail, (post.tags || []).join(' ')].filter(Boolean).join('\n\n');
@@ -1122,7 +1420,28 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
       { p: 0, h: 'Your {S} is worth {TI} with us', s: 'In perfect condition. See what you can swap it for' },
       { p: 0, h: 'Before you sell your {S} to the first person that calls, check this', s: '{TI} in perfect condition, and it can go towards {aT}' },
       { p: 0, h: 'Your {S} is worth {TI}. {aT} is only {TOPK} away', s: 'Swap list below' },
-      { p: 1, h: 'Your {S} still get value oh. {TI} in perfect condition', s: 'Come see how far it goes' }
+      { p: 1, h: 'Your {S} still get value oh. {TI} in perfect condition', s: 'Come see how far it goes' },
+      { p: 0, h: 'Do not sell your {S} cheap. It is worth {TI} with us', s: 'In perfect condition. See what it can become' },
+      { p: 0, h: 'Before you sell your {S}, know it is worth {TI}', s: 'In perfect condition. Then see what it can swap for' },
+      { p: 0, h: 'What can your {S} become? It can go towards {aT}', s: 'It is worth {TI} in perfect condition' },
+      { p: 0, h: 'Your old {S} is not useless. {TI} in perfect condition', s: 'Come and see what it can swap for' },
+      { p: 0, h: 'Your {S} is sitting on {TI} of value', s: 'In perfect condition. {aT} is {TOPK} away' },
+      { p: 0, h: '{S} owners, this one is for you', s: 'Worth {TI} in perfect condition. Swap list below' },
+      { p: 0, h: 'Stop keeping your {S} in the drawer. It is worth {TI}', s: 'In perfect condition. Come and see what it becomes' },
+      { p: 0, h: 'From {S} to {aT}: how far is it?', s: 'Your {S} is worth {TI} in perfect condition, the rest is {TOPK}' },
+      { p: 1, h: 'No sell your {S} for nothing. E worth {TI} in perfect condition', s: 'Come and see wetin e fit become' },
+      { p: 1, h: 'Wetin your {S} worth? {TI} in perfect condition', s: 'Come see how far e go reach' },
+      { p: 1, h: 'Make you no give away your {S} for cheap. Check wetin e worth', s: '{TI} in perfect condition' },
+      { p: 1, h: 'Your {S} still get value o. Na {TI} in perfect condition', s: 'Come see wetin e fit become' },
+      { p: 1, h: 'Abeg no give away your {S} for nothing. E worth {TI}', s: 'In perfect condition. Come see how far e go' },
+      { p: 1, h: 'Wetin be your {S} worth? {TI} for perfect condition', s: 'Swap list dey below' },
+      { p: 1, h: 'Before you sell that your {S} give anybody, check am here', s: '{TI} in perfect condition, and e fit carry you reach {T}' },
+      { p: 1, h: 'Your {S} na {TI} for perfect condition', s: 'Add {TOPK} and {T} don be yours' },
+      { p: 1, h: 'Oga, your old {S} no be useless. {TI} for perfect condition', s: 'Come see wetin e fit swap for' },
+      { p: 1, h: 'Na so your {S} fit become {T}', s: 'E worth {TI} in perfect condition, then {TOPK} remain' },
+      { p: 1, h: 'Wahala no dey for {S} owner. Your phone worth {TI} in perfect condition', s: 'Swap list dey below' },
+      { p: 1, h: 'Why your {S} dey inside drawer? E worth {TI}', s: 'In perfect condition. Come collect new phone' },
+      { p: 1, h: 'Android to iPhone: your {S} fit start am. {TI} in perfect condition', s: 'Check the swap list' }
     ]
   };
   function srcDisplay(s) { return s.brand === 'Samsung' && /^Galaxy A\d/.test(s.name) ? 'Samsung ' + srcLabel(s) : srcLabel(s); }
@@ -1205,7 +1524,7 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
         var dt = dealTarget(dev.d);
         if (dt.rank < 0 && pat !== 'TEASE' && pat !== 'BUDGET' && pat !== 'PLAIN') throw new Error('infeasible');
         if (dev.d.type !== 'Phones') throw new Error('infeasible');
-        post = dealify(buildPost(P, pat, r, o, used, dt), dev.d, o);
+        post = dealify(buildPost(P, pat, r, o, used, dt), dev.d, o, r);
       }
     }
     if (post.top === undefined) post.top = [post.hook, post.sub].filter(Boolean).join('\n');
@@ -1218,7 +1537,7 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
   // req: {items:[{kind:'sale'|'source'|'deal', id}], per:Number, types:[ids], seed:Number}
   function generateFor(D, req) {
     attachStd(D);
-    var o = { pidgin: 0.3, whatsapp: 'auto' };
+    var o = { pidgin: req.pidgin === undefined ? 0.85 : req.pidgin, whatsapp: 'auto' };
     var r = mulberry32(req.seed || 1);
     var P = new Pool(D);
     var stats = {}; D.patternStats.forEach(function (s) { stats[s.pattern] = s; });
@@ -1243,8 +1562,8 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
     });
     return groups;
   }
-  function regenerate(D, item, typeId, seed) {
-    var g = generateFor(D, { items: [item], per: 1, types: [typeId], seed: seed });
+  function regenerate(D, item, typeId, seed, pidgin) {
+    var g = generateFor(D, { items: [item], per: 1, types: [typeId], seed: seed, pidgin: pidgin });
     return g.length && g[0].options.length ? g[0].options[0] : null;
   }
 
@@ -1271,7 +1590,7 @@ function naira(n){return E.naira(n)}
 /* ---------- state ---------- */
 var sel={};            // key 'kind:id' -> {kind,id}
 var filter='all';
-var per=2;
+var per=2,pidgin=0.85;
 var typeOn={};
 E.TYPES.forEach(function(t){typeOn[t.id]=true});
 
@@ -1400,6 +1719,15 @@ $('selclear').addEventListener('click',function(){sel={};renderPicker()});
   });
 })();
 
+(function(){
+  var box=$('pid');
+  [['Some English Mixed In',0.5],['Mostly Pidgin',0.85],['Full Pidgin',1]].forEach(function(o){
+    var b=h('button',{type:'button',class:'chip','aria-pressed':String(o[1]===pidgin),text:o[0]});
+    b.addEventListener('click',function(){pidgin=o[1];Array.prototype.forEach.call(box.children,function(c){c.setAttribute('aria-pressed',String(c===b))})});
+    box.appendChild(b);
+  });
+})();
+
 /* ---------- step 3: types ---------- */
 var WORKS={sale:'Phones for sale',source:'Nigerian Used',deal:'Deals'};
 function renderTypes(){
@@ -1446,7 +1774,7 @@ function optionCard(group,post,readOnly,onChange){
       var redo=h('button',{type:'button',class:'btn ghost sm',text:'Redo'});
       redo.addEventListener('click',function(){
         var np=null,tries=0;
-        while(tries++<6){var c=E.regenerate(D,group.item,p.typeId,Math.floor(Math.random()*1e9)+1);if(c){np=c;if(c.top!==p.top||c.text!==p.text)break}}
+        while(tries++<6){var c=E.regenerate(D,group.item,p.typeId,Math.floor(Math.random()*1e9)+1,pidgin);if(c){np=c;if(c.top!==p.top||c.text!==p.text)break}}
         if(np){fill(np);if(onChange)onChange(np)}else toast('No other version fits this device');
       });
       head.push(redo);
@@ -1492,7 +1820,7 @@ $('go').addEventListener('click',function(){
   var items=selItems(),types=chosenTypes();
   if(!items.length){toast('Pick at least one device');return}
   if(!types.length){toast('Tick at least one caption type');return}
-  var groups=E.generateFor(D,{items:items,per:per,types:types,seed:Math.floor(Math.random()*1e9)+1});
+  var groups=E.generateFor(D,{items:items,per:per,types:types,pidgin:pidgin,seed:Math.floor(Math.random()*1e9)+1});
   var count=0;groups.forEach(function(g){count+=g.options.length});
   current={groups:groups,count:count};savedCurrent=false;
   renderResults();
