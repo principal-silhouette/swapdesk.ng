@@ -58,6 +58,83 @@ function initStoreEngine(){''' % endpoint
 else:
     print('Note: this engine version has no initStore(); saved captions keep the engine\'s own storage.')
 
+# The device list in step 1 uses SwapDesk's own format (the price list's look), not the engine's.
+# Only the display changes: the same items, filters, search and selection as the engine.
+PICKER = r"""function renderPicker(){
+  /* SwapDesk format: one card per model, storage in bold, SIM version and condition underneath, price on the right. */
+  var box=$('picklist');box.textContent='';
+  var s=shown();
+  var COND={'Brand New':'Brand New','Active':'Active Brand New','UK Used':'Foreign USED'};
+  var CORD={'Brand New':0,'Active':1,'UK Used':2};
+  var SIMS=['P+eSIM','Dual SIM','eSIM Only','Physical SIM'];
+  function gb(st){var m=String(st||'').match(/(\d+(?:\.\d+)?)\s*(tb|gb)/i);return m?parseFloat(m[1])*(m[2].toLowerCase()==='tb'?1024:1):0}
+  function sim(name,st){
+    var m=String(st||'').match(/^\s*(\d+(?:\.\d+)?\s*(?:tb|gb))\s*(.*)$/i);
+    var size=m?m[1]:String(st||''),x=(m?m[2]:'').trim()
+      .replace(/^p\s*[\/+]\s*esim$/i,'P+eSIM').replace(/^esim\s*only$/i,'eSIM Only').replace(/^dual\s*sim$/i,'Dual SIM');
+    if(!x&&/^iphone\b/i.test(name||''))x=/\bAir\b/i.test(name)?'eSIM Only':/^iphone (7|8|x)\b(?! ?[rs])/i.test(name)?'Physical SIM':'P+eSIM';
+    return [size,x];
+  }
+  function title(t){return String(t||'').replace(/[A-Za-z][\w'’-]*/g,function(w,at){if(/[A-Z]/.test(w.slice(1)))return w;return at>0&&/^(and|with|of|on|in|a|an|the|or|for|to)$/i.test(w)?w.toLowerCase():w[0].toUpperCase()+w.slice(1)})}
+  function row(item,top,sub,val,extra){
+    var inp=pickBox(item);
+    var main=h('span',{class:'sd-main'},[]);
+    if(extra)main.appendChild(extra);
+    main.appendChild(h('b',{class:'sd-st',text:top}));
+    if(sub)main.appendChild(h('span',{class:'sd-sub',text:sub}));
+    return h('label',{class:'sd-row'},[main,h('span',{class:'sd-val',text:val}),inp]);
+  }
+  function card(titleText,rows){var c=h('div',{class:'sd-card'},[h('p',{class:'sd-t',text:titleText})]);rows.forEach(function(r){c.appendChild(r)});return c}
+  /* deals */
+  if(s.deal.length){
+    box.appendChild(h('div',{class:'ph2',text:'Deals'}));
+    s.deal.forEach(function(d){
+      var p=sim(d.model,d.storage),st=d.std;
+      var note=[p[1],d.diff?title(d.diff):''].filter(Boolean).join(' · ');
+      if(st&&st.save>0)note+=(note?' · ':'')+naira(st.save)+' less than '+st.primaryLabel;
+      box.appendChild(card(d.model,[row({kind:'deal',id:d.id},p[0]||d.model,note,naira(d.price),h('span',{class:'sd-tag',text:'One unit'}))]));
+    });
+  }
+  /* phones for sale: one card per model */
+  if(s.sale.length){
+    box.appendChild(h('div',{class:'ph2',text:'Phones For Sale'}));
+    var groups={},ord=[];
+    s.sale.forEach(function(t){if(!groups[t.name]){groups[t.name]=[];ord.push(t.name)}groups[t.name].push(t)});
+    ord.sort(function(a,b){var ra=groups[a][0].rank,rb=groups[b][0].rank;if(ra<0&&rb<0)return a<b?-1:1;if(ra<0)return 1;if(rb<0)return -1;return rb-ra});
+    ord.forEach(function(n){
+      var list=groups[n].slice().sort(function(a,b){
+        var sa=sim(a.name,a.storage),sb=sim(b.name,b.storage);
+        return gb(b.storage)-gb(a.storage)||SIMS.indexOf(sa[1])-SIMS.indexOf(sb[1])||(CORD[a.cond]||9)-(CORD[b.cond]||9);
+      });
+      box.appendChild(card(n,list.map(function(t){
+        var p=sim(t.name,t.storage);
+        return row({kind:'sale',id:t.id},p[0],[p[1],COND[t.cond]||t.cond].filter(Boolean).join(' · '),naira(t.price));
+      })));
+    });
+  }
+  /* nigerian used */
+  if(s.source.length){
+    box.appendChild(h('div',{class:'ph2',text:'Nigerian Used'}));
+    var sg={},so=[];
+    s.source.forEach(function(x){var n=E.srcDisplay(x);if(!sg[n]){sg[n]=[];so.push(n)}sg[n].push(x)});
+    so.sort();
+    so.forEach(function(n){
+      var list=sg[n].slice().sort(function(a,b){return gb(b.storage)-gb(a.storage)});
+      box.appendChild(card(n,list.map(function(x){return row({kind:'source',id:x.id},x.storage,'Trade-In Value',naira(x.ti))})));
+    });
+  }
+  if(!s.sale.length&&!s.source.length&&!s.deal.length){
+    box.appendChild(h('p',{class:'empty',text:filter==='deal'&&!availDeals().length?'No deals are marked Available in the sheet right now.':'Nothing matches. Try a shorter search.'}));
+  }
+  upd();
+}
+function renderPickerEngine(){"""
+NEED = ['function renderPicker(){', 'function shown(){', 'function pickBox(', 'E.srcDisplay(', 'function availDeals(']
+if all(n in body for n in NEED):
+    body = body.replace('function renderPicker(){', PICKER, 1)
+else:
+    print('Note: the engine\'s device list changed shape; keeping the engine\'s own device list. Check before publishing.')
+
 SHELL_TOP = """<!doctype html>
 <html lang="en-NG">
 <head>
@@ -83,6 +160,21 @@ body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
 .btn{border-radius:12px}.btn.sm{border-radius:10px}
 .sd-back{display:inline-flex;align-items:center;gap:8px;margin:0 auto 10px;max-width:860px;width:100%;font:600 14px var(--font-body);color:var(--accent);text-decoration:none}
 .sd-back img{width:28px;height:28px;border-radius:7px}
+/* Device list in SwapDesk's format */
+.picklist{gap:12px}
+.picklist>*{flex:none}
+.picklist{max-height:62vh}
+.sd-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sd-t{margin:0;padding:12px 16px 6px;font:700 1rem var(--font-display);color:var(--ink)}
+.sd-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--line);cursor:pointer}
+.sd-row:first-of-type{border-top:0}
+.sd-row:has(input:checked){background:var(--accent-soft)}
+.sd-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sd-st{font-weight:700;font-size:1rem}
+.sd-sub{font-size:.84rem;color:var(--muted)}
+.sd-val{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sd-row input{width:20px;height:20px;margin:0;flex:none;accent-color:var(--accent)}
+.sd-tag{align-self:flex-start;font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-bottom:2px}
 </style>
 <div class="wrap"><a class="sd-back" href="../"><img src="../icons/icon-180.png?v=2" alt="">‹ SwapDesk Admin</a></div>
 """
