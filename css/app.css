@@ -1213,3 +1213,5 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 }
 /* Add a Device to Compare: storage leads, like the price list (8 Oct). */
 .cfg .cfg-st { font-weight: 700; }
+/* Opening a quote link: the blue bar in the usual place, the words under it (8 Oct). */
+.qv-opening { margin: 0 !important; text-align: center; }

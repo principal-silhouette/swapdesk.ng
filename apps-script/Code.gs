@@ -10,6 +10,7 @@
  *   POST {action:"signIn", phone, pin} → { ok, name, city, hasPin } or { ok:false, needPin | notFound }
  *   POST {action:"myCodes", phone, pin}  → { ok, codes:[{id, created, label}] } or { ok:false, needPin }
  *   POST {action:"setPin", phone, pin, oldPin} → { ok }
+ *   POST {action:"admin", key, op, …} → the admin site (admin.html). key = the adminPassword script property.
  *
  * Only customer-safe data leaves the sheet. Margins, supply prices, bands and
  * keep rates are never returned.
@@ -48,6 +49,7 @@ function doPost(e) {
     if (body.action === 'signIn') return json_(signIn_(String(body.phone || ''), String(body.pin || '')));
     if (body.action === 'myCodes') return json_(myCodes_(String(body.phone || ''), String(body.pin || '')));
     if (body.action === 'setPin') return json_(setPin_(String(body.phone || ''), String(body.pin || ''), String(body.oldPin || '')));
+    if (body.action === 'admin') return json_(admin_(body));
     return json_({ ok: false, error: 'Unknown action' });
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
@@ -476,6 +478,120 @@ function int_(v) { var n = Math.round(Number(v)); return isFinite(n) ? n : 0; }
 
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------- admin (swapdesk.ng/admin) ----------
+//
+// Set the password once: Project Settings (gear) → Script Properties → Add → adminPassword = your password.
+// Everything here only reads the sheet, except setStatus, addDeal and dealSold.
+
+function admin_(b) {
+  var props = PropertiesService.getScriptProperties();
+  var real = props.getProperty('adminPassword');
+  if (!real) return { ok: false, error: 'Set adminPassword in the script properties first.' };
+  var cache = CacheService.getScriptCache();
+  var fails = Number(cache.get('adminfail') || 0);
+  if (fails >= 10) return { ok: false, error: 'Too many wrong passwords. Try again in 15 minutes.' };
+  if (String(b.key || '') !== real) { cache.put('adminfail', String(fails + 1), 900); return { ok: false, badKey: true, error: 'Wrong password.' }; }
+  cache.remove('adminfail');
+  switch (b.op) {
+    case 'all': return adminAll_();
+    case 'setStatus': return adminSetStatus_(String(b.id || ''), String(b.status || ''), b.notes);
+    case 'addDeal': return adminAddDeal_(b.deal || {});
+    case 'dealSold': return adminDealSold_(String(b.id || ''), b.sold !== false);
+    default: return { ok: true };
+  }
+}
+
+/** Everything the admin pages show, in one read. */
+function adminAll_() {
+  var tz = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+  var quotes = [];
+  quoteTabs_().forEach(function (sh) {
+    var last = sh.getLastRow();
+    if (last < QUOTE_FIRST_ROW) return;
+    // B id … U site data (20 columns)
+    sh.getRange(QUOTE_FIRST_ROW, 2, last - QUOTE_FIRST_ROW + 1, 20).getValues().forEach(function (r) {
+      if (!r[0]) return;
+      var q = {};
+      try { q = JSON.parse(r[19]); } catch (e) { /* older row */ }
+      var created = r[1] instanceof Date ? r[1] : (q.created ? new Date(q.created) : null);
+      var trades = q.items && q.items.length > 1 ? q.items.map(function (it) { return { name: it.name, value: it.value }; })
+        : q.device ? [{ name: q.device.name, value: q.value }] : [];
+      quotes.push({
+        id: String(r[0]), at: created ? created.toISOString() : '', name: String(r[2] || ''), phone: normPhone_(r[3]) || String(r[3] || ''),
+        city: String(r[4] || ''), trades: trades, value: num_(r[12]) || 0,
+        swaps: (q.compare || []).map(function (c) { return { name: c.name, price: c.price, kind: c.kind, amount: c.amount }; }),
+        status: String(r[16] || 'New'), handledBy: String(r[17] || ''), notes: String(r[18] || ''), link: String(r[15] || '')
+      });
+    });
+  });
+  quotes.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+
+  var customers = [];
+  var cs = SpreadsheetApp.getActive().getSheetByName('Customers');
+  if (cs && cs.getLastRow() > 1) {
+    cs.getRange(2, 1, cs.getLastRow() - 1, 9).getValues().forEach(function (r) {
+      if (!r[0]) return;
+      customers.push({ phone: String(r[0]), name: String(r[1] || ''), city: String(r[2] || ''),
+        first: r[3] instanceof Date ? r[3].toISOString() : '', last: r[4] instanceof Date ? r[4].toISOString() : '',
+        quotes: Number(r[5] || 0), tradeIn: String(r[6] || ''), swaps: String(r[7] || ''), pin: r[8] === 'Yes' });
+    });
+  }
+
+  var deals = [];
+  var ds = SpreadsheetApp.getActive().getSheetByName('Deals');
+  if (ds && ds.getLastRow() >= 5) {
+    ds.getRange(5, 2, ds.getLastRow() - 4, 14).getValues().forEach(function (r, i) {
+      if (!r[0]) return;
+      deals.push({ id: String(r[0]), model: String(r[1] || ''), storage: String(r[2] || ''), note: String(r[4] || ''), price: num_(r[5]) || 0,
+        status: String(r[6] || ''), listed: r[7] instanceof Date ? Utilities.formatDate(r[7], tz, 'yyyy-MM-dd') : String(r[7] || ''),
+        sold: r[8] instanceof Date ? Utilities.formatDate(r[8], tz, 'yyyy-MM-dd') : String(r[8] || ''), notes: String(r[9] || ''), onSite: r[13] === 'Yes' || r[13] === true });
+    });
+  }
+  return { ok: true, now: new Date().toISOString(), quotes: quotes.slice(0, 2000), customers: customers, deals: deals };
+}
+
+function adminSetStatus_(id, status, notes) {
+  var hit = findQuote_(id);
+  if (!hit) return { ok: false, error: 'Quote not found' };
+  if (status) hit.sheet.getRange(hit.row, 18).setValue(cut_(status, 30));
+  if (notes !== undefined && notes !== null) hit.sheet.getRange(hit.row, 20).setValue(cut_(notes, 500));
+  return { ok: true };
+}
+
+/** A new deal row: B id, C model, D storage, F what's different, G price, H status, I date listed, K notes. */
+function adminAddDeal_(d) {
+  var model = cut_(d.model, 60), storage = cut_(d.storage, 30), price = num_(d.price);
+  if (!model || !price) return { ok: false, error: 'Model and price are needed.' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sh = SpreadsheetApp.getActive().getSheetByName('Deals');
+    var last = Math.max(sh.getLastRow(), 4);
+    var ids = last >= 5 ? sh.getRange(5, 2, last - 4, 1).getValues().map(function (r) { return String(r[0]); }) : [];
+    var n = 0;
+    ids.forEach(function (x) { var m = /^deal-(\d+)$/.exec(x); if (m) n = Math.max(n, Number(m[1])); });
+    var id = 'deal-' + ('00' + (n + 1)).slice(-3);
+    var row = 5; while (row <= last && ids[row - 5]) row++;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    sh.getRange(row, 2, 1, 10).setValues([[id, model, storage, '', cut_(d.note, 120), price, 'Available', today, '', 'Added on the admin site.' + (d.notes ? ' ' + cut_(d.notes, 200) : '')]]);
+    CacheService.getScriptCache().remove(CACHE_KEY); // shows on the site within a minute
+    return { ok: true, id: id };
+  } finally { lock.releaseLock(); }
+}
+
+function adminDealSold_(id, sold) {
+  var sh = SpreadsheetApp.getActive().getSheetByName('Deals');
+  var last = sh.getLastRow();
+  if (last < 5) return { ok: false, error: 'Deal not found' };
+  var f = sh.getRange(5, 2, last - 4, 1).createTextFinder(id).matchEntireCell(true).findNext();
+  if (!f) return { ok: false, error: 'Deal not found' };
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  sh.getRange(f.getRow(), 8).setValue(sold ? 'Sold' : 'Available');
+  sh.getRange(f.getRow(), 10).setValue(sold ? today : '');
+  CacheService.getScriptCache().remove(CACHE_KEY);
+  return { ok: true };
 }
 
 /** Run once from the editor after deploying to warm the cache and check the output. */

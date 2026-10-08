@@ -16,7 +16,14 @@ function bandFor(b) {
 
 export function quoteScreen(el, app, p) {
   el.classList.add('wide');
-  el.innerHTML = '<p class="eyebrow">Opening your quote…</p>';
+  // The blue bar carries the wait: it runs most of the way while the quote loads, then the quote replaces it.
+  el.innerHTML = '<div class="screen-main"><div class="progress load-bar" aria-hidden="true"><i style="transform:scaleX(0.06)"></i></div><p class="eyebrow qv-opening" role="status">Opening your quote…</p></div>';
+  const bar = el.querySelector('.load-bar i');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (!bar) return;
+    bar.style.transition = 'transform 6s cubic-bezier(0.1, 0.7, 0.2, 1)';
+    bar.style.transform = 'scaleX(0.92)';
+  }));
   (async () => {
     let q;
     try {

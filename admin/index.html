@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en-NG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>SwapDesk Admin</title>
+<link rel="icon" href="../assets/icon.svg?v=3" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=3">
+<meta name="apple-mobile-web-app-title" content="SwapDesk Admin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F4F8FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E2238" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+:root {
+  --bg: #F4F8FC; --panel: #FFFFFF; --ink: #0E2238; --muted: #5B6F86; --line: #DCE6F1; --soft: #E6F1FD;
+  --blue: #007BFF; --brand: #1F5E9F; --good: #1A9E4B; --good-soft: #E3F5EA; --warn: #9A5B00; --warn-soft: #FFF2DE; --bad: #C4262E;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0E2238; --panel: #142D4A; --ink: #EAF2FB; --muted: #9DB3CB; --line: #24446A; --soft: #1A3A5E;
+  --blue: #4DA3FF; --brand: #8CC4FF; --good: #43C483; --good-soft: #123A2A; --warn: #F2B35B; --warn-soft: #3A2C14; --bad: #FF7A7F; color-scheme: dark } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.45 var(--font); letter-spacing: -0.01em; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+.wrap { max-width: 920px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 90px); }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.brand img { width: 34px; height: 34px; border-radius: 9px; }
+.brand small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); letter-spacing: 0; }
+.ghost { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 600; color: var(--blue); }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--panel); border-top: 1px solid var(--line); padding: 6px 6px calc(env(safe-area-inset-bottom) + 6px); }
+.tabs button { background: none; border: 0; padding: 7px 2px; border-radius: 12px; font-size: 11.5px; font-weight: 600; color: var(--muted); display: grid; justify-items: center; gap: 3px; }
+.tabs button svg { width: 22px; height: 22px; }
+.tabs button[aria-selected="true"] { color: var(--blue); background: var(--soft); }
+@media (min-width: 760px) { .tabs { position: static; border: 1px solid var(--line); border-radius: 16px; margin-bottom: 16px; } .wrap { padding-bottom: 40px; } }
+h2 { font-size: 22px; letter-spacing: -0.03em; margin: 4px 0 12px; }
+h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 22px 0 8px; font-weight: 700; }
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, 1fr); } }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.tile b { display: block; font-size: 26px; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.tile span { font-size: 13px; color: var(--muted); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .main { flex: 1; min-width: 0; }
+.row .t { font-weight: 600; }
+.row .s { font-size: 13px; color: var(--muted); }
+.row .v { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.bar { height: 6px; border-radius: 3px; background: var(--soft); margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--blue); border-radius: 3px; }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px 8px; }
+.chart svg { width: 100%; height: 120px; display: block; }
+.chart .axis { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+.search { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); margin-bottom: 10px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.q { padding: 14px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.q:first-child { border-top: 0; }
+.q .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.q .id { font-weight: 700; letter-spacing: 0.02em; }
+.q .when { font-size: 12.5px; color: var(--muted); }
+.q .who { font-size: 14px; }
+.q .line { font-size: 13.5px; color: var(--muted); }
+.q .line b { color: var(--ink); font-weight: 600; }
+.q .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--panel); color: var(--blue); text-decoration: none; }
+.pill.wa { color: var(--good); }
+.status { border-radius: 999px; padding: 5px 10px; font-size: 12.5px; font-weight: 700; border: 0; }
+.status.New { background: var(--soft); color: var(--blue); }
+.status.Contacted { background: var(--warn-soft); color: var(--warn); }
+.status.Done { background: var(--good-soft); color: var(--good); }
+.status.Lost { background: var(--soft); color: var(--muted); }
+textarea.notes { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; font-size: 13.5px; resize: vertical; }
+.empty { padding: 22px 14px; text-align: center; color: var(--muted); }
+.btn { border: 0; border-radius: 14px; padding: 13px 16px; font-weight: 700; background: var(--blue); color: #fff; width: 100%; }
+.btn.sm { width: auto; padding: 8px 14px; border-radius: 999px; font-size: 13px; }
+.btn.line { background: none; border: 1px solid var(--line); color: var(--blue); }
+.btn[disabled] { opacity: 0.55; }
+.form { display: grid; gap: 10px; padding: 14px; }
+.form label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.form input { width: 100%; min-width: 0; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font-size: 16px; color: var(--ink); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.tag { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
+.tag.sold { background: var(--soft); color: var(--muted); }
+.login { max-width: 360px; margin: 18vh auto 0; display: grid; gap: 12px; text-align: center; }
+.login img { width: 64px; height: 64px; border-radius: 16px; margin: 0 auto; }
+.login input { padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); font-size: 16px; text-align: center; }
+.err { color: var(--bad); font-size: 13.5px; min-height: 1.2em; margin: 0; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); translate: -50% 0; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; z-index: 20; }
+.loadbar { height: 3px; background: var(--soft); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+.loadbar i { display: block; height: 100%; width: 40%; background: var(--blue); animation: slide 1.1s ease-in-out infinite; }
+@keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+.muted { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="login" id="login" hidden>
+    <img src="../assets/apple-touch-icon.png?v=3" alt="">
+    <h2 style="margin:0">SwapDesk Admin</h2>
+    <p class="muted" style="margin:0">Type the admin password.</p>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
+    <button class="btn" id="go" type="button">Open</button>
+    <p class="err" id="lerr"></p>
+  </section>
+
+  <div id="app" hidden>
+    <header>
+      <div class="brand"><img src="../assets/apple-touch-icon.png?v=3" alt=""><div>SwapDesk Admin<small id="updated">Loading…</small></div></div>
+      <button class="ghost" id="refresh" type="button">Refresh</button>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="overview" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Overview</button>
+      <button type="button" role="tab" data-tab="enquiries"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/></svg>Popular</button>
+      <button type="button" role="tab" data-tab="quotes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>Quotes</button>
+      <button type="button" role="tab" data-tab="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Accounts</button>
+      <button type="button" role="tab" data-tab="deals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg>Deals</button>
+    </nav>
+    <div class="loadbar" id="busy" hidden><i></i></div>
+    <main id="view"></main>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxzQrWPBr0arYZgp5kCF48qTE-uNG8_iHEAyC3R6AttBNukQBz9E5wlF9sI9_h0E2jn/exec';
+const KEY = 'swapdesk.admin.key';
+const STATUSES = ['New', 'Contacted', 'Done', 'Lost'];
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const naira = (n) => '₦' + Math.round(Number(n) || 0).toLocaleString('en-NG');
+const nK = (n) => { n = Number(n) || 0; return n >= 1e6 ? '₦' + (n / 1e6).toFixed(n % 1e6 ? 2 : 0).replace(/\.?0+$/, '') + 'M' : '₦' + Math.round(n / 1000) + 'K'; };
+const model = (name) => String(name || '').split(' · ')[0];
+const day = (iso) => (iso ? new Date(iso) : null);
+const fmtDate = (iso) => { const d = day(iso); return d && !isNaN(d) ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''; };
+const shortDay = (ymd) => { const d = ymd ? new Date(ymd + 'T12:00:00') : null; return d && !isNaN(d) ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ymd || ''; };
+const showPhone = (p) => String(p || '').replace(/^(\d{4})(\d{3})(\d{4})$/, '$1 $2 $3');
+const waLink = (p) => { const d = String(p || '').replace(/\D/g, ''); return d ? 'https://wa.me/' + (d.startsWith('0') ? '234' + d.slice(1) : d) : ''; };
+let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch (e) {}
+let data = null, tab = 'overview', qFilter = 'All', qSearch = '', aSearch = '', models = [];
+
+function toast(t) { const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2200); }
+async function call(op, extra = {}) {
+  const r = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin', key, op, ...extra }) });
+  const j = await r.json();
+  if (!j.ok) { const e = new Error(j.error || 'Something went wrong.'); e.badKey = j.badKey; throw e; }
+  return j;
+}
+async function load() {
+  $('#busy').hidden = false;
+  try {
+    data = await call('all');
+    $('#updated').textContent = 'Updated ' + fmtDate(data.now);
+    render();
+  } catch (e) {
+    if (e.badKey) return signOut(e.message);
+    $('#updated').textContent = e.message;
+  } finally { $('#busy').hidden = true; }
+}
+function signOut(msg) { try { localStorage.removeItem(KEY); } catch (e) {} key = ''; $('#app').hidden = true; $('#login').hidden = false; $('#lerr').textContent = msg || ''; }
+
+// ---------- overview ----------
+function overview() {
+  const q = data.quotes, now = Date.now(), D = 864e5;
+  const since = (days) => q.filter((x) => x.at && now - new Date(x.at) < days * D).length;
+  const today = q.filter((x) => x.at && new Date(x.at).toDateString() === new Date().toDateString()).length;
+  const signed = q.filter((x) => x.phone).length;
+  const newAcc = data.customers.filter((c) => c.first && now - new Date(c.first) < 7 * D).length;
+  const open = data.deals.filter((d) => d.status === 'Available').length;
+  const waiting = q.filter((x) => x.status === 'New' && x.phone).length;
+  // Quotes per day, last 30 days.
+  const days = []; for (let i = 29; i >= 0; i--) { const d = new Date(now - i * D); days.push({ k: d.toDateString(), d, n: 0 }); }
+  const idx = new Map(days.map((x, i) => [x.k, i]));
+  q.forEach((x) => { if (!x.at) return; const i = idx.get(new Date(x.at).toDateString()); if (i !== undefined) days[i].n++; });
+  const max = Math.max(1, ...days.map((x) => x.n)), bw = 100 / days.length;
+  const bars = days.map((x, i) => `<rect x="${i * bw + bw * 0.15}" y="${100 - (x.n / max) * 92}" width="${bw * 0.7}" height="${(x.n / max) * 92}" rx="0.8" fill="var(--blue)"><title>${x.d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${x.n}</title></rect>`).join('');
+  return `<h2>Overview</h2>
+    <div class="tiles">
+      <div class="tile"><b>${today}</b><span>Quotes today</span></div>
+      <div class="tile"><b>${since(7)}</b><span>Quotes this week</span></div>
+      <div class="tile"><b>${since(30)}</b><span>Quotes in 30 days</span></div>
+      <div class="tile"><b>${q.length}</b><span>Quotes in total</span></div>
+      <div class="tile"><b>${data.customers.length}</b><span>Accounts${newAcc ? ` · ${newAcc} new this week` : ''}</span></div>
+      <div class="tile"><b>${q.length ? Math.round((signed / q.length) * 100) : 0}%</b><span>Quotes from signed-in customers</span></div>
+      <div class="tile"><b>${waiting}</b><span>New quotes with a number to call</span></div>
+      <div class="tile"><b>${open}</b><span>Deals on the site</span></div>
+    </div>
+    <h3>Quotes per day, last 30 days</h3>
+    <div class="chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${bars}</svg>
+      <div class="axis"><span>${days[0].d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span><span>Busiest day: ${max}</span><span>Today</span></div></div>
+    <h3>Latest quotes</h3>
+    <div class="card">${q.slice(0, 5).map(quoteCard).join('') || '<p class="empty">No quotes yet.</p>'}</div>`;
+}
+
+// ---------- popular ----------
+function ranked(list, label, valueFn) {
+  if (!list.length) return '<div class="card"><p class="empty">Nothing yet.</p></div>';
+  const top = list[0][1].n;
+  return `<div class="card">${list.slice(0, 10).map(([k, v]) => `<div class="row"><div class="main"><div class="t">${esc(k)}</div>
+    <div class="s">${v.n} ${label}${valueFn ? ' · ' + valueFn(v) : ''}</div><div class="bar"><i style="width:${(v.n / top) * 100}%"></i></div></div></div>`).join('')}</div>`;
+}
+function tally(items, keyFn, valFn) {
+  const m = new Map();
+  items.forEach((x) => { const k = keyFn(x); if (!k) return; const v = m.get(k) || { n: 0, sum: 0, vals: 0 }; v.n++; const val = valFn ? valFn(x) : 0; if (val) { v.sum += val; v.vals++; } m.set(k, v); });
+  return [...m.entries()].sort((a, b) => b[1].n - a[1].n);
+}
+function enquiries() {
+  const q = data.quotes;
+  const trades = q.flatMap((x) => x.trades.map((t) => ({ m: model(t.name), v: t.value })));
+  const swaps = q.flatMap((x) => x.swaps.map((s) => ({ m: model(s.name), full: s.name.split(' · ').slice(0, 2).join(' · '), p: s.price })));
+  const cities = q.filter((x) => x.city);
+  return `<h2>Popular</h2>
+    <h3>Most traded-in phones</h3>${ranked(tally(trades, (t) => t.m, (t) => t.v), 'quotes', (v) => (v.vals ? 'average value ' + nK(v.sum / v.vals) : ''))}
+    <h3>Most wanted phones</h3>${ranked(tally(swaps, (s) => s.m, (s) => s.p), 'times compared', (v) => (v.vals ? 'average price ' + nK(v.sum / v.vals) : ''))}
+    <h3>Most wanted versions</h3>${ranked(tally(swaps, (s) => s.full), 'times compared')}
+    <h3>Cities</h3>${ranked(tally(cities, (x) => x.city), 'quotes')}`;
+}
+
+// ---------- quotes ----------
+function quoteCard(x) {
+  const who = x.name || x.phone ? `${esc(x.name || 'No name')}${x.phone ? ' · ' + esc(showPhone(x.phone)) : ''}${x.city ? ' · ' + esc(x.city) : ''}` : `Guest${x.city ? ' · ' + esc(x.city) : ''}`;
+  const trade = x.trades.length ? x.trades.map((t) => `<b>${esc(t.name)}</b> ${nK(t.value)}`).join(', ') : '';
+  const swaps = x.swaps.map((s) => esc(s.name.split(' · ').slice(0, 3).join(' · '))).join('<br>');
+  const wa = waLink(x.phone);
+  return `<div class="q" data-id="${esc(x.id)}">
+    <div class="top"><span class="id">${esc(x.id)}</span><span class="when">${fmtDate(x.at)}</span></div>
+    <div class="who">${who}</div>
+    ${trade ? `<div class="line">Trade-in: ${trade}</div>` : ''}
+    ${swaps ? `<div class="line">Wants: ${swaps}</div>` : ''}
+    <div class="acts">
+      <button class="status ${esc(x.status)}" type="button" data-act="status" aria-label="Status: ${esc(x.status)}. Tap to change.">${esc(x.status)}</button>
+      ${wa ? `<a class="pill wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+      ${x.link ? `<a class="pill" href="${esc(x.link)}" target="_blank" rel="noopener">Open Quote</a>` : ''}
+    </div>
+    <textarea class="notes" data-act="notes" placeholder="Notes for the team">${esc(x.notes)}</textarea>
+  </div>`;
+}
+function quotes() {
+  const s = qSearch.trim().toLowerCase();
+  const list = data.quotes.filter((x) => (qFilter === 'All' || (qFilter === 'With Number' ? x.phone : x.status === qFilter)) &&
+    (!s || [x.id, x.name, x.phone, x.city, ...x.trades.map((t) => t.name), ...x.swaps.map((w) => w.name)].join(' ').toLowerCase().includes(s)));
+  return `<h2>Quotes</h2>
+    <input class="search" id="qs" type="search" placeholder="Search code, name, number or phone model" value="${esc(qSearch)}">
+    <div class="chips">${['All', 'With Number', ...STATUSES].map((f) => `<button class="chip" type="button" data-qf="${f}" aria-pressed="${f === qFilter}">${f}</button>`).join('')}</div>
+    <p class="muted">${list.length} ${list.length === 1 ? 'quote' : 'quotes'}${list.length > 100 ? ', showing the latest 100' : ''}</p>
+    <div class="card" id="qlist">${list.slice(0, 100).map(quoteCard).join('') || '<p class="empty">No quotes match.</p>'}</div>`;
+}
+
+// ---------- accounts ----------
+function accounts() {
+  const s = aSearch.trim().toLowerCase();
+  const list = data.customers.filter((c) => !s || [c.name, c.phone, c.city].join(' ').toLowerCase().includes(s))
+    .sort((a, b) => (a.last < b.last ? 1 : -1));
+  return `<h2>Accounts</h2>
+    <input class="search" id="as" type="search" placeholder="Search name, number or city" value="${esc(aSearch)}">
+    <p class="muted">${list.length} ${list.length === 1 ? 'account' : 'accounts'} · ${data.customers.filter((c) => c.pin).length} with a PIN</p>
+    <div class="card">${list.map((c) => `<div class="row"><div class="main"><div class="t">${esc(c.name || 'No name')}</div>
+      <div class="s">${esc(showPhone(c.phone))}${c.city ? ' · ' + esc(c.city) : ''} · ${c.quotes} ${c.quotes === 1 ? 'quote' : 'quotes'}</div>
+      <div class="s">Last seen ${fmtDate(c.last)}${c.tradeIn ? ' · last trade-in ' + esc(model(c.tradeIn)) : ''}</div></div>
+      ${waLink(c.phone) ? `<a class="pill wa" href="${waLink(c.phone)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</div>`).join('') || '<p class="empty">No accounts yet. They appear here when customers sign up.</p>'}</div>`;
+}
+
+// ---------- deals ----------
+function deals() {
+  const on = data.deals.filter((d) => d.status === 'Available');
+  const off = data.deals.filter((d) => d.status !== 'Available').reverse();
+  const row = (d, sold) => `<div class="row"><div class="main"><div class="t">${esc(d.model)} · ${esc(d.storage)}</div>
+    <div class="s">${esc(d.note || 'No notes')}${sold && d.sold ? ' · sold ' + esc(shortDay(d.sold)) : d.listed ? ' · listed ' + esc(shortDay(d.listed)) : ''}</div></div>
+    <div class="v">${naira(d.price)}</div>
+    <button class="btn sm${sold ? ' line' : ''}" type="button" data-sold="${esc(d.id)}" data-to="${sold ? 'available' : 'sold'}">${sold ? 'Put Back' : 'Mark Sold'}</button></div>`;
+  return `<h2>Deals</h2>
+    <h3>Add a deal</h3>
+    <div class="card"><form class="form" id="dealForm" autocomplete="off">
+      <label>Model<input id="dm" list="models" placeholder="e.g. iPhone 13 Pro" required></label>
+      <div class="two"><label>Storage<input id="ds" placeholder="128gb" required></label><label>Price (₦)<input id="dp" inputmode="numeric" placeholder="310000" required></label></div>
+      <label>What’s different<input id="dn" placeholder="e.g. 88% Battery Health, New Screen"></label>
+      <button class="btn" type="submit">Add Deal</button>
+    </form><datalist id="models">${models.map((m) => `<option value="${esc(m)}">`).join('')}</datalist></div>
+    <h3>On the site (${on.length})</h3>
+    <div class="card">${on.map((d) => row(d, false)).join('') || '<p class="empty">No deals on the site.</p>'}</div>
+    <h3>Sold (${off.length})</h3>
+    <div class="card">${off.slice(0, 30).map((d) => row(d, true)).join('') || '<p class="empty">Nothing sold yet.</p>'}</div>`;
+}
+
+function render() {
+  document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  $('#view').innerHTML = ({ overview, enquiries, quotes, accounts, deals }[tab])();
+}
+
+// ---------- events ----------
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-tab]');
+  if (t) { tab = t.dataset.tab; render(); scrollTo(0, 0); return; }
+  const f = e.target.closest('[data-qf]');
+  if (f) { qFilter = f.dataset.qf; render(); return; }
+  const st = e.target.closest('[data-act="status"]');
+  if (st) {
+    const id = st.closest('.q').dataset.id, x = data.quotes.find((q) => q.id === id);
+    const next = STATUSES[(STATUSES.indexOf(x.status) + 1) % STATUSES.length];
+    const prev = x.status; x.status = next; st.className = 'status ' + next; st.textContent = next;
+    try { await call('setStatus', { id, status: next }); } catch (err) { x.status = prev; st.className = 'status ' + prev; st.textContent = prev; toast(err.message); }
+    return;
+  }
+  const sd = e.target.closest('[data-sold]');
+  if (sd) {
+    sd.disabled = true;
+    const sold = sd.dataset.to === 'sold';
+    try {
+      await call('dealSold', { id: sd.dataset.sold, sold });
+      const d = data.deals.find((x) => x.id === sd.dataset.sold);
+      d.status = sold ? 'Sold' : 'Available'; d.sold = sold ? new Date().toISOString().slice(0, 10) : '';
+      toast(sold ? 'Marked sold. It leaves the site within a minute.' : 'Back on the site.'); render();
+    } catch (err) { sd.disabled = false; toast(err.message); }
+    return;
+  }
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'qs') { qSearch = e.target.value; const pos = e.target.selectionStart; render(); const i = $('#qs'); i.focus(); i.setSelectionRange(pos, pos); }
+  if (e.target.id === 'as') { aSearch = e.target.value; const pos = e.target.selectionStart; render(); const i = $('#as'); i.focus(); i.setSelectionRange(pos, pos); }
+});
+// Notes save when you leave the box.
+document.addEventListener('change', async (e) => {
+  if (!e.target.matches('[data-act="notes"]')) return;
+  const id = e.target.closest('.q').dataset.id, x = data.quotes.find((q) => q.id === id);
+  try { await call('setStatus', { id, notes: e.target.value }); x.notes = e.target.value; toast('Note saved'); } catch (err) { toast(err.message); }
+});
+document.addEventListener('submit', async (e) => {
+  if (e.target.id !== 'dealForm') return;
+  e.preventDefault();
+  const btn = e.target.querySelector('button'); btn.disabled = true;
+  const deal = { model: $('#dm').value.trim(), storage: $('#ds').value.trim(), price: Number($('#dp').value.replace(/\D/g, '')), note: $('#dn').value.trim() };
+  try { const r = await call('addDeal', { deal }); toast(`${r.id} added. It shows on the site within a minute.`); await load(); }
+  catch (err) { toast(err.message); btn.disabled = false; }
+});
+$('#refresh').onclick = load;
+$('#go').onclick = async () => {
+  key = $('#pw').value; $('#lerr').textContent = ''; $('#go').disabled = true;
+  try { await call('ping'); try { localStorage.setItem(KEY, key); } catch (e) {} start(); }
+  catch (err) { $('#lerr').textContent = err.message; }
+  finally { $('#go').disabled = false; }
+};
+$('#pw').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#go').click(); });
+function start() {
+  $('#login').hidden = true; $('#app').hidden = false; load();
+  // Model names for the Add a Deal box.
+  fetch(ENDPOINT + '?action=catalog').then((r) => r.json()).then((c) => { models = [...new Set((c.devices || []).map((d) => d.model))].sort(); if (tab === 'deals') render(); }).catch(() => {});
+}
+if (key) start(); else $('#login').hidden = false;
+</script>
+</body>
+</html>
