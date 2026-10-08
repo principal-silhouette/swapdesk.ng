@@ -195,6 +195,7 @@ function overview() {
     <div class="wide">
       <button class="wbtn blue" type="button" data-go="deals">Add a Deal</button>
       <button class="wbtn" type="button" data-go="quotes" data-filter="To Call">Quotes to Call${waiting ? ` (${waiting})` : ''}</button>
+      <a class="wbtn green" href="captions/">Make TikTok Captions</a>
     </div>
     <div class="tiles">
       <button class="tile" type="button" data-go="quotes" data-filter="All"><b>${today}</b><span>Quotes today</span></button>
@@ -290,6 +291,7 @@ function deals() {
     <div class="v">${naira(d.price)}</div>
     <button class="btn sm${sold ? ' line' : ''}" type="button" data-sold="${esc(d.id)}" data-to="${sold ? 'available' : 'sold'}">${sold ? 'Put Back' : 'Mark Sold'}</button></div>`;
   return `<h2>Deals</h2>
+    <div class="wide"><a class="wbtn green" href="captions/">Make TikTok Captions</a></div>
     <h3>Add a deal</h3>
     <div class="card"><form class="form" id="dealForm" autocomplete="off">
       <label>Model<input id="dm" list="models" placeholder="e.g. iPhone 13 Pro" required></label>

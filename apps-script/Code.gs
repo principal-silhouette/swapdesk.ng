@@ -499,6 +499,10 @@ function admin_(b) {
     case 'setStatus': return adminSetStatus_(String(b.id || ''), String(b.status || ''), b.notes);
     case 'addDeal': return adminAddDeal_(b.deal || {});
     case 'dealSold': return adminDealSold_(String(b.id || ''), b.sold !== false);
+    case 'rows': return adminRows_(String(b.range || ''));
+    case 'captions': return adminCaptions_();
+    case 'saveCaption': return adminSaveCaption_(b.rec || {});
+    case 'deleteCaption': return adminDeleteCaption_(String(b.id || ''));
     default: return { ok: true };
   }
 }
@@ -591,6 +595,64 @@ function adminDealSold_(id, sold) {
   sh.getRange(f.getRow(), 8).setValue(sold ? 'Sold' : 'Available');
   sh.getRange(f.getRow(), 10).setValue(sold ? today : '');
   CacheService.getScriptCache().remove(CACHE_KEY);
+  return { ok: true };
+}
+
+// ---------- caption engine (swapdesk.ng/admin/captions) ----------
+
+/** Sheet rows for the caption engine, formatted as the sheet shows them (same as the Google Sheets connector). */
+function adminRows_(a1) {
+  var m = /^([A-Za-z ]+)!([A-Z]+\d+:[A-Z]+\d+)$/.exec(a1);
+  if (!m || ['Devices', 'Deals', 'Deductions', 'Rules'].indexOf(m[1]) === -1) return { ok: false, error: 'That range is not allowed.' };
+  var sh = SpreadsheetApp.getActive().getSheetByName(m[1]);
+  if (!sh) return { ok: false, error: 'No ' + m[1] + ' tab.' };
+  var vals = sh.getRange(m[2]).getDisplayValues();
+  // Trim empty cells at the end of each row and empty rows at the end, like the connector does.
+  var out = vals.map(function (r) { var n = r.length; while (n && r[n - 1] === '') n--; return r.slice(0, n); });
+  while (out.length && !out[out.length - 1].length) out.pop();
+  return { ok: true, values: out };
+}
+
+var CAPTION_HEAD = ['Save ID', 'Saved At', 'Devices', 'Captions', 'Data (don\'t edit)'];
+function captionsTab_() {
+  var ss = SpreadsheetApp.getActive();
+  var sh = ss.getSheetByName('Captions');
+  if (!sh) {
+    sh = ss.insertSheet('Captions');
+    sh.getRange(1, 1, 1, CAPTION_HEAD.length).setValues([CAPTION_HEAD]).setFontWeight('bold');
+    sh.setFrozenRows(1);
+    sh.setColumnWidth(3, 320);
+  }
+  return sh;
+}
+function adminCaptions_() {
+  var sh = captionsTab_(), last = sh.getLastRow();
+  if (last < 2) return { ok: true, saves: [] };
+  var saves = [];
+  sh.getRange(2, 1, last - 1, 5).getValues().forEach(function (r) {
+    if (!r[0]) return;
+    try { var rec = JSON.parse(r[4]); rec.id = String(r[0]); saves.push(rec); } catch (e) { /* edited by hand */ }
+  });
+  return { ok: true, saves: saves };
+}
+function adminSaveCaption_(rec) {
+  var id = cut_(rec.id, 40);
+  if (!id) return { ok: false, error: 'Nothing to save' };
+  var json = JSON.stringify(rec);
+  if (json.length > 45000) return { ok: false, code: 'quota_exceeded', error: 'Too many captions in one save. Save fewer devices at once.' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sh = captionsTab_();
+    sh.appendRow([id, new Date(), cut_((rec.devices || []).join(', '), 500), Number(rec.count || 0), json]);
+    return { ok: true };
+  } finally { lock.releaseLock(); }
+}
+function adminDeleteCaption_(id) {
+  var sh = captionsTab_(), last = sh.getLastRow();
+  if (last < 2) return { ok: true };
+  var f = sh.getRange(2, 1, last - 1, 1).createTextFinder(id).matchEntireCell(true).findNext();
+  if (f) sh.deleteRow(f.getRow());
   return { ok: true };
 }
 

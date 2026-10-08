@@ -1,0 +1,1681 @@
+<!doctype html>
+<html lang="en-NG">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../icons/icon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/icon-180.png?v=2">
+<meta name="theme-color" content="#F4F8FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E2238" media="(prefers-color-scheme: dark)">
+</head>
+<body>
+
+<title>SwapDesk Captions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working column, tabs on top, each generated post is a card with four copyable blocks. */
+:root{
+  --bg:#f1f5f2; --surface:#ffffff; --ink:#13201a; --muted:#566860; --line:#d6e0d9;
+  --accent:#0b7a4b; --accent-ink:#ffffff; --accent-soft:#dff1e7;
+  --ov-bg:#111713; --ov-fg:#ffffff; --warn:#8a5a00; --warn-soft:#fff1cf; --bad:#b3261e;
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Figtree',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1410; --surface:#151e18; --ink:#e7f0ea; --muted:#92a69a; --line:#26352b;
+  --accent:#3ddc97; --accent-ink:#06150d; --accent-soft:#17382a;
+  --ov-bg:#000000; --ov-fg:#ffffff; --warn:#f0c15a; --warn-soft:#3a2d0d; --bad:#ff8a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1410; --surface:#151e18; --ink:#e7f0ea; --muted:#92a69a; --line:#26352b;
+  --accent:#3ddc97; --accent-ink:#06150d; --accent-soft:#17382a;
+  --ov-bg:#000000; --ov-fg:#ffffff; --warn:#f0c15a; --warn-soft:#3a2d0d; --bad:#ff8a80; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:20px 64px}
+.wrap{max-width:860px;margin-inline:auto}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.9rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.3rem;font-weight:800}
+h3{font-size:1rem;font-weight:600}
+p{margin:0}
+.sub{color:var(--muted);margin-top:6px;max-width:60ch}
+header{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 .95rem var(--font-body);padding:10px 14px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel[hidden]{display:none}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);min-width:0}
+select,input[type=number]{font:500 .95rem var(--font-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1}
+.chip{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:99px;font:600 .82rem var(--font-body);padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;grid-column:1/-1}
+.btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:600 .9rem var(--font-body);border-radius:6px;padding:9px 16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.sm{padding:4px 10px;font-size:.78rem}
+.seed{color:var(--muted);font-size:.8rem;font-family:var(--font-mono)}
+.list{display:flex;flex-direction:column;gap:18px;margin-top:20px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.ph{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.num{font-family:var(--font-mono);color:var(--muted);font-size:.85rem}
+.pill{background:var(--accent-soft);color:var(--ink);border-radius:99px;padding:2px 10px;font-size:.78rem;font-weight:600}
+.dev{font-family:var(--font-display);font-weight:600;font-size:1.02rem}
+.ev{color:var(--muted);font-size:.8rem}
+.blk{display:flex;flex-direction:column;gap:6px;min-width:0}
+.bh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bl{font-size:.74rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ovs{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ov{background:var(--ov-bg);color:var(--ov-fg);border-radius:6px;padding:6px 10px;font-weight:600;max-width:100%;overflow-wrap:anywhere;white-space:pre-line}
+.ov small{display:block;font-size:.66rem;opacity:.65;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+pre{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font:400 .86rem/1.55 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.cap{font-family:var(--font-body);font-size:.92rem}
+details summary{cursor:pointer;color:var(--muted);font-size:.82rem;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;font-weight:600;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .15s}
+.toast.on{opacity:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px 14px;margin-top:10px}
+.checks label{display:flex;gap:8px;align-items:center;font-size:.9rem}
+.res{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums;border-bottom:1px dashed var(--line);padding-block:4px}
+.row.big{font-family:var(--font-display);font-size:1.3rem;font-weight:800;border-bottom:0;padding-top:10px}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:6px;padding:8px 12px;font-size:.84rem;margin-top:12px}
+.tw{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n,th.n{text-align:right}
+.bar{display:inline-block;height:8px;background:var(--accent);border-radius:4px;vertical-align:middle;margin-left:8px}
+.rules{margin:10px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.sec{margin-top:26px}
+.picker{margin-top:16px}
+.pickbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px;align-items:end}
+.picklist{display:flex;flex-direction:column;gap:10px;margin-top:14px;max-height:360px;overflow-y:auto;border-top:1px solid var(--line);padding-top:12px}
+.pg{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.pg b{font-family:var(--font-display);font-weight:600;min-width:9.5em}
+.pv{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:.82rem;cursor:pointer;background:var(--bg)}
+.pv:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.pv input{margin:0;width:15px;height:15px}
+.dlist{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.dl{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);cursor:pointer}
+.dl input{width:18px;height:18px;margin:2px 0 0}
+.dl:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.dl .dn{font-family:var(--font-display);font-weight:600}
+.dl .dp{font-family:var(--font-display);font-weight:800;font-size:1.1rem;text-align:right;font-variant-numeric:tabular-nums}
+.dl .dc{grid-column:2/-1;color:var(--muted);font-size:.84rem}
+.dl .ds{grid-column:2/-1;display:flex;gap:6px;flex-wrap:wrap}
+.tag{border-radius:99px;padding:1px 9px;font-size:.76rem;font-weight:600;background:var(--surface);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.tag.good{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.bh h2{font-size:1.15rem}
+input[type=search]{font:500 .95rem var(--font-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;min-width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* v3: single page flow */
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:16px}
+.sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.sn{font-family:var(--font-mono);font-size:.8rem;background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:1px 9px;font-weight:500}
+.sh .seed{margin-left:auto}
+.status{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.84rem;margin-top:10px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.tools input[type=search]{flex:1 1 180px;width:auto}
+.picklist{max-height:420px}
+.ph2{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.dl .dn small{font-family:var(--font-body);font-weight:500;color:var(--muted);font-size:.8rem}
+.types{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.ty{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);cursor:pointer}
+.ty:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.ty input{margin:3px 0 0;width:18px;height:18px;flex:none}
+.ty .tb{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ty b{font-family:var(--font-display);font-weight:600}
+.ty span{color:var(--muted);font-size:.86rem}
+.ty em{font-style:normal;font-size:.76rem;color:var(--muted)}
+.perrow{display:flex;gap:6px;margin-top:12px}
+.gbar{position:sticky;bottom:0;margin-top:20px;margin-inline:-16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;z-index:5}
+.gbar .btn{padding:11px 22px;font-size:1rem}
+.gsum{color:var(--muted);font-size:.9rem}
+.results{margin-top:24px;display:flex;flex-direction:column;gap:28px}
+.dg h2{font-size:1.15rem;margin-bottom:10px}
+.opts{display:flex;flex-direction:column;gap:14px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.oh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.oh b{font-family:var(--font-display);font-weight:600}
+.oh span{display:block;color:var(--muted);font-size:.82rem}
+.skip{color:var(--muted);font-size:.84rem}
+.empty{color:var(--muted);padding:12px 0}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:4px;overflow-x:auto}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 .95rem var(--font-body);padding:10px 14px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.rbar .gsum{font-size:.9rem}
+.btn:disabled{opacity:.6;cursor:default}
+.saves{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.sv{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.sv>summary{cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:6px;color:var(--ink);font-size:1rem}
+.sv>summary::-webkit-details-marker{display:none}
+.sv .when{font-family:var(--font-display);font-weight:600}
+.sv .meta{color:var(--muted);font-size:.84rem;font-weight:500}
+.sv .devs{display:flex;flex-wrap:wrap;gap:6px}
+.sv .body{margin-top:14px;display:flex;flex-direction:column;gap:24px}
+.sv .del{display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.sv .del span{color:var(--muted);font-size:.84rem}
+</style>
+<style>
+:root{--bg:#F4F8FC;--surface:#FFFFFF;--ink:#0E2238;--muted:#5B6F86;--line:#DCE6F1;--accent:#007BFF;--accent-ink:#FFFFFF;--accent-soft:#E6F1FD;
+  --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E2238;--surface:#142D4A;--ink:#EAF2FB;--muted:#9DB3CB;--line:#24446A;--accent:#4DA3FF;--accent-ink:#06182B;--accent-soft:#1A3A5E;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E2238;--surface:#142D4A;--ink:#EAF2FB;--muted:#9DB3CB;--line:#24446A;--accent:#4DA3FF;--accent-ink:#06182B;--accent-soft:#1A3A5E;color-scheme:dark}
+body{margin:0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
+.step,.post,.opt,.card,.controls{border-radius:16px}
+.btn{border-radius:12px}.btn.sm{border-radius:10px}
+.sd-back{display:inline-flex;align-items:center;gap:8px;margin:0 auto 10px;max-width:860px;width:100%;font:600 14px var(--font-body);color:var(--accent);text-decoration:none}
+.sd-back img{width:28px;height:28px;border-radius:7px}
+</style>
+<div class="wrap"><a class="sd-back" href="../"><img src="../icons/icon-180.png?v=2" alt="">‹ SwapDesk Admin</a></div>
+<div class="wrap">
+<header>
+  <h1>SwapDesk Caption Engine</h1>
+  <p class="sub">Pick the devices, choose how many captions and which types, and get a top caption, bottom caption and text caption for each one. Every part copies on its own.</p>
+  <div class="status"><span id="syncmsg">Prices from the sheet of <span id="upd"></span>.</span><button class="btn ghost sm" id="sync" type="button">Refresh From Sheet</button></div>
+</header>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t-gen" aria-selected="true" aria-controls="p-gen" type="button">Generate</button>
+  <button class="tab" role="tab" id="t-saved" aria-selected="false" aria-controls="p-saved" type="button">Saved Captions <span id="savedn"></span></button>
+</div>
+<div id="p-gen" role="tabpanel" aria-labelledby="t-gen">
+
+<section class="step" aria-labelledby="h1s">
+  <div class="sh"><span class="sn">1</span><h2 id="h1s">Pick Devices</h2><span class="seed" id="selinfo">None selected</span></div>
+  <p class="sub">Phones for sale, Nigerian Used phones people swap in, and the deals listed in the sheet.</p>
+  <div class="filters" id="filters" role="group" aria-label="Show"></div>
+  <div class="tools">
+    <input type="search" id="dq" placeholder="Search: 13, Pro Max, A16, 256gb" aria-label="Search devices">
+    <button class="btn ghost sm" id="selshown" type="button">Select Shown</button>
+    <button class="btn ghost sm" id="selclear" type="button">Clear</button>
+  </div>
+  <div id="picklist" class="picklist"></div>
+</section>
+
+<section class="step" aria-labelledby="h2s">
+  <div class="sh"><span class="sn">2</span><h2 id="h2s">Captions Per Device</h2></div>
+  <div class="perrow" id="per" role="group" aria-label="Captions per device"></div>
+</section>
+
+<section class="step" aria-labelledby="h3s">
+  <div class="sh"><span class="sn">3</span><h2 id="h3s">Caption Types</h2><span class="seed" id="tyinfo"></span></div>
+  <p class="sub">Each caption you get is one of these types. Untick the ones you do not want.</p>
+  <div class="tools"><button class="btn ghost sm" id="tyall" type="button">All</button><button class="btn ghost sm" id="tynone" type="button">None</button></div>
+  <div class="types" id="types"></div>
+</section>
+
+<div class="gbar"><span class="gsum" id="gsum">Pick at least one device</span><button class="btn" id="go" type="button">Generate Captions</button></div>
+
+<div class="results" id="out" aria-live="polite"></div>
+</div>
+<div id="p-saved" role="tabpanel" aria-labelledby="t-saved" hidden>
+  <div class="step"><div class="sh"><h2>Saved Captions</h2><span class="seed" id="svinfo"></span></div>
+  <p class="sub" id="svsub">Captions you save show up here with the date and time, and the devices they cover.</p></div>
+  <div class="saves" id="saves"></div>
+</div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>const DATA={"updated":"8 Oct 2026","targets":[{"id":"iphone-17-256gb-bn","brand":"Apple","name":"iPhone 17","key":"17","storage":"256gb P/eSIM","cond":"Brand New","price":1310000,"rank":33,"w":0.4},{"id":"iphone-air-256gb-bn","brand":"Apple","name":"iPhone Air","key":"Air","storage":"256gb","cond":"Brand New","price":1260000,"rank":34,"w":0.4},{"id":"iphone-air-512gb-bn","brand":"Apple","name":"iPhone Air","key":"Air","storage":"512gb","cond":"Brand New","price":1420000,"rank":34,"w":0.4},{"id":"iphone-air-256gb-abn","brand":"Apple","name":"iPhone Air","key":"Air","storage":"256gb","cond":"Active","price":1150000,"rank":34,"w":0.4},{"id":"iphone-air-512gb-abn","brand":"Apple","name":"iPhone Air","key":"Air","storage":"512gb","cond":"Active","price":1320000,"rank":34,"w":0.4},{"id":"iphone-air-256gb-fu","brand":"Apple","name":"iPhone Air","key":"Air","storage":"256gb","cond":"UK Used","price":1100000,"rank":34,"w":0.4},{"id":"iphone-17-pro-256gb-bn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb P/eSIM","cond":"Brand New","price":1740000,"rank":35,"w":0.4},{"id":"iphone-17-pro-512gb-bn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"512gb P/eSIM","cond":"Brand New","price":2030000,"rank":35,"w":0.4},{"id":"iphone-17-pro-256gb-abn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb P/eSIM","cond":"Active","price":1650000,"rank":35,"w":0.4},{"id":"iphone-17-pro-max-256gb-bn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"256gb P/eSIM","cond":"Brand New","price":1890000,"rank":36,"w":0.4},{"id":"iphone-17-pro-max-512gb-bn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"512gb P/eSIM","cond":"Brand New","price":2240000,"rank":36,"w":0.4},{"id":"iphone-17-pro-max-256gb-abn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"256gb P/eSIM","cond":"Active","price":1820000,"rank":36,"w":0.4},{"id":"iphone-17-pro-max-512gb-abn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"512gb P/eSIM","cond":"Active","price":2000000,"rank":36,"w":0.4},{"id":"iphone-16-128gb-abn","brand":"Apple","name":"iPhone 16","key":"16","storage":"128gb","cond":"Active","price":960000,"rank":29,"w":1.1},{"id":"iphone-16-128gb-fu","brand":"Apple","name":"iPhone 16","key":"16","storage":"128gb P/eSIM","cond":"UK Used","price":790000,"rank":29,"w":1.1},{"id":"iphone-16-256gb-fu","brand":"Apple","name":"iPhone 16","key":"16","storage":"256gb","cond":"UK Used","price":890000,"rank":29,"w":1.1},{"id":"iphone-16-pro-128gb-abn","brand":"Apple","name":"iPhone 16 Pro","key":"16 Pro","storage":"128gb","cond":"Active","price":1180000,"rank":31,"w":0.8},{"id":"iphone-16-pro-256gb-abn","brand":"Apple","name":"iPhone 16 Pro","key":"16 Pro","storage":"256gb","cond":"Active","price":1280000,"rank":31,"w":0.8},{"id":"iphone-16-pro-128gb-fu","brand":"Apple","name":"iPhone 16 Pro","key":"16 Pro","storage":"128gb","cond":"UK Used","price":1030000,"rank":31,"w":0.8},{"id":"iphone-16-plus-128gb-abn","brand":"Apple","name":"iPhone 16 Plus","key":"16 Plus","storage":"128gb","cond":"Active","price":1000000,"rank":30,"w":0.5},{"id":"iphone-16-plus-256gb-abn","brand":"Apple","name":"iPhone 16 Plus","key":"16 Plus","storage":"256gb","cond":"Active","price":1130000,"rank":30,"w":0.5},{"id":"iphone-16-plus-128gb-fu","brand":"Apple","name":"iPhone 16 Plus","key":"16 Plus","storage":"128gb","cond":"UK Used","price":870000,"rank":30,"w":0.5},{"id":"iphone-16-plus-256gb-fu","brand":"Apple","name":"iPhone 16 Plus","key":"16 Plus","storage":"256gb","cond":"UK Used","price":900000,"rank":30,"w":0.5},{"id":"iphone-16-pro-max-256gb-abn","brand":"Apple","name":"iPhone 16 Pro Max","key":"16 Pro Max","storage":"256gb","cond":"Active","price":1380000,"rank":32,"w":0.7},{"id":"iphone-16-pro-max-256gb-fu","brand":"Apple","name":"iPhone 16 Pro Max","key":"16 Pro Max","storage":"256gb","cond":"UK Used","price":1180000,"rank":32,"w":0.7},{"id":"iphone-16-pro-max-512gb-fu","brand":"Apple","name":"iPhone 16 Pro Max","key":"16 Pro Max","storage":"512gb","cond":"UK Used","price":1270000,"rank":32,"w":0.7},{"id":"iphone-15-128gb-abn","brand":"Apple","name":"iPhone 15","key":"15","storage":"128gb","cond":"Active","price":650000,"rank":25,"w":1},{"id":"iphone-15-256gb-abn","brand":"Apple","name":"iPhone 15","key":"15","storage":"256gb","cond":"Active","price":710000,"rank":25,"w":1},{"id":"iphone-15-128gb-fu","brand":"Apple","name":"iPhone 15","key":"15","storage":"128gb","cond":"UK Used","price":610000,"rank":25,"w":1},{"id":"iphone-15-256gb-fu","brand":"Apple","name":"iPhone 15","key":"15","storage":"256gb","cond":"UK Used","price":690000,"rank":25,"w":1},{"id":"iphone-15-pro-128gb-abn","brand":"Apple","name":"iPhone 15 Pro","key":"15 Pro","storage":"128gb","cond":"Active","price":850000,"rank":27,"w":1.2},{"id":"iphone-15-pro-256gb-abn","brand":"Apple","name":"iPhone 15 Pro","key":"15 Pro","storage":"256gb","cond":"Active","price":920000,"rank":27,"w":1.2},{"id":"iphone-15-pro-128gb-fu","brand":"Apple","name":"iPhone 15 Pro","key":"15 Pro","storage":"128gb","cond":"UK Used","price":800000,"rank":27,"w":1.2},{"id":"iphone-15-pro-256gb-fu","brand":"Apple","name":"iPhone 15 Pro","key":"15 Pro","storage":"256gb","cond":"UK Used","price":870000,"rank":27,"w":1.2},{"id":"iphone-15-pro-max-256gb-abn","brand":"Apple","name":"iPhone 15 Pro Max","key":"15 Pro Max","storage":"256gb","cond":"Active","price":1030000,"rank":28,"w":0.8},{"id":"iphone-15-pro-max-256gb-fu","brand":"Apple","name":"iPhone 15 Pro Max","key":"15 Pro Max","storage":"256gb","cond":"UK Used","price":960000,"rank":28,"w":0.8},{"id":"iphone-14-128gb-fun","brand":"Apple","name":"iPhone 14","key":"14","storage":"128gb","cond":"UK Used","price":440000,"rank":21,"w":0.9},{"id":"iphone-14-256gb-fun","brand":"Apple","name":"iPhone 14","key":"14","storage":"256gb","cond":"UK Used","price":510000,"rank":21,"w":0.9},{"id":"iphone-14-pro-128gb-fun","brand":"Apple","name":"iPhone 14 Pro","key":"14 Pro","storage":"128gb P/eSIM","cond":"UK Used","price":660000,"rank":23,"w":1.1},{"id":"iphone-14-pro-256gb-fun","brand":"Apple","name":"iPhone 14 Pro","key":"14 Pro","storage":"256gb","cond":"UK Used","price":700000,"rank":23,"w":1.1},{"id":"iphone-14-pro-max-128gb-fun","brand":"Apple","name":"iPhone 14 Pro Max","key":"14 Pro Max","storage":"128gb","cond":"UK Used","price":750000,"rank":24,"w":0.8},{"id":"iphone-14-pro-max-256gb-fun","brand":"Apple","name":"iPhone 14 Pro Max","key":"14 Pro Max","storage":"256gb","cond":"UK Used","price":800000,"rank":24,"w":0.8},{"id":"iphone-13-mini-128gb-fu","brand":"Apple","name":"iPhone 13 mini","key":"13 mini","storage":"128gb","cond":"UK Used","price":340000,"rank":17,"w":0.6},{"id":"iphone-13-128gb-fu","brand":"Apple","name":"iPhone 13","key":"13","storage":"128gb","cond":"UK Used","price":380000,"rank":18,"w":1.3},{"id":"iphone-13-256gb-fu","brand":"Apple","name":"iPhone 13","key":"13","storage":"256gb","cond":"UK Used","price":410000,"rank":18,"w":1.3},{"id":"iphone-12-mini-64gb-fu","brand":"Apple","name":"iPhone 12 mini","key":"12 mini","storage":"64gb","cond":"UK Used","price":230000,"rank":13,"w":0.5},{"id":"iphone-12-64gb-fu","brand":"Apple","name":"iPhone 12","key":"12","storage":"64gb","cond":"UK Used","price":260000,"rank":14,"w":1.1},{"id":"iphone-12-128gb-fu","brand":"Apple","name":"iPhone 12","key":"12","storage":"128gb","cond":"UK Used","price":305000,"rank":14,"w":1.1},{"id":"iphone-12-pro-128gb-fu","brand":"Apple","name":"iPhone 12 Pro","key":"12 Pro","storage":"128gb","cond":"UK Used","price":370000,"rank":15,"w":0.8},{"id":"iphone-12-pro-256gb-fu","brand":"Apple","name":"iPhone 12 Pro","key":"12 Pro","storage":"256gb","cond":"UK Used","price":390000,"rank":15,"w":0.8},{"id":"iphone-12-pro-max-128gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"128gb","cond":"UK Used","price":440000,"rank":16,"w":0.9},{"id":"iphone-12-pro-max-256gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"256gb","cond":"UK Used","price":490000,"rank":16,"w":0.9},{"id":"iphone-11-64gb-fu","brand":"Apple","name":"iPhone 11","key":"11","storage":"64gb","cond":"UK Used","price":235000,"rank":10,"w":1.2},{"id":"iphone-11-128gb-fu","brand":"Apple","name":"iPhone 11","key":"11","storage":"128gb","cond":"UK Used","price":270000,"rank":10,"w":1.2},{"id":"iphone-11-pro-64gb-fu","brand":"Apple","name":"iPhone 11 Pro","key":"11 Pro","storage":"64gb","cond":"UK Used","price":290000,"rank":11,"w":0.9},{"id":"iphone-11-pro-256gb-fu","brand":"Apple","name":"iPhone 11 Pro","key":"11 Pro","storage":"256gb","cond":"UK Used","price":320000,"rank":11,"w":0.9},{"id":"iphone-11-pro-max-64gb-fu","brand":"Apple","name":"iPhone 11 Pro Max","key":"11 Pro Max","storage":"64gb","cond":"UK Used","price":310000,"rank":12,"w":0.7},{"id":"iphone-11-pro-max-256gb-fu","brand":"Apple","name":"iPhone 11 Pro Max","key":"11 Pro Max","storage":"256gb","cond":"UK Used","price":350000,"rank":12,"w":0.7},{"id":"iphone-xr-64gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"64gb","cond":"UK Used","price":200000,"rank":6,"w":1.2},{"id":"iphone-xr-128gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"128gb","cond":"UK Used","price":235000,"rank":6,"w":1.2},{"id":"iphone-xr-256gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"256gb","cond":"UK Used","price":240000,"rank":6,"w":1.2},{"id":"iphone-se-2nd-gen-64gb-fu","brand":"Apple","name":"iPhone SE (2nd Gen)","key":"SE 2","storage":"64gb","cond":"UK Used","price":150000,"rank":8,"w":0.2},{"id":"iphone-se-2nd-gen-128gb-fu","brand":"Apple","name":"iPhone SE (2nd Gen)","key":"SE 2","storage":"128gb","cond":"UK Used","price":170000,"rank":8,"w":0.2},{"id":"iphone-se-3rd-gen-64gb-fu","brand":"Apple","name":"iPhone SE (3rd Gen)","key":"SE 3","storage":"64gb","cond":"UK Used","price":170000,"rank":9,"w":0.2},{"id":"iphone-se-3rd-gen-128gb-fu","brand":"Apple","name":"iPhone SE (3rd Gen)","key":"SE 3","storage":"128gb","cond":"UK Used","price":220000,"rank":9,"w":0.2},{"id":"galaxy-s26-ultra-256gb-fu","brand":"Samsung","name":"Galaxy S26 Ultra","key":"Galaxy S26 Ultra","storage":"256gb","cond":"Active","price":1330000,"rank":-1,"w":0.3},{"id":"galaxy-s25-ultra-256gb-fu","brand":"Samsung","name":"Galaxy S25 Ultra","key":"Galaxy S25 Ultra","storage":"256gb","cond":"Active","price":1060000,"rank":-1,"w":0.3},{"id":"galaxy-s25-ultra-512gb-fu","brand":"Samsung","name":"Galaxy S25 Ultra","key":"Galaxy S25 Ultra","storage":"512gb","cond":"Active","price":1160000,"rank":-1,"w":0.3},{"id":"galaxy-s24-ultra-256gb-fu","brand":"Samsung","name":"Galaxy S24 Ultra","key":"Galaxy S24 Ultra","storage":"256gb","cond":"Active","price":860000,"rank":-1,"w":0.3},{"id":"galaxy-s22-128gb-fu","brand":"Samsung","name":"Galaxy S22","key":"Galaxy S22","storage":"128gb","cond":"Active","price":320000,"rank":-1,"w":0.3},{"id":"galaxy-s22-ultra-256gb-fu","brand":"Samsung","name":"Galaxy S22 Ultra","key":"Galaxy S22 Ultra","storage":"256gb","cond":"Active","price":520000,"rank":-1,"w":0.3},{"id":"pixel-9-128gb-abn","brand":"Google","name":"Pixel 9","key":"Pixel 9","storage":"128gb","cond":"Active","price":670000,"rank":-1,"w":0.3},{"id":"pixel-9-128gb-fu","brand":"Google","name":"Pixel 9","key":"Pixel 9","storage":"128gb","cond":"UK Used","price":570000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-128gb-abn","brand":"Google","name":"Pixel 9 Pro","key":"Pixel 9 Pro","storage":"128gb","cond":"Active","price":770000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-128gb-fu","brand":"Google","name":"Pixel 9 Pro","key":"Pixel 9 Pro","storage":"128gb","cond":"UK Used","price":670000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-256gb-fu","brand":"Google","name":"Pixel 9 Pro","key":"Pixel 9 Pro","storage":"256gb","cond":"UK Used","price":770000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-xl-32gb-abn","brand":"Google","name":"Pixel 9 Pro XL","key":"Pixel 9 Pro XL","storage":"128gb","cond":"Active","price":820000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-xl-64gb-abn","brand":"Google","name":"Pixel 9 Pro XL","key":"Pixel 9 Pro XL","storage":"256gb","cond":"Active","price":870000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-xl-128gb-fu","brand":"Google","name":"Pixel 9 Pro XL","key":"Pixel 9 Pro XL","storage":"128gb","cond":"UK Used","price":720000,"rank":-1,"w":0.3},{"id":"pixel-9-pro-xl-256gb-fu","brand":"Google","name":"Pixel 9 Pro XL","key":"Pixel 9 Pro XL","storage":"256gb","cond":"UK Used","price":770000,"rank":-1,"w":0.3},{"id":"pixel-8-128gb-fu","brand":"Google","name":"Pixel 8","key":"Pixel 8","storage":"128gb","cond":"UK Used","price":420000,"rank":-1,"w":0.3},{"id":"pixel-8-pro-128gb-fu","brand":"Google","name":"Pixel 8 Pro","key":"Pixel 8 Pro","storage":"128gb","cond":"UK Used","price":520000,"rank":-1,"w":0.3},{"id":"iphone-18-pro-256gb-abn","brand":"Apple","name":"iPhone 18 Pro","key":"18 Pro","storage":"256gb","cond":"Active","price":2050000,"rank":37,"w":0.4},{"id":"iphone-18-pro-512gb-abn","brand":"Apple","name":"iPhone 18 Pro","key":"18 Pro","storage":"512gb","cond":"Active","price":2350000,"rank":37,"w":0.4},{"id":"iphone-18-pro-max-512gb-abn","brand":"Apple","name":"iPhone 18 Pro Max","key":"18 Pro Max","storage":"512gb","cond":"Active","price":2750000,"rank":38,"w":0.4},{"id":"iphone-18-pro-max-256gb-bn","brand":"Apple","name":"iPhone 18 Pro Max","key":"18 Pro Max","storage":"256gb","cond":"Brand New","price":2500000,"rank":38,"w":0.4},{"id":"iphone-18-pro-max-512gb-bn","brand":"Apple","name":"iPhone 18 Pro Max","key":"18 Pro Max","storage":"512gb","cond":"Brand New","price":2850000,"rank":38,"w":0.4},{"id":"iphone-16-128gb-bn","brand":"Apple","name":"iPhone 16","key":"16","storage":"128gb","cond":"Brand New","price":1030000,"rank":29,"w":1.1},{"id":"iphone-16-plus-128gb-bn","brand":"Apple","name":"iPhone 16 Plus","key":"16 Plus","storage":"128gb","cond":"Brand New","price":1130000,"rank":30,"w":0.5},{"id":"iphone-16-pro-256gb-bn","brand":"Apple","name":"iPhone 16 Pro","key":"16 Pro","storage":"256gb","cond":"Brand New","price":1330000,"rank":31,"w":0.8},{"id":"iphone-14-pro-128gb-abnn","brand":"Apple","name":"iPhone 14 Pro","key":"14 Pro","storage":"128gb","cond":"Active","price":690000,"rank":23,"w":1.1},{"id":"iphone-14-pro-256gb-abnn","brand":"Apple","name":"iPhone 14 Pro","key":"14 Pro","storage":"256gb","cond":"Active","price":740000,"rank":23,"w":1.1},{"id":"iphone-14-pro-max-128gb-abnn","brand":"Apple","name":"iPhone 14 Pro Max","key":"14 Pro Max","storage":"128gb","cond":"Active","price":770000,"rank":24,"w":0.8},{"id":"iphone-14-pro-max-256gb-abnn","brand":"Apple","name":"iPhone 14 Pro Max","key":"14 Pro Max","storage":"256gb","cond":"Active","price":860000,"rank":24,"w":0.8},{"id":"iphone-12-pro-max-512gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"512gb","cond":"UK Used","price":510000,"rank":16,"w":0.9},{"id":"galaxy-s22-ultra-128gb-abn","brand":"Samsung","name":"Galaxy S22 Ultra","key":"Galaxy S22 Ultra","storage":"128gb","cond":"Active","price":480000,"rank":-1,"w":0.3},{"id":"galaxy-s24-128gb-fu","brand":"Samsung","name":"Galaxy S24","key":"Galaxy S24","storage":"128gb","cond":"UK Used","price":450000,"rank":-1,"w":0.3},{"id":"galaxy-s22-128gb-uk","brand":"Samsung","name":"Galaxy S22","key":"Galaxy S22","storage":"128gb","cond":"UK Used","price":300000,"rank":-1,"w":0.3},{"id":"iphone-17-pro-256gb-esim-bn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb eSIM only","cond":"Brand New","price":1640000,"rank":35,"w":0.4},{"id":"iphone-17-pro-max-256gb-esim-bn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"256gb eSIM only","cond":"Brand New","price":1770000,"rank":36,"w":0.4},{"id":"iphone-17-pro-256gb-esim-abn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb eSIM only","cond":"Active","price":1460000,"rank":35,"w":0.4},{"id":"iphone-17-pro-512gb-esim-abn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"512gb eSIM only","cond":"Active","price":1550000,"rank":35,"w":0.4},{"id":"iphone-17-pro-512gb-ds-abn","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"512gb Dual SIM","cond":"Active","price":1820000,"rank":35,"w":0.4},{"id":"iphone-17-pro-max-256gb-esim-abn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"256gb eSIM only","cond":"Active","price":1680000,"rank":36,"w":0.4},{"id":"iphone-17-pro-max-256gb-ds-abn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"256gb Dual SIM","cond":"Active","price":1780000,"rank":36,"w":0.4},{"id":"iphone-17-pro-max-512gb-esim-abn","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"512gb eSIM only","cond":"Active","price":1900000,"rank":36,"w":0.4},{"id":"iphone-17-pro-256gb-psim-fu","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb P/eSIM","cond":"UK Used","price":1520000,"rank":35,"w":0.4},{"id":"iphone-17-pro-256gb-esim-fu","brand":"Apple","name":"iPhone 17 Pro","key":"17 Pro","storage":"256gb eSIM only","cond":"UK Used","price":1360000,"rank":35,"w":0.4},{"id":"iphone-17-pro-max-512gb-esim-fu","brand":"Apple","name":"iPhone 17 Pro Max","key":"17 Pro Max","storage":"512gb eSIM only","cond":"UK Used","price":1650000,"rank":36,"w":0.4},{"id":"iphone-18-pro-256gb-bn","brand":"Apple","name":"iPhone 18 Pro","key":"18 Pro","storage":"256gb","cond":"Brand New","price":2100000,"rank":37,"w":0.4},{"id":"iphone-18-pro-512gb-bn","brand":"Apple","name":"iPhone 18 Pro","key":"18 Pro","storage":"512gb","cond":"Brand New","price":2430000,"rank":37,"w":0.4},{"id":"iphone-16-128gb-esim-fun","brand":"Apple","name":"iPhone 16","key":"16","storage":"128gb eSIM only","cond":"UK Used","price":750000,"rank":29,"w":1.1},{"id":"iphone-14-pro-128gb-esim-fun","brand":"Apple","name":"iPhone 14 Pro","key":"14 Pro","storage":"128gb eSIM only","cond":"UK Used","price":590000,"rank":23,"w":1.1}],"sources":[{"id":"iphone-14-128gb-fun","brand":"Apple","name":"iPhone 14","key":"14","storage":"128gb","gb":128,"ti":305000,"iphone":true,"rank":21,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-14-256gb-fun","brand":"Apple","name":"iPhone 14","key":"14","storage":"256gb","gb":256,"ti":355000,"iphone":true,"rank":21,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-13-mini-128gb-fu","brand":"Apple","name":"iPhone 13 mini","key":"13 mini","storage":"128gb","gb":128,"ti":225000,"iphone":true,"rank":17,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-13-mini-256gb-fu","brand":"Apple","name":"iPhone 13 mini","key":"13 mini","storage":"256gb","gb":256,"ti":260000,"iphone":true,"rank":17,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-13-128gb-fu","brand":"Apple","name":"iPhone 13","key":"13","storage":"128gb","gb":128,"ti":255000,"iphone":true,"rank":18,"multi":true,"isBase":true,"w":0.5},{"id":"iphone-13-256gb-fu","brand":"Apple","name":"iPhone 13","key":"13","storage":"256gb","gb":256,"ti":275000,"iphone":true,"rank":18,"multi":true,"isBase":false,"w":0.5},{"id":"iphone-12-mini-64gb-fu","brand":"Apple","name":"iPhone 12 mini","key":"12 mini","storage":"64gb","gb":64,"ti":140000,"iphone":true,"rank":13,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-12-mini-128gb-fu","brand":"Apple","name":"iPhone 12 mini","key":"12 mini","storage":"128gb","gb":128,"ti":160000,"iphone":true,"rank":13,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-12-64gb-fu","brand":"Apple","name":"iPhone 12","key":"12","storage":"64gb","gb":64,"ti":160000,"iphone":true,"rank":14,"multi":true,"isBase":true,"w":0.9},{"id":"iphone-12-128gb-fu","brand":"Apple","name":"iPhone 12","key":"12","storage":"128gb","gb":128,"ti":190000,"iphone":true,"rank":14,"multi":true,"isBase":false,"w":0.9},{"id":"iphone-12-pro-128gb-fu","brand":"Apple","name":"iPhone 12 Pro","key":"12 Pro","storage":"128gb","gb":128,"ti":245000,"iphone":true,"rank":15,"multi":true,"isBase":true,"w":0.4},{"id":"iphone-12-pro-256gb-fu","brand":"Apple","name":"iPhone 12 Pro","key":"12 Pro","storage":"256gb","gb":256,"ti":260000,"iphone":true,"rank":15,"multi":true,"isBase":false,"w":0.4},{"id":"iphone-12-pro-max-128gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"128gb","gb":128,"ti":305000,"iphone":true,"rank":16,"multi":true,"isBase":true,"w":0.3},{"id":"iphone-12-pro-max-256gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"256gb","gb":256,"ti":340000,"iphone":true,"rank":16,"multi":true,"isBase":false,"w":0.3},{"id":"iphone-12-pro-max-512gb-fu","brand":"Apple","name":"iPhone 12 Pro Max","key":"12 Pro Max","storage":"512gb","gb":512,"ti":355000,"iphone":true,"rank":16,"multi":true,"isBase":false,"w":0.3},{"id":"iphone-11-64gb-fu","brand":"Apple","name":"iPhone 11","key":"11","storage":"64gb","gb":64,"ti":145000,"iphone":true,"rank":10,"multi":true,"isBase":true,"w":1.2},{"id":"iphone-11-128gb-fu","brand":"Apple","name":"iPhone 11","key":"11","storage":"128gb","gb":128,"ti":165000,"iphone":true,"rank":10,"multi":true,"isBase":false,"w":1.2},{"id":"iphone-11-256gb-fu","brand":"Apple","name":"iPhone 11","key":"11","storage":"256gb","gb":256,"ti":175000,"iphone":true,"rank":10,"multi":true,"isBase":false,"w":1.2},{"id":"iphone-11-pro-64gb-fu","brand":"Apple","name":"iPhone 11 Pro","key":"11 Pro","storage":"64gb","gb":64,"ti":195000,"iphone":true,"rank":11,"multi":true,"isBase":true,"w":0.7},{"id":"iphone-11-pro-256gb-fu","brand":"Apple","name":"iPhone 11 Pro","key":"11 Pro","storage":"256gb","gb":256,"ti":215000,"iphone":true,"rank":11,"multi":true,"isBase":false,"w":0.7},{"id":"iphone-11-pro-max-64gb-fu","brand":"Apple","name":"iPhone 11 Pro Max","key":"11 Pro Max","storage":"64gb","gb":64,"ti":205000,"iphone":true,"rank":12,"multi":true,"isBase":true,"w":0.4},{"id":"iphone-11-pro-max-256gb-fu","brand":"Apple","name":"iPhone 11 Pro Max","key":"11 Pro Max","storage":"256gb","gb":256,"ti":235000,"iphone":true,"rank":12,"multi":true,"isBase":false,"w":0.4},{"id":"iphone-x-64gb-fu","brand":"Apple","name":"iPhone X","key":"X","storage":"64gb","gb":64,"ti":90000,"iphone":true,"rank":4,"multi":true,"isBase":true,"w":0.9},{"id":"iphone-x-256gb-fu","brand":"Apple","name":"iPhone X","key":"X","storage":"256gb","gb":256,"ti":115000,"iphone":true,"rank":4,"multi":true,"isBase":false,"w":0.9},{"id":"iphone-xr-64gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"64gb","gb":64,"ti":110000,"iphone":true,"rank":6,"multi":true,"isBase":true,"w":1.3},{"id":"iphone-xr-128gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"128gb","gb":128,"ti":125000,"iphone":true,"rank":6,"multi":true,"isBase":false,"w":1.3},{"id":"iphone-xr-256gb-fu","brand":"Apple","name":"iPhone XR","key":"XR","storage":"256gb","gb":256,"ti":130000,"iphone":true,"rank":6,"multi":true,"isBase":false,"w":1.3},{"id":"iphone-xs-64gb-fu","brand":"Apple","name":"iPhone XS","key":"XS","storage":"64gb","gb":64,"ti":110000,"iphone":true,"rank":5,"multi":true,"isBase":true,"w":0.3},{"id":"iphone-xs-256gb-fu","brand":"Apple","name":"iPhone XS","key":"XS","storage":"256gb","gb":256,"ti":130000,"iphone":true,"rank":5,"multi":true,"isBase":false,"w":0.3},{"id":"iphone-xs-max-64gb-fu","brand":"Apple","name":"iPhone XS Max","key":"XS Max","storage":"64gb","gb":64,"ti":125000,"iphone":true,"rank":7,"multi":true,"isBase":true,"w":0.4},{"id":"iphone-xs-max-256gb-fu","brand":"Apple","name":"iPhone XS Max","key":"XS Max","storage":"256gb","gb":256,"ti":150000,"iphone":true,"rank":7,"multi":true,"isBase":false,"w":0.4},{"id":"iphone-se-2nd-gen-64gb-fu","brand":"Apple","name":"iPhone SE 2","key":"SE 2","storage":"64gb","gb":64,"ti":75000,"iphone":true,"rank":8,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-se-2nd-gen-128gb-fu","brand":"Apple","name":"iPhone SE 2","key":"SE 2","storage":"128gb","gb":128,"ti":85000,"iphone":true,"rank":8,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-se-3rd-gen-64gb-fu","brand":"Apple","name":"iPhone SE 3","key":"SE 3","storage":"64gb","gb":64,"ti":85000,"iphone":true,"rank":9,"multi":true,"isBase":true,"w":0.15},{"id":"iphone-se-3rd-gen-128gb-fu","brand":"Apple","name":"iPhone SE 3","key":"SE 3","storage":"128gb","gb":128,"ti":110000,"iphone":true,"rank":9,"multi":true,"isBase":false,"w":0.15},{"id":"iphone-8-64gb-fu","brand":"Apple","name":"iPhone 8","key":"8","storage":"64gb","gb":64,"ti":50000,"iphone":true,"rank":2,"multi":true,"isBase":true,"w":0.15},{"id":"iphone-8-256gb-fu","brand":"Apple","name":"iPhone 8","key":"8","storage":"256gb","gb":256,"ti":55000,"iphone":true,"rank":2,"multi":true,"isBase":false,"w":0.15},{"id":"iphone-8-plus-64gb-fu","brand":"Apple","name":"iPhone 8 Plus","key":"8 Plus","storage":"64gb","gb":64,"ti":60000,"iphone":true,"rank":3,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-8-plus-256gb-fu","brand":"Apple","name":"iPhone 8 Plus","key":"8 Plus","storage":"256gb","gb":256,"ti":70000,"iphone":true,"rank":3,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-7-32gb-fu","brand":"Apple","name":"iPhone 7","key":"7","storage":"32gb","gb":32,"ti":35000,"iphone":true,"rank":0,"multi":true,"isBase":true,"w":0.15},{"id":"iphone-7-128gb-fu","brand":"Apple","name":"iPhone 7","key":"7","storage":"128gb","gb":128,"ti":40000,"iphone":true,"rank":0,"multi":true,"isBase":false,"w":0.15},{"id":"iphone-7-256gb-fu","brand":"Apple","name":"iPhone 7","key":"7","storage":"256gb","gb":256,"ti":40000,"iphone":true,"rank":0,"multi":true,"isBase":false,"w":0.15},{"id":"iphone-7-plus-32gb-fu","brand":"Apple","name":"iPhone 7 Plus","key":"7 Plus","storage":"32gb","gb":32,"ti":50000,"iphone":true,"rank":1,"multi":true,"isBase":true,"w":0.2},{"id":"iphone-7-plus-128gb-fu","brand":"Apple","name":"iPhone 7 Plus","key":"7 Plus","storage":"128gb","gb":128,"ti":55000,"iphone":true,"rank":1,"multi":true,"isBase":false,"w":0.2},{"id":"iphone-7-plus-256gb-fu","brand":"Apple","name":"iPhone 7 Plus","key":"7 Plus","storage":"256gb","gb":256,"ti":60000,"iphone":true,"rank":1,"multi":true,"isBase":false,"w":0.2},{"id":"galaxy-a73-128gb-nu","brand":"Samsung","name":"Galaxy A73","key":"Galaxy A73","storage":"128gb","gb":128,"ti":120000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a72-128gb-nu","brand":"Samsung","name":"Galaxy A72","key":"Galaxy A72","storage":"128gb","gb":128,"ti":110000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a71-128gb-nu","brand":"Samsung","name":"Galaxy A71","key":"Galaxy A71","storage":"128gb","gb":128,"ti":75000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a70-128gb-nu","brand":"Samsung","name":"Galaxy A70","key":"Galaxy A70","storage":"128gb","gb":128,"ti":75000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a53-128gb-nu","brand":"Samsung","name":"Galaxy A53","key":"Galaxy A53","storage":"128gb","gb":128,"ti":90000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a52-128gb-nu","brand":"Samsung","name":"Galaxy A52","key":"Galaxy A52","storage":"128gb","gb":128,"ti":85000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a51-128gb-nu","brand":"Samsung","name":"Galaxy A51","key":"Galaxy A51","storage":"128gb","gb":128,"ti":75000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a50-64gb-nu","brand":"Samsung","name":"Galaxy A50","key":"Galaxy A50","storage":"64gb","gb":64,"ti":60000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a33-64gb-nu","brand":"Samsung","name":"Galaxy A33","key":"Galaxy A33","storage":"64gb","gb":64,"ti":95000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a32-128gb-nu","brand":"Samsung","name":"Galaxy A32","key":"Galaxy A32","storage":"128gb","gb":128,"ti":80000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a31-64gb-nu","brand":"Samsung","name":"Galaxy A31","key":"Galaxy A31","storage":"64gb","gb":64,"ti":55000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a30-32gb-nu","brand":"Samsung","name":"Galaxy A30","key":"Galaxy A30","storage":"32gb","gb":32,"ti":55000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a23-64gb-nu","brand":"Samsung","name":"Galaxy A23","key":"Galaxy A23","storage":"64gb","gb":64,"ti":80000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a22-32gb-nu","brand":"Samsung","name":"Galaxy A22","key":"Galaxy A22","storage":"32gb","gb":32,"ti":65000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a21-32gb-nu","brand":"Samsung","name":"Galaxy A21","key":"Galaxy A21","storage":"32gb","gb":32,"ti":35000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"galaxy-a21-64gb-nu","brand":"Samsung","name":"Galaxy A21","key":"Galaxy A21","storage":"64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"galaxy-a20-32gb-nu","brand":"Samsung","name":"Galaxy A20","key":"Galaxy A20","storage":"32gb","gb":32,"ti":45000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a17-128gb-nu","brand":"Samsung","name":"Galaxy A17","key":"Galaxy A17","storage":"128gb","gb":128,"ti":100000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.3},{"id":"galaxy-a16-128gb-nu","brand":"Samsung","name":"Galaxy A16","key":"Galaxy A16","storage":"128gb","gb":128,"ti":85000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":1},{"id":"galaxy-a15-128gb-nu","brand":"Samsung","name":"Galaxy A15","key":"Galaxy A15","storage":"128gb","gb":128,"ti":70000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.7},{"id":"galaxy-a14-64gb-nu","brand":"Samsung","name":"Galaxy A14","key":"Galaxy A14","storage":"64gb","gb":64,"ti":60000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.3},{"id":"galaxy-a13-32gb-nu","brand":"Samsung","name":"Galaxy A13","key":"Galaxy A13","storage":"32gb","gb":32,"ti":30000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.2},{"id":"galaxy-a12-32gb-nu","brand":"Samsung","name":"Galaxy A12","key":"Galaxy A12","storage":"32gb","gb":32,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a10-32gb-nu","brand":"Samsung","name":"Galaxy A10","key":"Galaxy A10","storage":"32gb","gb":32,"ti":45000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"galaxy-a06-64gb-nu","brand":"Samsung","name":"Galaxy A06","key":"Galaxy A06","storage":"64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"galaxy-a06-128gb-nu","brand":"Samsung","name":"Galaxy A06","key":"Galaxy A06","storage":"128gb","gb":128,"ti":60000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"galaxy-a05-64gb-nu","brand":"Samsung","name":"Galaxy A05","key":"Galaxy A05","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"galaxy-a05-128gb-nu","brand":"Samsung","name":"Galaxy A05","key":"Galaxy A05","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"galaxy-a04s-64gb-nu","brand":"Samsung","name":"Galaxy A04s","key":"Galaxy A04s","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-50i-128gb-nu","brand":"Infinix","name":"Hot 50i","key":"Hot 50i","storage":"128gb","gb":128,"ti":55000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.2},{"id":"infinix-hot-40-128gb-nu","brand":"Infinix","name":"Hot 40","key":"Hot 40","storage":"128gb","gb":128,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"infinix-hot-40-256gb-nu","brand":"Infinix","name":"Hot 40","key":"Hot 40","storage":"256gb","gb":256,"ti":85000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"infinix-hot-40i-128gb-nu","brand":"Infinix","name":"Hot 40i","key":"Hot 40i","storage":"128gb","gb":128,"ti":55000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.2},{"id":"infinix-hot-30i-128gb-nu","brand":"Infinix","name":"Hot 30i","key":"Hot 30i","storage":"128gb","gb":128,"ti":55000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-12-64gb-nu","brand":"Infinix","name":"Hot 12","key":"Hot 12","storage":"64gb","gb":64,"ti":30000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"infinix-hot-12-128gb-nu","brand":"Infinix","name":"Hot 12","key":"Hot 12","storage":"128gb","gb":128,"ti":35000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"infinix-hot-8-3-32gb-nu","brand":"Infinix","name":"Hot 8","key":"Hot 8","storage":"3/32gb","gb":32,"ti":20000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-note-40-256gb-nu","brand":"Infinix","name":"Infinix Note 40","key":"Infinix Note 40","storage":"256gb","gb":256,"ti":130000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-note-30-128gb-nu","brand":"Infinix","name":"Infinix Note 30","key":"Infinix Note 30","storage":"128gb","gb":128,"ti":80000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-note-12i-128gb-nu","brand":"Infinix","name":"Infinix Note 12i","key":"Infinix Note 12i","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-smart-9-3-64gb-nu","brand":"Infinix","name":"Smart 9","key":"Smart 9","storage":"3/64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.4},{"id":"infinix-smart-9-4-64gb-nu","brand":"Infinix","name":"Smart 9","key":"Smart 9","storage":"4/64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.4},{"id":"infinix-smart-8-64gb-nu","brand":"Infinix","name":"Smart 8","key":"Smart 8","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.8},{"id":"infinix-smart-6-64gb-nu","brand":"Infinix","name":"Smart 6","key":"Smart 6","storage":"64gb","gb":64,"ti":30000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"tecno-camon-19-128gb-nu","brand":"Tecno","name":"Camon 19","key":"Camon 19","storage":"128gb","gb":128,"ti":60000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.2},{"id":"tecno-pop-9-64gb-nu","brand":"Tecno","name":"Pop 9","key":"Pop 9","storage":"64gb","gb":64,"ti":45000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.7},{"id":"tecno-pop-9-128gb-nu","brand":"Tecno","name":"Pop 9","key":"Pop 9","storage":"128gb","gb":128,"ti":60000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.7},{"id":"tecno-pop-8-64gb-nu","brand":"Tecno","name":"Pop 8","key":"Pop 8","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.5},{"id":"tecno-pop-8-128gb-nu","brand":"Tecno","name":"Pop 8","key":"Pop 8","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.5},{"id":"tecno-pop-7-3-64gb-nu","brand":"Tecno","name":"Pop 7","key":"Pop 7","storage":"3/64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"tecno-spark-30c-128gb-nu","brand":"Tecno","name":"Spark 30C","key":"Spark 30C","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.3},{"id":"tecno-spark-20-128gb-nu","brand":"Tecno","name":"Spark 20","key":"Spark 20","storage":"128gb","gb":128,"ti":55000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":1},{"id":"tecno-spark-20-256gb-nu","brand":"Tecno","name":"Spark 20","key":"Spark 20","storage":"256gb","gb":256,"ti":75000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":1},{"id":"tecno-spark-10c-128gb-nu","brand":"Tecno","name":"Spark 10C","key":"Spark 10C","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.4},{"id":"tecno-spark-9-64gb-nu","brand":"Tecno","name":"Spark 9","key":"Spark 9","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"tecno-spark-8c-64gb-nu","brand":"Tecno","name":"Spark 8C","key":"Spark 8C","storage":"64gb","gb":64,"ti":35000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"redmi-14c-128gb-nu","brand":"Xiaomi","name":"Redmi 14C","key":"Redmi 14C","storage":"128gb","gb":128,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.9},{"id":"redmi-14c-256gb-nu","brand":"Xiaomi","name":"Redmi 14C","key":"Redmi 14C","storage":"256gb","gb":256,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.9},{"id":"redmi-13c-64gb-nu","brand":"Xiaomi","name":"Redmi 13C","key":"Redmi 13C","storage":"64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.8},{"id":"redmi-13c-128gb-nu","brand":"Xiaomi","name":"Redmi 13C","key":"Redmi 13C","storage":"128gb","gb":128,"ti":55000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.8},{"id":"redmi-12-128gb-nu","brand":"Xiaomi","name":"Redmi 12","key":"Redmi 12","storage":"128gb","gb":128,"ti":70000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"redmi-a5-64gb-nu","brand":"Xiaomi","name":"Redmi A5","key":"Redmi A5","storage":"64gb","gb":64,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"redmi-a2-4-64gb-nu","brand":"Xiaomi","name":"Redmi A2+","key":"Redmi A2+","storage":"4/64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"redmi-note-14-6-128gb-nu","brand":"Xiaomi","name":"Redmi Note 14","key":"Redmi Note 14","storage":"6/128gb","gb":128,"ti":85000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.3},{"id":"redmi-note-14-8-256gb-nu","brand":"Xiaomi","name":"Redmi Note 14","key":"Redmi Note 14","storage":"8/256gb","gb":256,"ti":115000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.3},{"id":"redmi-note-12-8-128gb-nu","brand":"Xiaomi","name":"Redmi Note 12","key":"Redmi Note 12","storage":"8/128gb","gb":128,"ti":85000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"redmi-note-11-64gb-nu","brand":"Xiaomi","name":"Redmi Note 11","key":"Redmi Note 11","storage":"64gb","gb":64,"ti":60000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"redmi-note-11-128gb-nu","brand":"Xiaomi","name":"Redmi Note 11","key":"Redmi Note 11","storage":"128gb","gb":128,"ti":75000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"itel-a70-128gb-nu","brand":"Itel","name":"Itel A70","key":"Itel A70","storage":"128gb","gb":128,"ti":45000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"itel-p55-128gb-nu","brand":"Itel","name":"Itel P55","key":"Itel P55","storage":"128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"itel-p55-plus-128gb-nu","brand":"Itel","name":"Itel P55 Plus","key":"Itel P55 Plus","storage":"128gb","gb":128,"ti":40000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"itel-p55-plus-256gb-nu","brand":"Itel","name":"Itel P55 Plus","key":"Itel P55 Plus","storage":"256gb","gb":256,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"itel-s23-8-128gb-nu","brand":"Itel","name":"Itel S23","key":"Itel S23","storage":"8/128gb","gb":128,"ti":50000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"tecno-pop-8-pro-64gb-nu","brand":"Tecno","name":"Pop 8 Pro","key":"Pop 8 Pro","storage":"64gb","gb":64,"ti":45000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-smart-10-64gb-nu","brand":"Infinix","name":"Smart 10","key":"Smart 10","storage":"64gb","gb":64,"ti":55000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.3},{"id":"infinix-smart-10-128gb-nu","brand":"Infinix","name":"Smart 10","key":"Smart 10","storage":"128gb","gb":128,"ti":60000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.3},{"id":"itel-a50c-2-32gb-nu","brand":"Itel","name":"Itel A50C","key":"Itel A50C","storage":"2/32gb","gb":32,"ti":25000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-20i-64gb-nu","brand":"Infinix","name":"Hot 20i","key":"Hot 20i","storage":"64gb","gb":64,"ti":40000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-20-128gb-nu","brand":"Infinix","name":"Hot 20","key":"Hot 20","storage":"128gb","gb":128,"ti":45000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-30-128gb-nu","brand":"Infinix","name":"Hot 30","key":"Hot 30","storage":"128gb","gb":128,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"infinix-hot-30-256gb-nu","brand":"Infinix","name":"Hot 30","key":"Hot 30","storage":"256gb","gb":256,"ti":70000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"infinix-hot-40-pro-256gb-nu","brand":"Infinix","name":"Hot 40 Pro","key":"Hot 40 Pro","storage":"256gb","gb":256,"ti":85000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-50-128gb-nu","brand":"Infinix","name":"Hot 50","key":"Hot 50","storage":"128gb","gb":128,"ti":65000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"infinix-hot-50-256gb-nu","brand":"Infinix","name":"Hot 50","key":"Hot 50","storage":"256gb","gb":256,"ti":80000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15},{"id":"infinix-hot-60i-128gb-nu","brand":"Infinix","name":"Hot 60i","key":"Hot 60i","storage":"128gb","gb":128,"ti":70000,"iphone":false,"rank":-1,"multi":false,"isBase":true,"w":0.15},{"id":"infinix-hot-60-pro-plus-128gb-nu","brand":"Infinix","name":"Hot 60 Pro+","key":"Hot 60 Pro+","storage":"128gb","gb":128,"ti":130000,"iphone":false,"rank":-1,"multi":true,"isBase":true,"w":0.15},{"id":"infinix-hot-60-pro-plus-256gb-nu","brand":"Infinix","name":"Hot 60 Pro+","key":"Hot 60 Pro+","storage":"256gb","gb":256,"ti":140000,"iphone":false,"rank":-1,"multi":true,"isBase":false,"w":0.15}],"deductions":{"7":[14,8,24,23,null,null,null,10,12,11,12,11],"8":[16,11,32,28,10,9,null,15,12,11,14,11],"11":[29,24,43,52,29,12,43,null,14,17,21,22],"12":[34,26,48,87,32,16,48,null,18,19,23,22],"13":[39,38,76,111,51,18,76,null,23,22,29,24],"14":[44,44,91,146,61,19,91,null,26,28,33,28],"15":[49,61,138,182,92,29,138,null,29,31,37,31],"16":[74,79,237,220,120,44,180,null,44,47,56,47],"17":[99,133,399,572,172,59,258,null,58,62,74,62],"Air":[99,108,323,565,165,59,247,null,58,62,74,62],"17 Pro":[109,174,524,630,230,59,345,null,58,62,104,62],"17 Pro Max":[119,189,569,710,250,59,375,null,58,62,104,62],"16 Pro":[81,102,306,276,156,44,234,null,44,47,79,47],"16 Plus":[74,87,261,262,132,44,198,null,44,47,56,47],"16 Pro Max":[89,109,329,304,179,44,268,null,44,47,79,47],"15 Pro":[54,81,181,211,121,29,181,null,29,31,52,31],"15 Plus":[49,66,165,200,110,29,165,null,29,31,37,31],"15 Pro Max":[59,96,217,245,145,29,217,null,29,31,52,31],"14 Pro":[49,66,138,172,92,21,138,null,26,28,46,28],"14 Plus":[44,49,115,197,77,22,115,null,26,28,33,28],"14 Pro Max":[54,74,162,198,108,22,162,null,26,28,46,28],"13 mini":[34,31,67,120,45,18,67,null,23,22,29,24],"13 Pro":[44,49,102,148,68,18,102,null,23,22,41,24],"13 Pro Max":[49,54,115,152,77,22,115,null,23,22,41,24],"12 mini":[29,23,42,88,28,16,42,null,18,19,23,22],"12 Pro":[39,37,73,104,49,22,73,null,18,19,33,22],"12 Pro Max":[44,44,91,131,61,16,91,null,18,19,33,22],"11 Pro":[34,29,58,79,39,12,58,null,14,17,29,22],"11 Pro Max":[39,31,61,86,41,12,61,null,14,17,29,22],"X":[29,13,30,34,18,9,30,null,14,17,21,17],"XR":[29,21,33,42,22,12,33,null,14,17,18,17],"XS":[29,16,33,38,22,12,33,null,14,17,21,17],"XS Max":[29,17,37,45,25,12,37,null,14,17,21,17],"SE 2":[16,14,44,33,15,9,null,22,12,11,14,11],"SE 3":[17,17,51,35,17,9,null,25,12,11,14,11],"8 Plus":[17,12,36,31,12,9,null,18,12,11,18,11],"7 Plus":[16,9,29,28,null,null,null,15,12,11,14,11]},"patternStats":[{"pattern":"QUIZ","n":3,"med_views":171700,"mean_views":216900,"eng":5.398479148403358,"like":4.092782302871827,"com":0.2288192785328038,"sav":0.1685526648570407,"shr":0.09404456007301298,"tot_views":650700,"tot_com":1885,"tot_shr":559,"score":82.1},{"pattern":"PROVERB","n":3,"med_views":37800,"mean_views":61600,"eng":7.697716984807544,"like":5.519678224880537,"com":0.21353172605581083,"sav":0.4096839751945725,"shr":0.239358543790143,"tot_views":184800,"tot_com":279,"tot_shr":420,"score":68.8},{"pattern":"BUDGET","n":4,"med_views":147600,"mean_views":175050,"eng":4.127289285751044,"like":2.688153922732974,"com":0.32159918668650045,"sav":0.17672041982499234,"shr":0.04029898776952814,"tot_views":700200,"tot_com":2294,"tot_shr":292,"score":66.6},{"pattern":"TEASE","n":8,"med_views":54800,"mean_views":56091.25,"eng":4.545762123451441,"like":3.139768147782017,"com":0.15375613645134642,"sav":0.23761343938342272,"shr":0.15649956251617994,"tot_views":448730,"tot_com":608,"tot_shr":636,"score":48.2},{"pattern":"DEBATE","n":6,"med_views":34650,"mean_views":44633.333333333336,"eng":4.934085644091651,"like":3.847258629301973,"com":0.08704592477846948,"sav":0.25594874541503626,"shr":0.10459724987473243,"tot_views":267800,"tot_com":280,"tot_shr":294,"score":46.5},{"pattern":"POV","n":5,"med_views":17600,"mean_views":43960,"eng":5.313850683227088,"like":3.7638678335997557,"com":0.17009740549428107,"sav":0.2540688882134807,"shr":0.17718428557250906,"tot_views":219800,"tot_com":605,"tot_shr":688,"score":45.5},{"pattern":"ANCHOR","n":11,"med_views":66500,"mean_views":72963.63636363637,"eng":3.4443376069076335,"like":2.5783837858277785,"com":0.1026937655565551,"sav":0.19458719701987343,"shr":0.05623271012348093,"tot_views":802600,"tot_com":841,"tot_shr":453,"score":42.3},{"pattern":"PLAIN","n":9,"med_views":25800,"mean_views":45764.11111111111,"eng":4.110568295232403,"like":2.6592519387030644,"com":0.23821989434409754,"sav":0.26306083050761825,"shr":0.07017833749393633,"tot_views":411877,"tot_com":1320,"tot_shr":232,"score":38.1}],"posts":[{"img":"0996","posted":"2025-08-05","views":363300,"likes":9415,"comments":1075,"saves":462,"shares":120,"hook":"I want to Swap my android but my budget is 50K / Come collect this one","pattern":"BUDGET","eng":3.832645196807047},{"img":"0997","posted":"2025-05-14","views":147200,"likes":9369,"comments":507,"saves":627,"shares":566,"hook":"POV: You finally changed that your iPhone 11 (14 Pro unboxing)","pattern":"POV","eng":9.403532608695652},{"img":"0998","posted":"2025-12-15","views":251300,"likes":6424,"comments":960,"saves":474,"shares":141,"hook":"I want to swap my Android but my budget is 70K / Come collect this one","pattern":"BUDGET","eng":4.247910863509749},{"img":"0999","posted":"2026-05-28","views":120600,"likes":6012,"comments":154,"saves":407,"shares":149,"hook":"Na who never use 15 Pro go think say 16 Camera too good","pattern":"DEBATE","eng":6.413764510779436},{"img":"1001","posted":"2026-05-06","views":121100,"likes":4776,"comments":99,"saves":611,"shares":224,"hook":"I can't settle for less but you leave this sweet deal go buy 11","pattern":"PROVERB","eng":5.753096614368291},{"img":"1002","posted":"2025-07-02","views":194600,"likes":4352,"comments":900,"saves":274,"shares":65,"hook":"Oya rush come collect this sweet iPhone X Deal","pattern":"PLAIN","eng":4.005652620760534},{"img":"1003","posted":"2025-07-30","views":124400,"likes":4305,"comments":218,"saves":305,"shares":86,"hook":"You go buy XR for 250K ke? Wetin do this 128gb 11","pattern":"ANCHOR","eng":4.684083601286174},{"img":"1004","posted":"2025-10-14","views":120900,"likes":3811,"comments":129,"saves":231,"shares":95,"hook":"Try change that android make you sef see your true colors","pattern":"TEASE","eng":4.090157154673284},{"img":"1005","posted":"2025-07-05","views":110100,"likes":3065,"comments":120,"saves":281,"shares":92,"hook":"Pay 300K for iPhone 11 ke? Wetin do this iPhone 12","pattern":"ANCHOR","eng":3.8719346049046326},{"img":"1006","posted":"2025-12-15","views":32300,"likes":2180,"comments":14,"saves":42,"shares":2,"hook":"I don't know what's special about Dynamic Island / Collect this 14 Pro first e go clear","pattern":"DEBATE","eng":7.157894736842104},{"img":"1007","posted":"2025-05-30","views":37800,"likes":2178,"comments":112,"saves":179,"shares":184,"hook":"Money cant buy Happiness ke Buy this iPhone 13 first see if you no go get joy","pattern":"PROVERB","eng":9.058201058201059},{"img":"1008","posted":"2026-05-11","views":55000,"likes":2138,"comments":54,"saves":166,"shares":294,"hook":"Sweet boy but your home girl still dey use iPhone 13 / Show working fine boy","pattern":"TEASE","eng":6.38909090909091},{"img":"1009","posted":"2025-05-21","views":66500,"likes":1960,"comments":86,"saves":88,"shares":21,"hook":"Pay 300K for iPhone 11 ke? Just add 30K collect 12","pattern":"ANCHOR","eng":3.694736842105263},{"img":"1010","posted":"2026-03-31","views":52000,"likes":1881,"comments":120,"saves":166,"shares":61,"hook":"Fine girl time done reach make you swap that your X / Even iPhone 11 done reach 200K you still no want Swap?","pattern":"TEASE","eng":5.3},{"img":"1011","posted":"2026-04-07","views":54600,"likes":1836,"comments":149,"saves":192,"shares":62,"hook":"You go really talk why you never change that your Android / Even iPhone 11 sef done reach 195K","pattern":"TEASE","eng":5.225274725274725},{"img":"1012","posted":"2025-08-07","views":49900,"likes":1829,"comments":63,"saves":135,"shares":65,"hook":"Another one done drop oh 128gb 11 for 285K","pattern":"PLAIN","eng":4.975951903807616},{"img":"1013","posted":"2025-10-16","views":25900,"likes":1775,"comments":68,"saves":65,"shares":12,"hook":"XR no cost na you Dey find one wey look like 17 Pro Max","pattern":"PROVERB","eng":8.281853281853282},{"img":"1018","posted":"2025-10-14","views":82200,"likes":1754,"comments":40,"saves":134,"shares":60,"hook":"You go buy 11 Pro 330K ke? Wetin do this iPhone 13","pattern":"ANCHOR","eng":2.8248175182481754},{"img":"1019","posted":"2025-06-15","views":30800,"likes":1723,"comments":57,"saves":132,"shares":94,"hook":"POV: You finally Upgrade iPhone 16 in Pink (unboxing)","pattern":"POV","eng":7.922077922077922},{"img":"1020","posted":"2025-10-31","views":79600,"likes":1612,"comments":66,"saves":114,"shares":27,"hook":"220K for iPhone XR? Just add 10K collect this 11","pattern":"ANCHOR","eng":2.662060301507538},{"img":"1021","posted":"2025-07-08","views":62100,"likes":1594,"comments":84,"saves":127,"shares":39,"hook":"Leave that iPhone 11 come collect 11 Pro for 295K","pattern":"ANCHOR","eng":3.570048309178744},{"img":"1022","posted":"2025-07-09","views":66000,"likes":1591,"comments":69,"saves":58,"shares":26,"hook":"Fine girl that your android never tire you / Try come collect this sweet 128gb XR Deal","pattern":"TEASE","eng":3.018181818181818},{"img":"1033","posted":"2025-07-28","views":48900,"likes":1000,"comments":71,"saves":74,"shares":16,"hook":"Osim 'I don't like iPhone' we get deal for you oh","pattern":"PLAIN","eng":2.8813905930470347},{"img":"1034","posted":"2026-07-28","views":27400,"likes":963,"comments":42,"saves":96,"shares":28,"hook":"See iPhone 13 camera for 300K you say na 11 Pro you want","pattern":"ANCHOR","eng":4.981751824817518},{"img":"1023","posted":"2025-08-05","views":67600,"likes":1548,"comments":73,"saves":96,"shares":16,"hook":"You buy 11 290K ke? When this 11 Pro Deal Dey","pattern":"ANCHOR","eng":2.9689349112426036},{"img":"1024","posted":"2025-12-03","views":64500,"likes":1528,"comments":30,"saves":129,"shares":43,"hook":"That money you want use buy 13 better add 80K collect 14 / Abuja Delivery","pattern":"ANCHOR","eng":3.108527131782946},{"img":"1025","posted":"2025-07-23","views":54500,"likes":1414,"comments":48,"saves":95,"shares":29,"hook":"11 Pro Max camera sharp pass 12 but that one no really consign my customers","pattern":"ANCHOR","eng":3.36697247706422},{"img":"1026","posted":"2026-07-11","views":43900,"likes":1353,"comments":105,"saves":118,"shares":19,"hook":"I want to Swap my Android but my budget is 60K / Oya come collect ohh","pattern":"BUDGET","eng":4.466970387243736},{"img":"1027","posted":"2026-05-17","views":42400,"likes":1303,"comments":106,"saves":182,"shares":29,"hook":"See this Sweet Samsung Galaxy S24 going for 350K only!","pattern":"PLAIN","eng":4.886792452830189},{"img":"1028","posted":"2026-04-11","views":66900,"likes":1214,"comments":20,"saves":124,"shares":69,"hook":"Sweet boy but your hg dey use 13 Try do am 14 Pro abeg","pattern":"TEASE","eng":2.584454409566517},{"img":"1029","posted":"2026-01-10","views":40200,"likes":1212,"comments":34,"saves":106,"shares":53,"hook":"In anything you do this 2026 try use Dynamic Island","pattern":"DEBATE","eng":4.191542288557214},{"img":"1030","posted":"2025-06-13","views":37000,"likes":1132,"comments":38,"saves":152,"shares":51,"hook":"See iPad wey dey carry 2 camera no be that your 10th gen","pattern":"DEBATE","eng":4.602702702702702},{"img":"1031","posted":"2026-01-13","views":63700,"likes":1068,"comments":34,"saves":83,"shares":12,"hook":"You go buy 128gb 11 300K ke? Wetin do this iPhone 12","pattern":"ANCHOR","eng":2.1538461538461537},{"img":"1032","posted":"2026-02-16","views":41700,"likes":1052,"comments":154,"saves":51,"shares":12,"hook":"I want to Swap my Android but I only have 100K / Come collect we get two","pattern":"BUDGET","eng":3.961630695443645},{"img":"1035","posted":"2026-08-29","views":9030,"likes":462,"comments":16,"saves":30,"shares":21,"hook":"You go soon talk why you never change that your XR / iPhone 13 sef done reach 380K","pattern":"TEASE","eng":7.009966777408638},{"img":"1036","posted":"2026-02-10","views":156400,"likes":6408,"comments":124,"saves":378,"shares":84,"hook":"Difference Between iPhone 12 Pro & iPhone 13 (photo carousel: Forever an iPhone 13 fan. What side are you on?)","pattern":"QUIZ","eng":4.979539641943734},{"img":"1037","posted":"2025-09-26","views":171700,"likes":8565,"comments":225,"saves":309,"shares":298,"hook":"Between iPhone 13, 14 and 15. Can you tell the difference? / You no go fit get am correct no worry","pattern":"QUIZ","eng":6.262085032032615},{"img":"1038","posted":"2026-02-23","views":322600,"likes":10300,"comments":1536,"saves":271,"shares":177,"hook":"shebi you too sabi iPhone oya list all the 3 phones / Sure nobody can get all 3 phones correct","pattern":"QUIZ","eng":4.953812771233726},{"img":"1039","posted":"2025-07-16","views":25800,"likes":837,"comments":67,"saves":91,"shares":22,"hook":"Sweeet iPhone 12 Deal SOLD @299K / With Free Screenguard Free Pouch and Small Chops","pattern":"PLAIN","eng":4.984496124031008},{"img":"1040","posted":"2026-06-22","views":27500,"likes":755,"comments":37,"saves":84,"shares":25,"hook":"E no get wetin your 13 want do wey 13 mini no fit do","pattern":"DEBATE","eng":4.032727272727272},{"img":"1041","posted":"2025-11-15","views":24300,"likes":427,"comments":51,"saves":32,"shares":8,"hook":"Everybody done Swap to iPhone na only you remain ohhh (iOS transfer from Android)","pattern":"TEASE","eng":2.748971193415638},{"img":"1043","posted":"2025-10-21","views":17600,"likes":403,"comments":12,"saves":14,"shares":15,"hook":"POV: You finally swapped to an iPhone 16 (reply video)","pattern":"POV","eng":2.909090909090909},{"img":"1044","posted":"2026-07-09","views":8998,"likes":321,"comments":6,"saves":26,"shares":7,"hook":"Do you have iPhone 13 in Midnight Green? / I want iPhone 14 but it must be White (UK USED 14 and 13 available)","pattern":"PLAIN","eng":4.578795287841743},{"img":"1046","posted":"2025-10-09","views":20600,"likes":313,"comments":46,"saves":45,"shares":14,"hook":"We done drop 11 Pro Deal going for 275K only","pattern":"PLAIN","eng":2.830097087378641},{"img":"1047","posted":"2025-11-18","views":13300,"likes":276,"comments":8,"saves":13,"shares":5,"hook":"POV: You just moved from Fingerprint to Face ID (7 Plus to X)","pattern":"POV","eng":2.56390977443609},{"img":"1048","posted":"2025-11-11","views":10900,"likes":272,"comments":21,"saves":26,"shares":8,"hook":"POV: You finally changed your XR to iPhone 12","pattern":"POV","eng":3.7706422018348627},{"img":"1050","posted":"2025-10-09","views":10200,"likes":258,"comments":3,"saves":9,"shares":14,"hook":"This December na dynamic island or nothing","pattern":"DEBATE","eng":3.2058823529411766},{"img":"1051","posted":"2025-09-02","views":12000,"likes":254,"comments":29,"saves":19,"shares":8,"hook":"Let's Swap: iPhone Prices are dropping (13 to 14 Pro 480K)","pattern":"PLAIN","eng":3.3583333333333334},{"img":"1052","posted":"2025-05-31","views":8679,"likes":214,"comments":32,"saves":31,"shares":6,"hook":"iPhone Price done drop oh No say we no tell you","pattern":"PLAIN","eng":4.493605254061528}],"prices":[{"model":"iPhone 17","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"Brand New","price":1310000},{"model":"iPhone Air","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":1260000},{"model":"iPhone Air","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Brand New","price":1420000},{"model":"iPhone Air","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1150000},{"model":"iPhone Air","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":1320000},{"model":"iPhone Air","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":1100000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"Brand New","price":1740000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"512gb P/eSIM","gb":512,"cond":"Brand New","price":2030000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"Active","price":1650000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"Brand New","price":1890000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"512gb P/eSIM","gb":512,"cond":"Brand New","price":2240000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"Active","price":1820000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"512gb P/eSIM","gb":512,"cond":"Active","price":2000000},{"model":"iPhone 16","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":960000},{"model":"iPhone 16","brand":"Apple","type":"Phones","storage":"128gb P/eSIM","gb":128,"cond":"UK Used","price":790000},{"model":"iPhone 16","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":890000},{"model":"iPhone 16 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":1180000},{"model":"iPhone 16 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1280000},{"model":"iPhone 16 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":1030000},{"model":"iPhone 16 Plus","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":1000000},{"model":"iPhone 16 Plus","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1130000},{"model":"iPhone 16 Plus","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":870000},{"model":"iPhone 16 Plus","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":900000},{"model":"iPhone 16 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1380000},{"model":"iPhone 16 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":1180000},{"model":"iPhone 16 Pro Max","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"UK Used","price":1270000},{"model":"iPhone 15","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":650000},{"model":"iPhone 15","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":710000},{"model":"iPhone 15","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":610000},{"model":"iPhone 15","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":690000},{"model":"iPhone 15 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":850000},{"model":"iPhone 15 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":920000},{"model":"iPhone 15 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":800000},{"model":"iPhone 15 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":870000},{"model":"iPhone 15 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1030000},{"model":"iPhone 15 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":960000},{"model":"iPhone 14","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":440000},{"model":"iPhone 14","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":510000},{"model":"iPhone 14 Pro","brand":"Apple","type":"Phones","storage":"128gb P/eSIM","gb":128,"cond":"UK Used","price":660000},{"model":"iPhone 14 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":700000},{"model":"iPhone 14 Pro Max","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":750000},{"model":"iPhone 14 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":800000},{"model":"iPhone 13 mini","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":340000},{"model":"iPhone 13","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":380000},{"model":"iPhone 13","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":410000},{"model":"iPhone 13 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":490000},{"model":"iPhone 13 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":530000},{"model":"iPhone 12 mini","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":230000},{"model":"iPhone 12","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":260000},{"model":"iPhone 12","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":305000},{"model":"iPhone 12 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":370000},{"model":"iPhone 12 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":390000},{"model":"iPhone 12 Pro Max","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":440000},{"model":"iPhone 12 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":490000},{"model":"iPhone 11","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":235000},{"model":"iPhone 11","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":270000},{"model":"iPhone 11 Pro","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":290000},{"model":"iPhone 11 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":320000},{"model":"iPhone 11 Pro Max","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":310000},{"model":"iPhone 11 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":350000},{"model":"iPhone XR","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":200000},{"model":"iPhone XR","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":235000},{"model":"iPhone XR","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":240000},{"model":"iPhone SE (2nd Gen)","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":150000},{"model":"iPhone SE (2nd Gen)","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":170000},{"model":"iPhone SE (3rd Gen)","brand":"Apple","type":"Phones","storage":"64gb","gb":64,"cond":"UK Used","price":170000},{"model":"iPhone SE (3rd Gen)","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":220000},{"model":"Galaxy S26 Ultra","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1330000},{"model":"Galaxy S25 Ultra","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1060000},{"model":"Galaxy S25 Ultra","brand":"Samsung","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":1160000},{"model":"Galaxy S24 Ultra","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":860000},{"model":"Galaxy S22","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":320000},{"model":"Galaxy S22 Ultra","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":520000},{"model":"Galaxy S21","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":260000},{"model":"Galaxy S21","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":260000},{"model":"Galaxy S21 Ultra","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":370000},{"model":"Galaxy S20","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":240000},{"model":"Galaxy S10","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":240000},{"model":"Galaxy S10e","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":200000},{"model":"Galaxy Z Fold 6","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":1000000},{"model":"Galaxy Z Fold 6","brand":"Samsung","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":1060000},{"model":"Galaxy Z Fold 5","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":710000},{"model":"Galaxy Z Fold 5","brand":"Samsung","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":760000},{"model":"Galaxy Z Fold 4","brand":"Samsung","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":560000},{"model":"Galaxy Z Fold 4","brand":"Samsung","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":610000},{"model":"Pixel 10","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":1000000},{"model":"Pixel 10","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"Brand New","price":970000},{"model":"Pixel 10 Pro","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"Brand New","price":920000},{"model":"Pixel 10 Pro","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":1130000},{"model":"Pixel 9","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":670000},{"model":"Pixel 9","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":570000},{"model":"Pixel 9 Pro","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":770000},{"model":"Pixel 9 Pro","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":670000},{"model":"Pixel 9 Pro","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":770000},{"model":"Pixel 9 Pro XL","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":820000},{"model":"Pixel 9 Pro XL","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":870000},{"model":"Pixel 9 Pro XL","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":720000},{"model":"Pixel 9 Pro XL","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":770000},{"model":"Pixel 8","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":420000},{"model":"Pixel 8 Pro","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":520000},{"model":"Pixel 7","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":320000},{"model":"Pixel 7","brand":"Google","type":"Phones","storage":"256gb","gb":256,"cond":"UK Used","price":370000},{"model":"Pixel 7 Pro","brand":"Google","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":420000},{"model":"iPad 10.9-inch (10th Gen)","brand":"Apple","type":"Tablets","storage":"64gb","gb":64,"cond":"Active","price":490000},{"model":"iPad 10.9-inch (10th Gen)","brand":"Apple","type":"Tablets","storage":"256gb","gb":256,"cond":"Active","price":610000},{"model":"iPad 11-inch (11th Gen)","brand":"Apple","type":"Tablets","storage":"128gb","gb":128,"cond":"Active","price":630000},{"model":"iPad 11-inch (11th Gen)","brand":"Apple","type":"Tablets","storage":"256gb","gb":256,"cond":"Active","price":760000},{"model":"Apple Watch Series 11","brand":"Apple","type":"Watches","storage":"46mm","gb":0,"cond":"Brand New","price":540000},{"model":"AirPods 4","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":200000},{"model":"AirPods 4 with Active Noise Cancellation","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":270000},{"model":"AirPods Pro 2","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":290000},{"model":"AirPods Pro 3","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":320000},{"model":"JBL Charge 5","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":200000},{"model":"JBL Charge 6","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":200000},{"model":"JBL Flip 6","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":155000},{"model":"JBL Flip 7","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":160000},{"model":"JBL Xtreme 4","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":400000},{"model":"Harman Kardon Onyx Studio 9","brand":"Harman Kardon","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":300000},{"model":"iPhone 18 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":2050000},{"model":"iPhone 18 Pro","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":2350000},{"model":"iPhone 18 Pro Max","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Active","price":2750000},{"model":"iPhone 18 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":2500000},{"model":"iPhone 18 Pro Max","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Brand New","price":2850000},{"model":"iPhone 16","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Brand New","price":1030000},{"model":"iPhone 16 Plus","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Brand New","price":1130000},{"model":"iPhone 16 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":1330000},{"model":"iPhone 14 Pro","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":690000},{"model":"iPhone 14 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":740000},{"model":"iPhone 14 Pro Max","brand":"Apple","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":770000},{"model":"iPhone 14 Pro Max","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Active","price":860000},{"model":"iPhone 12 Pro Max","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"UK Used","price":510000},{"model":"iPhone 13 Pro","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"UK Used","price":550000},{"model":"Galaxy S22 Ultra","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Active","price":480000},{"model":"Galaxy S24","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":450000},{"model":"Galaxy A17","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"Brand New","price":278000},{"model":"Galaxy A07","brand":"Samsung","type":"Phones","storage":"64gb","gb":64,"cond":"Brand New","price":178000},{"model":"Galaxy S22","brand":"Samsung","type":"Phones","storage":"128gb","gb":128,"cond":"UK Used","price":300000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb eSIM only","gb":256,"cond":"Brand New","price":1640000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"256gb eSIM only","gb":256,"cond":"Brand New","price":1770000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb eSIM only","gb":256,"cond":"Active","price":1460000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"512gb eSIM only","gb":512,"cond":"Active","price":1550000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"512gb Dual SIM","gb":512,"cond":"Active","price":1820000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"256gb eSIM only","gb":256,"cond":"Active","price":1680000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"256gb Dual SIM","gb":256,"cond":"Active","price":1780000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"512gb eSIM only","gb":512,"cond":"Active","price":1900000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb P/eSIM","gb":256,"cond":"UK Used","price":1520000},{"model":"iPhone 17 Pro","brand":"Apple","type":"Phones","storage":"256gb eSIM only","gb":256,"cond":"UK Used","price":1360000},{"model":"iPhone 17 Pro Max","brand":"Apple","type":"Phones","storage":"512gb eSIM only","gb":512,"cond":"UK Used","price":1650000},{"model":"iPhone 18 Pro","brand":"Apple","type":"Phones","storage":"256gb","gb":256,"cond":"Brand New","price":2100000},{"model":"iPhone 18 Pro","brand":"Apple","type":"Phones","storage":"512gb","gb":512,"cond":"Brand New","price":2430000},{"model":"iPhone 16","brand":"Apple","type":"Phones","storage":"128gb eSIM only","gb":128,"cond":"UK Used","price":750000},{"model":"iPhone 14 Pro","brand":"Apple","type":"Phones","storage":"128gb eSIM only","gb":128,"cond":"UK Used","price":590000},{"model":"iPad Air 10.9-inch (4th Gen)","brand":"Apple","type":"Tablets","storage":"64gb","gb":64,"cond":"UK Used","price":400000},{"model":"iPad 10.9-inch (10th Gen)","brand":"Apple","type":"Tablets","storage":"64gb","gb":64,"cond":"UK Used","price":410000},{"model":"iPad 11-inch (11th Gen)","brand":"Apple","type":"Tablets","storage":"128gb Cellular","gb":128,"cond":"UK Used","price":560000},{"model":"iPad Pro 11-inch (M5)","brand":"Apple","type":"Tablets","storage":"256gb Cellular","gb":256,"cond":"Brand New","price":1650000},{"model":"Apple Pencil (USB-C)","brand":"Apple","type":"Accessories","storage":"","gb":0,"cond":"Brand New","price":160000},{"model":"AirPods 3","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":190000},{"model":"AirPods 5 (Wireless Charging Case)","brand":"Apple","type":"AirPods","storage":"","gb":0,"cond":"Brand New","price":310000},{"model":"JBL Grip","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":150000},{"model":"Starlink Mini","brand":"Starlink","type":"Accessories","storage":"","gb":0,"cond":"Brand New","price":460000},{"model":"JBL Boombox 4","brand":"JBL","type":"Speakers","storage":"","gb":0,"cond":"Brand New","price":700000}],"deals":[{"id":"deal-011","model":"iPhone 14 Pro Max","storage":"256gb","gb":256,"grade":"","diff":"No Face ID","price":400000,"status":"Sold","listed":"","notes":"Moved","type":"Phones","brand":"Apple","series":"iPhone 14","onsite":"No","std":{"uk":800000,"active":860000,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":400000,"pct":50}},{"id":"deal-012","model":"iPhone Air","storage":"256gb","gb":256,"grade":"","diff":"89% battery health, Gold","price":1060000,"status":"Available","listed":"5 Oct 2026","notes":"Added 5 Oct (Daniel).","type":"Phones","brand":"Apple","series":"iPhone 17","onsite":"Yes","std":{"uk":1100000,"active":1150000,"bn":1260000,"primary":"uk","primaryLabel":"UK Used","save":40000,"pct":4}},{"id":"deal-013","model":"iPhone XS","storage":"64gb","gb":64,"grade":"","diff":"No Face ID, new battery, Silver","price":130000,"status":"Available","listed":"5 Oct 2026","notes":"Added 5 Oct (Daniel).","type":"Phones","brand":"Apple","series":"iPhone X","onsite":"Yes","std":{"uk":null,"active":null,"bn":null,"primary":null,"primaryLabel":null,"save":0,"pct":0}},{"id":"deal-014","model":"iPhone 13","storage":"128gb","gb":128,"grade":"","diff":"75% battery health, Midnight","price":310000,"status":"Available","listed":"5 Oct 2026","notes":"Added 5 Oct (Daniel).","type":"Phones","brand":"Apple","series":"iPhone 13","onsite":"Yes","std":{"uk":380000,"active":null,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":70000,"pct":18}},{"id":"deal-015","model":"iPhone 13","storage":"256gb","gb":256,"grade":"","diff":"73% battery health","price":335000,"status":"Available","listed":"7 Oct 2026","notes":"Added 7 Oct (Daniel).","type":"Phones","brand":"Apple","series":"iPhone 13","onsite":"Yes","std":{"uk":410000,"active":null,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":75000,"pct":18}},{"id":"deal-016","model":"iPhone 14 Plus","storage":"128gb","gb":128,"grade":"","diff":"80% battery health","price":500000,"status":"Available","listed":"7 Oct 2026","notes":"Added 7 Oct (Daniel).","type":"Phones","brand":"Apple","series":"iPhone 14","onsite":"Yes","std":{"uk":null,"active":null,"bn":null,"primary":null,"primaryLabel":null,"save":0,"pct":0}},{"id":"deal-017","model":"iPhone XS Max","storage":"64gb","gb":64,"grade":"","diff":"100% battery health, cracked back","price":170000,"status":"Available","listed":"7 Oct 2026","notes":"Added","type":"Phones","brand":"Apple","series":"iPhone X","onsite":"Yes","std":{"uk":null,"active":null,"bn":null,"primary":null,"primaryLabel":null,"save":0,"pct":0}},{"id":"deal-018","model":"iPhone XR","storage":"64gb","gb":64,"grade":"","diff":"100% battery health (new), neatness 10/10","price":169000,"status":"Available","listed":"6 Oct 2026","notes":"Added","type":"Phones","brand":"Apple","series":"iPhone X","onsite":"Yes","std":{"uk":200000,"active":null,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":31000,"pct":16}},{"id":"deal-019","model":"iPhone 12 Pro Max","storage":"128gb","gb":128,"grade":"","diff":"88% battery health","price":400000,"status":"Available","listed":"7 Oct 2026","notes":"Added","type":"Phones","brand":"Apple","series":"iPhone 12","onsite":"Yes","std":{"uk":440000,"active":null,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":40000,"pct":9}},{"id":"deal-020","model":"iPhone 12 Pro Max","storage":"128gb","gb":128,"grade":"","diff":"83% battery health, new screen","price":360000,"status":"Available","listed":"7 Oct 2026","notes":"Added","type":"Phones","brand":"Apple","series":"iPhone 12","onsite":"Yes","std":{"uk":440000,"active":null,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":80000,"pct":18}},{"id":"deal-021","model":"Galaxy S10 Plus","storage":"128gb","gb":128,"grade":"","diff":"Cracked back and screen","price":119000,"status":"Available","listed":"5 Oct 2026","notes":"Added","type":"Phones","brand":"Samsung","series":"Galaxy S10","onsite":"Yes","std":{"uk":null,"active":null,"bn":null,"primary":null,"primaryLabel":null,"save":0,"pct":0}},{"id":"deal-022","model":"Galaxy S10e","storage":"128gb","gb":128,"grade":"","diff":"6GB RAM","price":169000,"status":"Available","listed":"6 Oct 2026","notes":"Added","type":"Phones","brand":"Samsung","series":"Galaxy S10","onsite":"Yes","std":{"uk":null,"active":200000,"bn":null,"primary":"active","primaryLabel":"Active","save":31000,"pct":16}},{"id":"deal-023","model":"Apple Watch Ultra","storage":"49mm","gb":0,"grade":"","diff":"93% battery health, GPS + LTE","price":400000,"status":"Available","listed":"5 Oct 2026","notes":"Added","type":"Watches","brand":"Apple","series":"Apple Watch Ultra","onsite":"Yes","std":{"uk":null,"active":null,"bn":null,"primary":null,"primaryLabel":null,"save":0,"pct":0}},{"id":"deal-024","model":"iPad 10.9-inch (10th Gen)","storage":"64gb","gb":64,"grade":"","diff":"WiFi, pouch included","price":360000,"status":"Available","listed":"5 Oct 2026","notes":"Added","type":"Tablets","brand":"Apple","series":"iPad","onsite":"Yes","std":{"uk":410000,"active":490000,"bn":null,"primary":"uk","primaryLabel":"UK Used","save":50000,"pct":12}}]};</script>
+<script>/* SwapDesk TikTok Caption Engine: pure logic. Needs global DATA (see data.js). */
+(function (root) {
+  'use strict';
+
+  /* ---------- helpers ---------- */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function fmtK(n) {
+    if (n >= 1000000) { return (+(n / 1000000).toFixed(3)) + 'M'; }
+    return Math.round(n / 1000) + 'K';
+  }
+  function naira(n) { return '₦' + fmtK(n); }
+  function ceilTo(n, step) { return Math.ceil(n / step) * step; }
+  function clean(s) { return s.replace(/—/g, ',').replace(/–/g, '-').replace(/ +/g, ' ').replace(/ ,/g, ',').trim(); }
+
+  var WHATSAPP = '0703 785 3959';
+
+  /* ---------- labels ---------- */
+  function srcLabel(s) {
+    if (s.iphone) return s.key;               // "12", "XR", "11 Pro"
+    return s.name.replace('Galaxy ', '');      // "A16", "Redmi 14C", "Spark 20"
+  }
+  function srcFull(s) { return s.iphone ? 'iPhone ' + s.key : srcLabel(s); }
+  function tName(t) { return t.name; }
+  function tKey(t) { return t.key; }
+  function tFull(t) { return t.name + ' ' + t.storage + ' (' + t.cond + ')'; }
+  function tShort(t) { return t.name + ' ' + t.storage; }
+
+  /* ---------- pools ---------- */
+  function Pool(D) {
+    this.D = D;
+    this.targets = D.targets;
+    this.sources = D.sources;
+    this.iTargets = D.targets.filter(function (t) { return t.brand === 'Apple'; });
+  }
+  Pool.prototype.topups = function (t, opts) {
+    opts = opts || {};
+    var min = opts.min || 20000;
+    return this.sources.filter(function (s) {
+      if (opts.iphone === true && !s.iphone) return false;
+      if (opts.iphone === false && s.iphone) return false;
+      if (s.iphone && t.brand === 'Apple' && s.rank >= t.rank) return false;
+      if (opts.base && !s.isBase) return false;
+      return (t.price - s.ti) >= min;
+    }).map(function (s) { return { s: s, top: t.price - s.ti }; });
+  };
+
+  function wpick(r, items, wf) {
+    var tot = 0, i;
+    for (i = 0; i < items.length; i++) tot += wf(items[i]);
+    if (tot <= 0) return items[Math.floor(r() * items.length)];
+    var x = r() * tot;
+    for (i = 0; i < items.length; i++) { x -= wf(items[i]); if (x <= 0) return items[i]; }
+    return items[items.length - 1];
+  }
+  function pick(r, arr) { return arr[Math.floor(r() * arr.length)]; }
+  function shuffle(r, arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  // choose n sources (distinct model) weighted by popularity; returns [{s,top}] sorted by top ascending
+  function pickLines(r, list, n) {
+    var left = list.slice(), out = [], seen = {};
+    while (out.length < n && left.length) {
+      var c = wpick(r, left, function (x) { return Math.max(0.05, x.s.w); });
+      left = left.filter(function (x) { return x !== c; });
+      var k = c.s.name;
+      if (seen[k]) continue;
+      seen[k] = 1; out.push(c);
+    }
+    out.sort(function (a, b) { return a.top - b.top; });
+    return out;
+  }
+  function lineText(x) { return fmtK(x.top) + ' with ' + srcLabel(x.s); }
+
+  /* ---------- facts (only safe, well known ones) ---------- */
+  var FEATS = {
+    '12': ['OLED screen', '5G'],
+    '12 Pro': ['OLED screen', '5G', 'LiDAR scanner'],
+    '13': ['smaller notch'],
+    '14 Pro': ['Dynamic Island', '48MP camera', 'always-on display'],
+    '14 Pro Max': ['Dynamic Island', '48MP camera', 'always-on display'],
+    '15': ['USB-C', 'Dynamic Island', '48MP camera'],
+    '15 Pro': ['USB-C', 'titanium body', 'Action Button'],
+    '15 Pro Max': ['USB-C', 'titanium body', '5x zoom'],
+    '16': ['Camera Control button', 'Action Button', 'USB-C'],
+    '16 Pro': ['Camera Control button', 'USB-C', 'bigger screen'],
+    '11': ['Night mode', 'two cameras'],
+    '11 Pro': ['three cameras', 'OLED screen']
+  };
+  function feat(r, key) { var f = FEATS[key]; return f ? pick(r, f) : null; }
+
+  /* ---------- text banks ---------- */
+  // Relatable lines for the normal caption. Everyone's phone life, no product claims.
+  var OBS = [
+    'Charging at 1% and still replying "on my way".',
+    'Nobody warns you that the phone will die at 2pm, the one day you left your charger at home.',
+    'Someone collects your phone to take a picture and says "ah, this camera is a bit tired". In front of everybody.',
+    'You have been saying "I will change it next month" since last year.',
+    'Group photo at the wedding, everybody looks fine, you look like a missing person poster.',
+    'You send a picture on WhatsApp and the person replies "which one is that?"',
+    'The phone says 7%. The charger is in the other room. Your courage is also gone.',
+    'The screen protector cracked before the phone did and you are still calling it a "small crack".',
+    'Every time you open the camera it needs two minutes of prayer.',
+    'You delete five apps to take one video, then the video also refuses to save.',
+    'Borrowing a charger like it is a family heirloom.',
+    'Your phone hangs while you are typing "I am almost there".',
+    'Saying "it is still working" is not the same as it is working.',
+    'You get a new notification and the phone thinks about it for ten seconds.'
+  ];
+  var BAIT_OPEN = [
+    'What phone are you using right now? Be honest.',
+    'Drop the phone you are using, I will tell you the swap price.',
+    'Tell me the phone, I will do the maths in the comments.',
+    'Which phone are you carrying right now? No lies.',
+    'Comment your phone and I will tell you how much to swap.'
+  ];
+  var BAIT_TAG = [
+    'Tag the friend who still says "it is still working".',
+    'Send this to the friend whose phone is on 3%.',
+    'Tag that friend. You know the one.',
+    'Send this to the person who needs to see it, and no, it is not you. Okay maybe it is you.'
+  ];
+  var BAIT_DEBATE = [
+    'Pick a side in the comments. No fence sitting.',
+    'Who is wrong here? Fight in the comments.',
+    'Say your own and defend it.'
+  ];
+  var BAIT_QUIZ = [
+    'Drop your answers, then see how many you got.',
+    'Comment A, B, C. No Googling.',
+    'Be honest, how many did you get right?'
+  ];
+
+  var OPEN_QUIZ = [
+    'Spot the difference is harder than it looks. Comment your answers.',
+    'Some of you will say you knew all of them. We will check.',
+    'I will wait. Take your time.'
+  ];
+  var OPEN_DEBATE = [
+    'I have strong opinions and I am not hiding them.',
+    'This one will divide the family WhatsApp group.',
+    'There is no wrong answer. There is only a wrong person.'
+  ];
+  var PINS = [
+    'Reply with your phone, its storage and battery health. I will give you the exact top-up.',
+    'Tell me the phone you want to swap from and I will reply with the price.',
+    'Want your own price? Drop your phone model and I will work it out for you.'
+  ];
+  function fresh(r, arr, used, key) {
+    var f = arr.filter(function (x) { return !used[key + x]; });
+    var c = pick(r, f.length ? f : arr); used[key + c] = 1; return c;
+  }
+
+  /* ---------- pattern definitions ---------- */
+  // Each template: {p:true|false (pidgin), t:'text with {slots}'}
+  var T = {};
+
+  T.QUIZ = {
+    hooks: [
+      { p: 0, h: 'Can you name these {n} iPhones without checking?', s: 'No Googling o. Comment your answers' },
+      { p: 0, h: 'Only a real iPhone person can get all {n} correct', s: 'Look well before you answer' },
+      { p: 0, h: 'Between iPhone {ks}, can you tell which is which?', s: 'Be honest, how many did you get?' },
+      { p: 1, h: 'Shebi you sabi iPhone? Oya name all {n}', s: 'Nobody will get all {n}, I am sure' },
+      { p: 0, h: 'Two of these look exactly alike. Which two?', s: 'Comment before you scroll' },
+      { p: 0, h: 'You say you know iPhones. Prove it', s: '{n} phones. One chance. Go' },
+      { p: 0, h: 'Quick one: name these {n} phones in 10 seconds', s: 'Timer starts now' }
+    ]
+  };
+
+  T.PROVERB = {
+    hooks: [
+      { p: 0, h: 'They say money cannot buy happiness. Go and buy {aT} first, then come back and tell me', s: 'Come and see it before you argue', needT: 1 },
+      { p: 0, h: 'They say cheap is expensive. That {S} that hangs on WhatsApp is the proof', s: 'Come and swap it for {aT}', needS: 1 },
+      { p: 0, h: 'No condition is permanent. Even that {S} will retire one day', s: 'Retire it with dignity. Swap it for {aT}', needS: 1 },
+      { p: 1, h: '{S} no bad, na your expectation dey carry fuel', s: 'Try the {T} and see the difference', needS: 1 },
+      { p: 0, h: 'Patience pays, but your {S} battery has not read that proverb', s: 'Swap to {aT}', needS: 1 },
+      { p: 0, h: 'Whoever said you cannot have everything has never held {aT}', s: 'Okay maybe not everything, but a lot', needT: 1 },
+      { p: 1, h: 'Slow and steady wins the race. Not when the race is you opening camera on {S}', s: 'Pass me that phone make I show you {T}', needS: 1 },
+      { p: 0, h: 'Old is gold, but not when it is 11pm and your {S} is on 4%', s: 'Come and see {aT}', needS: 1 },
+      { p: 0, h: 'A stitch in time saves nine. A swap in time saves your pocket', s: 'Come and see {aT}', needT: 1 }
+    ]
+  };
+
+  T.BUDGET = {
+    hooks: [
+      { p: 0, h: 'I want to swap my {SA} but my budget is {B}', s: 'Come collect this one' },
+      { p: 0, h: 'I only have {B} and my {SA} has seen things', s: 'Come, we have {N} options' },
+      { p: 0, h: 'POV: you walk in with {B} and an old {SA}', s: 'And you leave with {aT}' },
+      { p: 1, h: 'Abeg I want to swap my {SA}, I only get {B}', s: 'Oya come collect this one' },
+      { p: 0, h: '{B} and a dream. Let us see how far it goes', s: 'Spoiler: it goes to {aT}' },
+      { p: 0, h: 'My budget is {B}, my {SA} is tired, and my patience is finished', s: 'Come collect this one' },
+      { p: 0, h: 'Customer: "my budget is {B}"', s: 'Me: "come, I have {aT}"' },
+      { p: 0, h: 'I am not broke, I am budgeting. Budget is {B}', s: 'Come collect this one' }
+    ]
+  };
+
+  T.TEASE = {
+    hooks: [
+      { p: 0, h: 'Fine girl, your {S} is turning every picture into CCTV footage', s: 'Time to swap it', needS: 1 },
+      { p: 0, h: 'Sweet boy, that storage full notification has been in your life longer than your last relationship', s: 'This is your sign to swap', needS: 0 },
+      { p: 1, h: 'Sweet boy but your {S} dey embarrass your fine face', s: 'Try this {T} abeg', needS: 1 },
+      { p: 0, h: 'Your {S} is not a phone anymore, it is a power bank with notifications', s: 'Come swap it for {aT}', needS: 1 },
+      { p: 0, h: 'Friend: "why are you still using {S}?" Me: "it is still working"', s: 'The phone: "please let me rest"', needS: 1 },
+      { p: 0, h: 'Imagine still holding your {S} while {T} is {P}', s: 'Check the swap list', needS: 1, needT: 1 },
+      { p: 1, h: 'You go really talk why you never change that your {S}', s: 'Come and see {T}, it is {P}', needS: 1, needT: 1 },
+      { p: 0, h: 'Fine girl, your {S} has done enough. Let it retire', s: 'Swap it for {aT}', needS: 1 },
+      { p: 0, h: 'Sweet boy, your {S} has survived more drops than your last three relationships', s: 'Let it rest. Swap for {aT}', needS: 1 },
+      { p: 0, h: 'If your {S} could talk, it would beg you to swap', s: 'It has been through enough', needS: 1 }
+    ]
+  };
+
+  T.ANCHOR = {
+    hooks: [
+      { p: 1, h: 'You go buy {A} for {PA} ke? Wetin do this {T}', s: '{F}', cmp: 1 },
+      { p: 0, h: '{A} for {PA} or {T} for {PT}. Choose well', s: 'It is only {D} difference', cmp: 1 },
+      { p: 0, h: 'You are about to pay {PA} for the {A}?', s: 'See this {T} for {PT} first', cmp: 1 },
+      { p: 0, h: 'The market is not serious. {A} is {PA} and {T} is {PT}', s: '{F}', cmp: 1, needF: 1 },
+      { p: 0, h: 'Why are you buying {A} when {T} is just {D} more?', s: '{F}', cmp: 1, needF: 1 },
+      { p: 1, h: 'Leave that {A}. Come collect {T} for {PT}', s: 'Swap accepted', cmp: 1 }
+    ]
+  };
+
+  T.DEBATE = {
+    hooks: [
+      { p: 0, h: 'Notch or Dynamic Island? Be honest', s: 'Pick a side in the comments', type: 'notch' },
+      { p: 0, h: 'Flat edges or round edges? Choose your side', s: 'iPhone 11 vs iPhone 12, go', type: 'edges' },
+      { p: 0, h: 'Unpopular opinion: the iPhone 13 mini is still the best small iPhone', s: 'Fight me in the comments', type: 'mini' },
+      { p: 0, h: 'Lightning or USB-C? Your charger drawer knows the answer', s: 'iPhone 14 vs iPhone 15', type: 'usbc' },
+      { p: 0, h: 'Team {A} or Team {T}?', s: '{F}', type: 'teams', needF: 1 },
+      { p: 1, h: 'Na who never use {T} go talk say {A} better pass', s: 'Defend your own in the comments', type: 'teams' },
+      { p: 0, h: 'Is the {T} really better than the {A}?', s: 'Convince me in the comments', type: 'teams' },
+      { p: 0, h: 'Touch ID will always have a place in my heart', s: 'Or is it just me?', type: 'touchid' },
+      { p: 0, h: 'Hot take: the camera is the only thing that matters in a phone', s: 'Defend it in the comments', type: 'teams' }
+    ]
+  };
+
+  T.POV = {
+    hooks: [
+      { p: 0, h: 'POV: you finally changed that {S} of yours', s: 'Even the old phone is proud of you' },
+      { p: 0, h: 'POV: you have been saying "next month" since last year', s: 'This is your sign' },
+      { p: 0, h: 'POV: your {S} just watched you walk out with {aT}', s: 'It will be fine. It had a good run' },
+      { p: 0, h: 'POV: you just got your {T} and your friends are pretending not to notice', s: 'They noticed' },
+      { p: 0, h: 'POV: you moved from {S} to {T} and found out your camera roll has colours', s: 'Welcome' },
+      { p: 1, h: 'POV: you finally swap that your {S}', s: 'Nobody believed you go do am' },
+      { p: 0, h: 'POV: your old {S} is looking at you from the drawer after the swap', s: 'It knew this day would come' },
+      { p: 0, h: 'POV: you walked in with a cracked {S} and walked out with {aT}', s: 'Your pocket feels different already' }
+    ]
+  };
+
+  T.PLAIN = {
+    hooks: [
+      { p: 0, h: '{T} {ST}. {P}', s: 'Swaps accepted' },
+      { p: 0, h: 'See this sweet {T} for {P} only', s: 'Swaps accepted' },
+      { p: 1, h: 'Another one don land oh. {T} for {P}', s: 'Oya come collect' },
+      { p: 0, h: 'This {T} has been looking fine and waiting for you to stop dodging', s: '{P}. Swaps accepted' },
+      { p: 0, h: 'We have {T} {ST}. {P}. No long talk', s: 'Swap your old phone, we will do the maths' },
+      { p: 0, h: '{T} {ST}. {P}', s: 'Swap or cash, we do not judge' },
+      { p: 0, h: 'Looking for {T}? Found one. {P}', s: 'Swaps accepted' }
+    ]
+  };
+
+  var PATTERN_LABEL = {
+    QUIZ: 'Quiz', PROVERB: 'Proverb', BUDGET: 'Budget', TEASE: 'Tease',
+    DEBATE: 'Debate', POV: 'POV', ANCHOR: 'Price Anchor', PLAIN: 'Plain Deal'
+  };
+  var PATTERN_HINT = {
+    QUIZ: 'Photo or video of the phones, ask for answers in comments',
+    PROVERB: 'Short saying plus a device, built to be shared',
+    BUDGET: 'Customer voice with a budget, then the options that fit',
+    TEASE: 'Friendly teasing about the old phone',
+    DEBATE: 'A side to pick, people argue in the comments',
+    POV: 'Unboxing or reply video, relatable moment',
+    ANCHOR: 'Compare an older phone price with the one above it',
+    PLAIN: 'Straight deal post, lowest priority'
+  };
+
+  /* ---------- slot resolver ---------- */
+  function fill(tpl, ctx) {
+    return clean(tpl.replace(/\{(\w+)\}/g, function (m, k) {
+      if (ctx[k] === undefined || ctx[k] === null) throw new Error('missing slot ' + k + ' in: ' + tpl);
+      return ctx[k];
+    }));
+  }
+
+  function pickTemplate(r, list, pidginP, ok, used) {
+    var usable = list.filter(ok);
+    if (!usable.length) throw new Error('infeasible');
+    if (used) { var fresh = usable.filter(function (x) { return !used['t:' + x.h]; }); if (fresh.length) usable = fresh; }
+    var pid = usable.filter(function (x) { return x.p; });
+    var eng = usable.filter(function (x) { return !x.p; });
+    var wantP = r() < pidginP;
+    var from = wantP && pid.length ? pid : (eng.length ? eng : usable);
+    var chosen = pick(r, from);
+    if (used) used['t:' + chosen.h] = 1;
+    return chosen;
+  }
+
+  /* ---------- hashtags ---------- */
+  function tags(r, t, extra) {
+    var base = ['#iphonenigeria', '#portharcourt'];
+    var out = base.slice();
+    if (t && t.brand === 'Apple') {
+      out.push('#iphone' + t.key.toLowerCase().replace(/ /g, ''));
+    } else if (t) {
+      out.push('#' + t.name.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    }
+    var themes = ['#swapphone', '#upgrade', '#nigeriantiktok', '#phonedeals', '#fyp'];
+    var ex = extra ? [extra] : [];
+    var pool = shuffle(r, themes);
+    ex.concat(pool).forEach(function (x) { if (out.length < 5 && out.indexOf(x) < 0) out.push(x); });
+    return out.slice(0, 5);
+  }
+
+  /* ---------- core: build one post ---------- */
+  function buildPost(P, pat, r, o, used, forced) {
+    function infeasible() { throw new Error('infeasible'); }
+    var D = P.D, iT = P.iTargets;
+    var res = { pattern: pat, label: PATTERN_LABEL[pat] };
+    var ctx = {}, lines = [], hook, tpl, t, S, srcList, how = [];
+    var wa = o.whatsapp;
+
+    function chooseTarget(filter) {
+      if (forced) return forced;
+      var pool = iT.filter(filter);
+      var fresh = pool.filter(function (x) { return !used[x.name]; });
+      var from = fresh.length ? fresh : pool;
+      return wpick(r, from, function (x) { return Math.max(0.1, x.w); });
+    }
+    function setT(tt) {
+      t = tt; used[tt.name] = 1;
+      ctx.T = tName(tt); ctx.Tk = tKey(tt); ctx.aT = (/^[aeiou]/i.test(tt.name) ? 'an ' : 'a ') + tt.name; ctx.P = fmtK(tt.price); ctx.PT = fmtK(tt.price); ctx.ST = tt.storage + (tt.cond === 'Deal' ? '' : ' ' + tt.cond);
+    }
+
+    if (pat === 'QUIZ') {
+      var ladders = [
+        ['11', '12', '13', '14', '15', '16'],
+        ['11 Pro', '12 Pro', '14 Pro', '15 Pro', '16 Pro'],
+        ['13', '14', '15'], ['14', '15', '16'], ['12', '13', '14']
+      ];
+      var keys, tries = 0;
+      if (forced) {
+        if (forced.brand !== 'Apple') infeasible();
+        var wins = [];
+        ladders.forEach(function (ld) { for (var i = 0; i + 3 <= ld.length; i++) { var w3 = ld.slice(i, i + 3); if (w3.indexOf(forced.key) >= 0) wins.push(w3); } });
+        if (!wins.length) infeasible();
+        var fw = wins.filter(function (w3) { return !used['q:' + w3.join()]; });
+        keys = pick(r, fw.length ? fw : wins);
+      } else {
+        do {
+          var lad = pick(r, ladders);
+          var start = Math.floor(r() * (lad.length - 2));
+          keys = lad.slice(start, start + 3);
+        } while (used['q:' + keys.join()] && ++tries < 12);
+      }
+      used['q:' + keys.join()] = 1;
+      var tgs = keys.map(function (k) {
+        if (forced && forced.key === k) return forced;
+        var c = iT.filter(function (x) { return x.key === k; }).sort(function (a, b) { return a.price - b.price; });
+        return c[0];
+      }).filter(Boolean);
+      if (tgs.length < 3) infeasible();
+      tgs.forEach(function (x) { used[x.name] = 1; });
+      tpl = pickTemplate(r, T.QUIZ.hooks, o.pidgin, function () { return true; }, used);
+      ctx.n = 3; ctx.ks = tgs.map(function (x) { return x.key; }).join(', ').replace(/, ([^,]*)$/, ' and $1');
+      hook = fill(tpl.h, ctx);
+      res.hook = hook; res.sub = fill(tpl.s, ctx);
+      var src = D.sources.filter(function (s) { return s.iphone && s.isBase && ['XR', '11', '12', 'X'].indexOf(s.key) >= 0; });
+      var sx = pick(r, src);
+      res.targets = tgs; res.source = sx;
+      res.device = tgs.map(function (x) { return 'iPhone ' + x.key; }).join(' / ');
+      res.overlays = [
+        { k: 'Hook', v: res.hook }, { k: 'Sub Hook', v: res.sub },
+        { k: 'Labels', v: 'A  /  B  /  C (show one phone each, shuffle the order)' },
+        { k: 'Reveal', v: tgs.map(function (x) { return x.name + ': ' + naira(x.price); }).join('  |  ') },
+        { k: 'Location', v: '📍 Port Harcourt' }
+      ];
+      var bl = ['Swap your ' + srcFull(sx) + ' for:'];
+      tgs.forEach(function (x) {
+        bl.push(x.name + ' ' + x.storage + ' (' + x.cond + ', ' + naira(x.price) + '): ' + fmtK(x.price - sx.ti) + ' with ' + srcLabel(sx));
+        how.push(naira(x.price) + ' minus ' + srcLabel(sx) + ' ' + naira(sx.ti) + ' = ' + naira(x.price - sx.ti));
+      });
+      res.swapLines = tgs.map(function (x) { return fmtK(x.price - sx.ti) + ' for ' + x.name + ' with ' + srcLabel(sx); });
+      res.swapBlock = bl.join('\n');
+      res.obs = fresh(r, OPEN_QUIZ, used, 'o:');
+      res.bait = fresh(r, BAIT_QUIZ, used, 'b:');
+      res.pinned = 'Answers (edit to match your video order): ' + tgs.map(function (x) { return x.name; }).join(', ') + '. Who got all three?';
+      res.tags = tags(r, tgs[1], '#iphonequiz');
+      res.deal = null;
+      return finish();
+    }
+
+    /* single-target patterns */
+    if (pat === 'ANCHOR') {
+      // pick pair: older A priced near newer T
+      var pairs = [];
+      iT.forEach(function (a) {
+        iT.forEach(function (b) {
+          if (b.rank > a.rank && a.cond === b.cond && parseInt(a.storage) === parseInt(b.storage) && b.price - a.price >= -10000 && b.price - a.price <= 60000 && b.rank - a.rank <= 4 && a.price <= 900000 && (!forced || b.id === forced.id)) {
+            pairs.push({ a: a, b: b, w: Math.max(0.1, b.w) });
+          }
+        });
+      });
+      if (!pairs.length) infeasible();
+      var freshP = pairs.filter(function (x) { return !used[x.b.name]; });
+      var chosen = wpick(r, freshP.length ? freshP : pairs, function (x) { return x.w; });
+      setT(chosen.b);
+      ctx.A = chosen.a.name; ctx.PA = fmtK(chosen.a.price);
+      var dlt = chosen.b.price - chosen.a.price;
+      ctx.D = dlt <= 0 ? 'nothing' : fmtK(dlt);
+      var fa = feat(r, chosen.b.key); ctx.F = fa ? 'Plus the ' + fa : 'Same money, newer phone';
+      tpl = pickTemplate(r, T.ANCHOR.hooks, o.pidgin, function (x) { return (!x.needF || fa) && !(dlt <= 0 && /\{D\}/.test(x.h + x.s)); }, used);
+      res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+      srcList = P.topups(chosen.b, { iphone: true, base: true });
+      lines = pickLines(r, srcList, 4);
+      res.anchor = chosen.a;
+    } else if (pat === 'DEBATE') {
+      if (forced && forced.brand !== 'Apple') infeasible();
+      var DEB_FIXED = { notch: ['13', '14 Pro'], edges: ['11', '12'], mini: ['13 mini', '13'], usbc: ['14', '15'], touchid: ['SE 3', '12'] };
+      var DEB_TEAMS = [['13', '14'], ['14', '15'], ['12', '13'], ['15', '16'], ['14 Pro', '15 Pro'], ['15 Pro', '16 Pro'], ['11', '12']].filter(function (pr) { return !forced || pr.indexOf(forced.key) >= 0; });
+      var teamsKs = DEB_TEAMS.length ? pick(r, DEB_TEAMS) : null;
+      function debKs(x) { var k = x.type === 'teams' ? teamsKs : DEB_FIXED[x.type]; return (k && (!forced || k.indexOf(forced.key) >= 0)) ? k : null; }
+      tpl = pickTemplate(r, T.DEBATE.hooks, o.pidgin, function (x) { return !!debKs(x); }, used);
+      var typ = tpl.type, tgs2, ks = debKs(tpl);
+      if (!ks) infeasible();
+      function byKey(k) { if (forced && forced.key === k) return forced; return iT.filter(function (x) { return x.key === k; }).sort(function (a, b) { return a.price - b.price; })[0]; }
+      tgs2 = ks.map(byKey).filter(Boolean);
+      if (tgs2.length < 2) infeasible();
+      tgs2.forEach(function (x) { used[x.name] = 1; });
+      var older = tgs2[0], newer = tgs2[1];
+      ctx.A = older.name; ctx.T = newer.name; ctx.P = fmtK(newer.price);
+      var ff = feat(r, newer.key) || feat(r, older.key);
+      ctx.F = ff ? 'The ' + newer.name + ' has the ' + ff : 'Both are good, but only one is right';
+      res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+      res.targets = tgs2;
+      var common = P.sources.filter(function (s) { return s.iphone && s.isBase && ['XR', '11', '12', 'X', '13'].indexOf(s.key) >= 0 && tgs2.every(function (x) { return x.price - s.ti >= 20000 && s.rank < x.rank; }); });
+      if (!common.length) common = P.sources.filter(function (s) { return s.iphone && s.isBase && tgs2.every(function (x) { return x.price - s.ti >= 20000 && s.rank < x.rank; }); });
+      var bl2 = [];
+      res.swapLines = [];
+      tgs2.forEach(function (x) {
+        var pool2 = common.length ? common : P.topups(x, { iphone: true, base: true }).map(function (z) { return z.s; });
+        var cs = shuffle(r, pool2).slice(0, 2).sort(function (a, b) { return b.ti - a.ti; });
+        bl2.push(x.name + ' ' + x.storage + ' (' + x.cond + ', ' + naira(x.price) + ')');
+        cs.forEach(function (s) {
+          var tp = x.price - s.ti;
+          bl2.push('  ' + fmtK(tp) + ' with ' + srcLabel(s));
+          res.swapLines.push(fmtK(tp) + ' for ' + x.name + ' with ' + srcLabel(s));
+          how.push(x.name + ' ' + naira(x.price) + ' minus ' + srcLabel(s) + ' ' + naira(s.ti) + ' = ' + naira(tp));
+        });
+      });
+      res.device = tgs2.map(function (x) { return x.name; }).join(' vs ');
+      res.overlays = [
+        { k: 'Hook', v: res.hook }, { k: 'Sub Hook', v: res.sub },
+        { k: 'Device', v: res.device },
+        { k: 'Swap Lines', v: res.swapLines.join('\n') },
+        { k: 'Location', v: '📍 Port Harcourt' }
+      ];
+      res.swapBlock = bl2.join('\n');
+      res.obs = fresh(r, OPEN_DEBATE, used, 'o:'); res.bait = fresh(r, BAIT_DEBATE, used, 'b:');
+      res.pinned = 'Voting is open. Reply with your side and one reason. Best reason gets pinned.';
+      res.tags = tags(r, newer, '#iphonedebate');
+      res.deal = null;
+      return finish();
+    } else if (pat === 'BUDGET') {
+      if (forced && (forced.price > 450000 || forced.price < 100000)) infeasible();
+      var tg = chooseTarget(function (x) { return x.price <= 320000 && x.price >= 150000; });
+      setT(tg);
+      var andr = P.topups(tg, { iphone: false }).filter(function (x) { return x.s.isBase && x.s.w >= 0.3; });
+      andr.sort(function (a, b) { return a.top - b.top; });
+      if (andr.length < 4) infeasible();
+      var bands = [0, 1, 2, 3].map(function (i) {
+        var lo = Math.floor(andr.length * i / 4), hi = Math.floor(andr.length * (i + 1) / 4);
+        return andr.slice(lo, Math.max(hi, lo + 1));
+      });
+      lines = [];
+      bands.forEach(function (bd) { if (bd.length) lines.push(wpick(r, bd, function (x) { return Math.max(0.1, x.s.w); })); });
+      lines.sort(function (a, b) { return a.top - b.top; });
+      var sorted = lines.map(function (x) { return x.top; }).sort(function (a, b) { return a - b; });
+      var second = sorted[1] || sorted[0];
+      var nice = second <= 100000 ? ceilTo(second, 10000) : ceilTo(second, 50000);
+      ctx.B = fmtK(nice);
+      var fits = lines.filter(function (x) { return x.top <= nice; }).length;
+      ctx.N = ['zero', 'one', 'two', 'three', 'four'][fits] || String(fits);
+      ctx.SA = 'Android';
+      tpl = pickTemplate(r, T.BUDGET.hooks, o.pidgin, function () { return true; }, used);
+      res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+      res.budget = nice;
+    } else if (pat === 'TEASE' || pat === 'POV' || pat === 'PROVERB') {
+      if (forced && forced.brand !== 'Apple' && pat !== 'TEASE') infeasible();
+      var needIphoneSrc = ((pat !== 'TEASE') || r() < 0.55) && !(forced && forced.brand !== 'Apple');
+      var capTop = forced ? Infinity : 450000;
+      var tg2 = chooseTarget(function (x) { return x.price <= 700000 && x.price >= 200000; });
+      setT(tg2);
+      var cand = P.topups(tg2, { iphone: needIphoneSrc ? true : false, base: true });
+      if (needIphoneSrc) { cand = cand.filter(function (x) { return tg2.rank - x.s.rank >= 6 && x.top <= capTop && x.s.w >= 0.3; }); }
+      if (cand.length < 3) { cand = P.topups(tg2, { iphone: false, base: true }).filter(function (x) { return x.s.w >= 0.3; }); needIphoneSrc = false; }
+      lines = pickLines(r, cand, 4);
+      // featured old phone: popular, first line is a "named" one
+      var popular = lines.slice().sort(function (a, b) { return b.s.w - a.s.w; })[0];
+      ctx.S = needIphoneSrc ? ('iPhone ' + srcLabel(popular.s)) : srcLabel(popular.s);
+      if (!needIphoneSrc) ctx.S = ctx.S.indexOf('A') === 0 && /^A\d/.test(ctx.S) ? 'Samsung ' + ctx.S : ctx.S;
+      var tbank = T[pat].hooks;
+      tpl = pickTemplate(r, tbank, o.pidgin, function (x) { return true; }, used);
+      res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+      res.featured = popular;
+    } else { // PLAIN
+      var tg3 = chooseTarget(function (x) { return x.price <= 900000; });
+      setT(tg3);
+      var all = P.topups(tg3, { base: true }).filter(function (x) { return x.s.w >= 0.3 && x.top <= tg3.price * 0.85; });
+      if (all.length < 3) all = P.topups(tg3, { base: true });
+      lines = pickLines(r, all, 4);
+      tpl = pickTemplate(r, T.PLAIN.hooks, o.pidgin, function () { return true; }, used);
+      res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+    }
+
+    if (lines.length < 2) infeasible();
+    res.targets = [t];
+    res.device = tShort(t) + ' · ' + t.cond + ' · ' + naira(t.price);
+    res.lines = lines;
+    res.swapLines = lines.map(lineText);
+    lines.forEach(function (x) { how.push(naira(t.price) + ' minus ' + srcLabel(x.s) + ' ' + naira(x.s.ti) + ' = ' + naira(x.top)); });
+    res.swapBlock = [t.name + ' ' + t.storage + ' (' + t.cond + ', ' + naira(t.price) + ')'].concat(res.swapLines).join('\n');
+    res.overlays = [
+      { k: 'Hook', v: res.hook }, { k: 'Sub Hook', v: res.sub },
+      { k: 'Device', v: res.device },
+      { k: 'Swap Lines', v: res.swapLines.join('\n') },
+      { k: 'Location', v: '📍 Port Harcourt' }
+    ];
+    res.obs = fresh(r, OBS, used, 'o:');
+    res.bait = fresh(r, pat === 'POV' || pat === 'PROVERB' ? BAIT_TAG.concat(BAIT_OPEN) : BAIT_OPEN, used, 'b:');
+    res.pinned = fresh(r, PINS, used, 'p:');
+    var dealOn = wa === 'always' || (wa === 'auto' && (pat === 'PLAIN' || pat === 'ANCHOR' || pat === 'BUDGET'));
+    res.deal = dealOn ? (t.name + ' ' + t.storage + ' (' + t.cond + ') ' + naira(t.price) + '. Swaps accepted. WhatsApp ' + WHATSAPP) : null;
+    res.tags = tags(r, t, pat === 'BUDGET' ? '#androidtoiphone' : null);
+    return finish();
+
+    function finish() {
+      res.how = how.join('\n') + '\nBased on perfect-condition trade-in values. Battery, screen, Face ID and other faults reduce the value.';
+      res.caption = [res.obs, res.bait, res.deal, res.tags.join(' ')].filter(Boolean).join('\n\n');
+      res.caption = res.caption.split('\n').map(clean).join('\n');
+      ['hook', 'sub', 'caption', 'swapBlock', 'pinned', 'how'].forEach(function (k) { res[k] = typeof res[k] === 'string' ? res[k].replace(/—/g, ',') : res[k]; });
+      return res;
+    }
+  }
+
+  /* ---------- batch ---------- */
+  function generate(D, opts) {
+    opts = opts || {};
+    var o = {
+      n: opts.n || 10,
+      seed: opts.seed === undefined ? 1 : opts.seed,
+      patterns: opts.patterns && opts.patterns.length ? opts.patterns : Object.keys(PATTERN_LABEL),
+      pidgin: opts.pidgin === undefined ? 0.3 : opts.pidgin,
+      whatsapp: opts.whatsapp || 'auto'
+    };
+    var r = mulberry32(o.seed);
+    var P = new Pool(D);
+    var stats = {};
+    D.patternStats.forEach(function (s) { stats[s.pattern] = s; });
+    var byId = {}; D.targets.forEach(function (t) { byId[t.id] = t; });
+    var forcedList = (opts.devices || []).map(function (id) { return byId[id]; }).filter(Boolean);
+    if (forcedList.length) o.n = forcedList.length * (opts.perDevice || 1);
+    var used = {}, counts = {}, out = [], last = null, guard = 0, devPats = {};
+    var cap = Math.max(2, Math.ceil(o.n / 3)); var capQ = Math.max(1, Math.ceil(o.n / 6));
+    if (forcedList.length) { cap = o.n; capQ = Math.max(2, Math.ceil(o.n / 4)); }
+    while (out.length < o.n && guard++ < 1500) {
+      var forced = forcedList.length ? forcedList[out.length % forcedList.length] : null;
+      var seen = forced ? (devPats[forced.id] = devPats[forced.id] || {}) : {};
+      var cands = o.patterns.filter(function (p) { return p !== last && !seen[p] && (counts[p] || 0) < ((p === 'QUIZ' || p === 'DEBATE') ? capQ : cap); });
+      if (!cands.length) cands = o.patterns.filter(function (p) { return !seen[p]; });
+      if (!cands.length) cands = o.patterns.slice();
+      var post = null, tried = {};
+      while (!post && cands.length) {
+        var pat = wpick(r, cands, function (p) { return Math.max(5, (stats[p] && stats[p].score) || 20); });
+        cands = cands.filter(function (p) { return p !== pat; });
+        try { post = buildPost(P, pat, r, o, used, forced); }
+        catch (e) { if (opts.debug && e.message !== 'infeasible') throw e; post = null; }
+        if (post && post.hook) { post.id = out.length + 1; post.stat = stats[pat] || null; counts[pat] = (counts[pat] || 0) + 1; last = pat; if (forced) seen[pat] = 1; out.push(post); }
+        else post = null;
+      }
+      if (!post && forced) { // nothing fits this device: skip it
+        forcedList = forcedList.filter(function (f) { return f !== forced; });
+        if (!forcedList.length) break;
+        o.n = Math.min(o.n, out.length + forcedList.length * (opts.perDevice || 1));
+      }
+    }
+    return out;
+  }
+
+  /* ---------- calculator (iPhone deductions) ---------- */
+  var DED = ['battery', 'body', 'network', 'screen', 'trueTone', 'backGlass', 'faceId', 'touchId', 'earpiece', 'loudspeaker', 'camera', 'port'];
+  var NEAT = { spotless: 0, neat: 0, spots: 0.5, dents: 1, rough: 1.5 };
+
+  // inp: {battery:'85+'|'80-84'|'<80', batteryReplaced, body:'spotless'|..., screen:'ok'|'faulty'|'replaced', trueTone:bool(missing),
+  //       net:'none'|'chip'|'esimlocked'|'data', sim:'both'|'esim'|'physical', backGlass, faceId, touchId, earpiece, loudspeaker, camera, port}
+  function calc(D, src, target, inp) {
+    inp = inp || {};
+    var ti = Math.floor(src.ti / 1000) * 1000;
+    var out = { start: ti, items: [], total: 0, value: ti, topup: 0 };
+    if (!src.iphone) {
+      out.note = 'Android trade-in values are for perfect condition only. Anything else is quoted on inspection.';
+      out.value = ti;
+    } else {
+      var d = D.deductions[src.key];
+      if (!d) { out.note = 'No deduction table for this model.'; }
+      else {
+        var g = {}; DED.forEach(function (k, i) { g[k] = d[i] === null || d[i] === undefined ? null : d[i] * 1000; });
+        var add = function (label, v) { if (v > 0) { out.items.push({ label: label, v: v }); out.total += v; } };
+        var up = function (v) { return Math.ceil(v / 1000) * 1000; };
+        var batLine = false;
+        if (g.battery !== null) {
+          if (inp.battery === '<80') { add('Battery below 80%', g.battery); batLine = true; }
+          else if (inp.battery === '80-84' && !inp.batteryReplaced) { add('Battery 80 to 84%', up(g.battery * 0.6)); batLine = true; }
+        }
+        if (inp.batteryReplaced && !batLine && g.battery !== null) add('Replaced battery', up(g.battery * 0.6));
+        if (g.body !== null && inp.body && NEAT[inp.body]) add('Body condition', Math.round(g.body * NEAT[inp.body]));
+        var faceId = g.faceId !== null;
+        if (inp.net && inp.net !== 'none' && g.network !== null) {
+          if (inp.net === 'chip') add('Chip unlocked', faceId ? Math.max(30000, g.network * 0.7) : g.network * 0.7);
+          else if (inp.net === 'esimlocked') add('eSIM locked', g.network);
+          else if (inp.net === 'data') add('Mobile data issue', g.network);
+        }
+        var screenFault = inp.screen === 'faulty', screenRep = inp.screen === 'replaced';
+        if (screenFault && g.screen !== null) add('Faulty screen', g.screen);
+        if (screenRep) {
+          var rep = (g.trueTone !== null && g.trueTone > 0) ? g.trueTone : up(ti * 0.2);
+          add('Replaced screen', rep);
+        }
+        if (inp.trueTone && !screenFault && !screenRep && g.trueTone !== null) add('True Tone missing', g.trueTone);
+        if (inp.backGlass && g.backGlass !== null) add('Broken back glass', g.backGlass);
+        if (inp.faceId && g.faceId !== null) add('Face ID not working', g.faceId);
+        if (inp.touchId && g.touchId !== null) add('Touch ID not working', g.touchId);
+        if (inp.earpiece && g.earpiece !== null) add('Earpiece fault', g.earpiece);
+        if (inp.loudspeaker && g.loudspeaker !== null) add('Loudspeaker fault', g.loudspeaker);
+        if (inp.camera && g.camera !== null) add('Camera fault', g.camera);
+        if (inp.port && g.port !== null) add('Charging port fault', g.port);
+        if (src.rank >= 21 && inp.sim) { // iPhone 14 and up (not Air)
+          if (inp.sim === 'esim') add('eSIM only', Math.round(ti * (1 - 0.893)));
+          else if (inp.sim === 'physical') add('Physical SIM only', Math.round(ti * (1 - 0.97)));
+        }
+        if (inp.sim === 'both' && false) { /* none */ }
+        out.value = Math.max(0, Math.floor((ti - out.total) / 1000) * 1000);
+      }
+    }
+    out.topup = target.price - out.value;
+    return out;
+  }
+
+  /* ---------- sheet sync: raw Google Sheet rows to engine data ---------- */
+  var RANK = ['7', '7 Plus', '8', '8 Plus', 'X', 'XS', 'XR', 'XS Max', 'SE 2', 'SE 3', '11', '11 Pro', '11 Pro Max', '12 mini', '12', '12 Pro', '12 Pro Max', '13 mini', '13', '13 Pro', '13 Pro Max', '14', '14 Plus', '14 Pro', '14 Pro Max', '15', '15 Plus', '15 Pro', '15 Pro Max', '16', '16 Plus', '16 Pro', '16 Pro Max', '17', 'Air', '17 Pro', '17 Pro Max', '18 Pro', '18 Pro Max'];
+  var CONDLAB = { 'Foreign USED': 'UK Used', 'Foreign USED (Non LLA)': 'UK Used', 'Active Brand New': 'Active', 'Active Brand New (Non LLA)': 'Active', 'Brand New': 'Brand New' };
+  var TW = { '13': 1.3, '11': 1.2, 'XR': 1.2, '12': 1.1, '12 Pro': 0.8, '12 Pro Max': 0.9, '11 Pro': 0.9, '11 Pro Max': 0.7, '13 mini': 0.6, '14': 0.9, '14 Pro': 1.1, '14 Pro Max': 0.8, '15': 1.0, '15 Pro': 1.2, '15 Pro Max': 0.8, '16': 1.1, '16 Pro': 0.8, '16 Pro Max': 0.7, '16 Plus': 0.5, 'SE 2': 0.2, 'SE 3': 0.2, 'X': 0.0 };
+  var SW = { 'Spark 20': 1.0, 'A16': 1.0, 'Galaxy A16': 1.0, 'Smart 8': 0.8, 'Redmi 13C': 0.8, 'Redmi 14C': 0.9, 'Pop 9': 0.7, 'Pop 8': 0.5, 'Galaxy A15': 0.7, 'Smart 9': 0.4, 'Spark 10C': 0.4, 'Redmi Note 14': 0.3, 'Galaxy A17': 0.3, 'Spark 30C': 0.3, 'Hot 40i': 0.2, 'Hot 50i': 0.2, 'Smart 10': 0.3, 'Camon 19': 0.2, 'Galaxy A14': 0.3, 'Galaxy A13': 0.2,
+    'X': 0.9, 'XR': 1.3, 'XS': 0.3, 'XS Max': 0.4, '11': 1.2, '11 Pro': 0.7, '11 Pro Max': 0.4, '12 mini': 0.2, '12': 0.9, '12 Pro': 0.4, '12 Pro Max': 0.3, '13 mini': 0.2, '13': 0.5, '14': 0.2, '7 Plus': 0.2, '8 Plus': 0.2, 'SE 2': 0.2 };
+  function ipkey(model) { return String(model || '').replace('iPhone ', '').replace('SE (2nd Gen)', 'SE 2').replace('SE (3rd Gen)', 'SE 3').replace('iPhone Air', 'Air'); }
+  function money(v) { if (v === undefined || v === null) return null; var d = String(v).replace(/[^\d]/g, ''); return d ? parseInt(d, 10) : null; }
+  function gbOf(s) { var m = String(s || '').match(/(\d+)\s*gb/gi); if (!m) return 0; return parseInt(m[m.length - 1], 10); }
+  function cell(row, i) { var v = row[i]; return v === undefined || v === null ? '' : String(v).trim(); }
+  function shortName(r) {
+    var m = r.model;
+    if (r.brand === 'Tecno') return m.replace('Tecno ', '');
+    if (r.brand === 'Infinix' && (m.indexOf('Smart') >= 0 || m.indexOf('Hot') >= 0)) return m.replace('Infinix ', '');
+    return m;
+  }
+  function parseDevices(rows) {
+    var out = [];
+    rows.forEach(function (x) {
+      if (!cell(x, 0)) return;
+      out.push({ id: cell(x, 0), type: cell(x, 1), brand: cell(x, 2), series: cell(x, 3), model: cell(x, 4), storage: cell(x, 5), cond: cell(x, 6), ti_ok: cell(x, 7), swap_into: cell(x, 8), show: cell(x, 9), notes: cell(x, 14), sell: money(x[17]), ti: money(x[22]), status: cell(x, 24) });
+    });
+    return out;
+  }
+  function parseDeals(rows) {
+    var out = [];
+    rows.forEach(function (x) {
+      if (!cell(x, 0)) return;
+      out.push({ id: cell(x, 0), model: cell(x, 1), storage: cell(x, 2), gb: gbOf(cell(x, 2)), grade: cell(x, 3), diff: cell(x, 4).replace(/\.\s*$/, ''), price: money(x[5]), status: cell(x, 6), listed: cell(x, 7), notes: cell(x, 9), type: cell(x, 10), brand: cell(x, 11), series: cell(x, 12), onsite: cell(x, 13) });
+    });
+    return out;
+  }
+  function parseDeductions(rows, base) {
+    var D = {};
+    Object.keys(base || {}).forEach(function (k) { D[k] = base[k].slice(); });
+    rows.forEach(function (x) {
+      if (cell(x, 1) !== 'Phones' || cell(x, 2) !== 'Apple') return;
+      var k = ipkey(cell(x, 0));
+      if (RANK.indexOf(k) < 0) return;
+      var arr = [], any = false;
+      for (var i = 4; i < 16; i++) {
+        var raw = cell(x, i);
+        if (raw === 'n/a') arr.push(null);
+        else { var m = money(raw); if (m === null) arr.push(D[k] ? D[k][i - 4] : null); else { arr.push(Math.round(m / 1000)); any = true; } }
+      }
+      if (any) D[k] = arr;
+    });
+    return D;
+  }
+  function buildFromRows(devs, base) {
+    var flag = function (n, t) { return (n || '').indexOf(t) >= 0; };
+    var targets = [], prices = [], srcRaw = {};
+    devs.forEach(function (r) {
+      var n = r.notes;
+      var sold = flag(n, '[Sold out]') || flag(n, '[Not sold]');
+      if (r.status === 'Live' && r.sell && !sold && CONDLAB[r.cond]) {
+        prices.push({ model: r.model, brand: r.brand, type: r.type, storage: r.storage, gb: gbOf(r.storage), cond: CONDLAB[r.cond], price: r.sell });
+      }
+      if (r.swap_into === 'Yes' && r.status === 'Live' && r.sell && !sold && !flag(n, '[Swap only if bought from us]') && CONDLAB[r.cond]) {
+        if (r.brand === 'Apple' && r.type === 'Phones') {
+          var key = ipkey(r.model);
+          if (RANK.indexOf(key) < 0) return;
+          var w = (key.indexOf('17') === 0 || key === 'Air' || key.indexOf('18') === 0) ? 0.4 : (TW[key] !== undefined ? TW[key] : 0.5);
+          targets.push({ id: r.id, brand: 'Apple', name: r.model, key: key, storage: r.storage, cond: CONDLAB[r.cond], price: r.sell, rank: RANK.indexOf(key), w: w });
+        } else if ((r.brand === 'Samsung' || r.brand === 'Google') && r.type === 'Phones' && /S24|S22|Pixel 8|Pixel 9|S25|S26/.test(r.model) && r.model.indexOf('Fold') < 0) {
+          targets.push({ id: r.id, brand: r.brand, name: r.model, key: r.model, storage: r.storage, cond: CONDLAB[r.cond], price: r.sell, rank: -1, w: 0.3 });
+        }
+      }
+      if (r.ti_ok === 'Yes' && r.ti && !flag(n, '[Swap only if bought from us]')) {
+        if (r.brand === 'Apple' && r.type === 'Phones') {
+          var k = ipkey(r.model);
+          if (RANK.indexOf(k) < 0 || /^(17|18|16|15)/.test(k) || k === 'Air' || ['14 Pro', '14 Pro Max', '14 Plus'].indexOf(k) >= 0) return;
+          if (r.cond !== 'Foreign USED' && r.cond !== 'Foreign USED (Non LLA)') return;
+          (srcRaw['Apple|' + k] = srcRaw['Apple|' + k] || []).push([gbOf(r.storage), r, k]);
+        } else if (r.cond === 'Nigerian USED' && r.type === 'Phones') {
+          var sn = shortName(r);
+          (srcRaw[r.brand + '|' + sn] = srcRaw[r.brand + '|' + sn] || []).push([gbOf(r.storage), r, sn]);
+        }
+      }
+    });
+    var sources = [];
+    Object.keys(srcRaw).forEach(function (key) {
+      var lst = srcRaw[key].sort(function (a, b) { return a[0] - b[0]; });
+      lst.forEach(function (e, i) {
+        var r = e[1], nm = e[2], iph = r.brand === 'Apple';
+        sources.push({ id: r.id, brand: r.brand, name: iph ? 'iPhone ' + nm : nm, key: nm, storage: r.storage, gb: e[0], ti: r.ti, iphone: iph, rank: iph ? RANK.indexOf(nm) : -1, multi: lst.length > 1, isBase: i === 0, w: SW[nm] !== undefined ? SW[nm] : 0.15 });
+      });
+    });
+    return { targets: targets, sources: sources, prices: prices };
+  }
+  // standard prices for a deal: lowest sheet price for the same model and storage, per condition
+  function standards(prices, deal) {
+    var m = String(deal.model).toLowerCase();
+    var out = { uk: null, active: null, bn: null };
+    prices.forEach(function (p) {
+      if (String(p.model).toLowerCase() !== m) return;
+      if (deal.gb ? p.gb !== deal.gb : String(p.storage).toLowerCase() !== String(deal.storage).toLowerCase()) return;
+      var f = p.cond === 'UK Used' ? 'uk' : p.cond === 'Active' ? 'active' : 'bn';
+      if (out[f] === null || p.price < out[f]) out[f] = p.price;
+    });
+    var primary = out.uk !== null ? 'uk' : out.active !== null ? 'active' : out.bn !== null ? 'bn' : null;
+    var label = { uk: 'UK Used', active: 'Active', bn: 'Brand New' };
+    out.primary = primary; out.primaryLabel = primary ? label[primary] : null;
+    out.save = primary && deal.price ? out[primary] - deal.price : 0;
+    out.pct = primary && out[primary] ? Math.round(out.save / out[primary] * 100) : 0;
+    return out;
+  }
+  function fromSheet(raw, base) {
+    var devs = parseDevices(raw.devices || []);
+    var b = buildFromRows(devs, base);
+    var deals = parseDeals(raw.deals || []).map(function (d) { d.std = standards(b.prices, d); return d; });
+    var out = {};
+    Object.keys(base).forEach(function (k) { out[k] = base[k]; });
+    out.targets = b.targets; out.sources = b.sources; out.prices = b.prices; out.deals = deals;
+    if (raw.deductions && raw.deductions.length) out.deductions = parseDeductions(raw.deductions, base.deductions);
+    return out;
+  }
+  function attachStd(D) {
+    (D.deals || []).forEach(function (d) { if (!d.std) d.std = standards(D.prices || [], d); });
+    return D;
+  }
+
+  /* ---------- deal posts ---------- */
+  var DEAL_OPEN = [
+    'Everybody likes a good price until they hear the catch. So here is the catch, upfront.',
+    'I will tell you what is different before you even ask.',
+    'Cheap is only cheap when you know exactly what you are buying. Read it all.',
+    'One unit. Here is the full story, no long talk.',
+    'A good price with a clear catch beats a bad surprise.'
+  ];
+  var DEAL_BAIT = [
+    'Would you take it or leave it? Be honest.',
+    'What would you do with the extra money? Tell me.',
+    'Is the catch a deal breaker for you? Say so in the comments.',
+    'Drop your phone and I will tell you the swap price.'
+  ];
+  T.DEAL = {
+    hooks: [
+      { p: 0, t: 'DEAL_GAP', h: 'Same {M}, {SAVE} less. Yes, there is a catch', s: 'The catch: {C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: '{STDL} {M} is {STD}. This one is {DEAL}', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'POV: you checked every price for {M} and then saw this', s: '{DEAL}. {C}', needSave: 1, needC: 1 },
+      { p: 1, t: 'DEAL_GAP', h: 'Oya see {M} wey cheap by {SAVE}', s: 'Check the catch first: {C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Budget is {B}? This {M} is {DEAL}', s: '{STDL} is {STD}', needSave: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'What would you do with the extra {SAVE}? This {M} leaves it in your pocket', s: '{STDL} is {STD}, this one is {DEAL}', needSave: 1 },
+      { p: 0, t: 'DEAL_GAP', h: 'Brand new {M} is {BN}. This one is {DEAL}', s: '{C}', needBN: 1, needC: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Guess the price of this {M} {ST}', s: 'Hint: {STDL} is {STD}', needSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Guess the price of this {M} {ST}', s: 'Hint: {C}', needC: 1, noSave: 1, reveal: 1 },
+      { p: 0, t: 'DEAL_GUESS', h: 'Closest guess wins my respect. How much is this {M}?', s: 'Comment your number', reveal: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'I will tell you why this {M} is {SAVE} cheaper. Stay till the end', s: '{C}', needSave: 1, needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'This {M} has one small story: {C}', s: '{DEAL}. Swaps accepted', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Read the catch before you fall in love with this {M}', s: '{C}. Then see the price: {DEAL}', needC: 1 },
+      { p: 0, t: 'DEAL_CATCH', h: 'Yes, this {M} has a catch. No, I will not hide it', s: '{C}', needC: 1 },
+      { p: 0, t: 'DEAL_PLAIN', h: 'One {M} {ST} just came in. {DEAL}', s: '{C}', needC: 1 },
+      { p: 0, t: 'DEAL_PLAIN', h: 'Just one {M}. {DEAL}', s: 'First come, first served' },
+      { p: 0, t: 'DEAL_PLAIN', h: '{M} {ST} is in. {DEAL}', s: 'Swaps accepted' }
+    ]
+  };
+
+  /* shared deal pieces */
+  function dealParts(deal, std, o) {
+    var hasSave = !!(std.primary && std.save > 0);
+    var hasBN = std.bn !== null && std.bn > deal.price;
+    var catchTxt = deal.diff || '';
+    var head = deal.model + ' ' + deal.storage + (catchTxt ? ' (' + catchTxt + ')' : '') + ': ' + naira(deal.price);
+    var cmp = [];
+    if (std.uk !== null) cmp.push('UK Used ' + naira(std.uk));
+    if (std.active !== null) cmp.push('Active ' + naira(std.active));
+    if (std.bn !== null) cmp.push('Brand New ' + naira(std.bn));
+    var cmpLine = cmp.length ? 'Standard: ' + cmp.join(', ') + (hasSave ? '\nThis one is ' + naira(std.save) + ' less than ' + std.primaryLabel : '') : '';
+    var body = deal.model + ' ' + deal.storage + ': ' + naira(deal.price) + '.' + (catchTxt ? ' What is different: ' + catchTxt + '.' : '');
+    if (hasSave) body += ' ' + std.primaryLabel + ' is ' + naira(std[std.primary]) + ', so that is ' + naira(std.save) + ' less.';
+    if (hasBN && std.primary !== 'bn') body += ' Brand new is ' + naira(std.bn) + '.';
+    var tail = 'Just one unit. Swaps accepted.' + (o.whatsapp === 'never' ? '' : ' WhatsApp ' + WHATSAPP);
+    return { hasSave: hasSave, hasBN: hasBN, catchTxt: catchTxt, head: head, cmpLine: cmpLine, body: body, tail: tail };
+  }
+  function dealTarget(deal) {
+    var key = ipkey(deal.model), rank = RANK.indexOf(key);
+    var apple = deal.brand === 'Apple' && deal.type === 'Phones' && rank >= 0;
+    return { id: deal.id, brand: apple ? 'Apple' : deal.brand, name: deal.model, key: apple ? key : deal.model, storage: deal.storage, cond: 'Deal', price: deal.price, rank: apple ? rank : -1, w: 0.5, isDeal: true };
+  }
+  function dealHashtags(deal) {
+    var isPhone = deal.type === 'Phones', t = dealTarget(deal);
+    var h = ['#portharcourt', t.brand === 'Apple' && isPhone ? '#iphonenigeria' : '#nigeriantiktok'];
+    if (t.brand === 'Apple' && isPhone) h.push('#iphone' + t.key.toLowerCase().replace(/ /g, ''));
+    else h.push('#' + (isPhone ? deal.model : (deal.series || deal.model)).toLowerCase().replace(/[^a-z0-9]/g, ''));
+    (isPhone ? ['#phonedeals', '#swapphone', '#fyp'] : ['#techdeals', '#swapdevice', '#fyp']).forEach(function (x) { if (h.length < 5) h.push(x); });
+    return h;
+  }
+
+  // post built from the generic patterns, then rewritten so it states the deal price, the catch and the standard price
+  function dealify(post, deal, o) {
+    var std = deal.std, dp = dealParts(deal, std, o);
+    post.bottom = [dp.head].concat(dp.cmpLine ? [dp.cmpLine] : [], post.swapLines || []).join('\n');
+    post.text = [post.obs, post.bait, dp.body + ' ' + dp.tail, (post.tags || []).join(' ')].filter(Boolean).join('\n\n');
+    return post;
+  }
+
+  /* deal-specific types: price gap, guess the price, the catch, just in */
+  function buildDeal(P, deal, typeId, r, o, used) {
+    var D = P.D;
+    var std = deal.std || standards(D.prices || [], deal);
+    var isPhone = deal.type === 'Phones';
+    var dt = dealTarget(deal);
+    var dp = dealParts(deal, std, o);
+    var ctx = {
+      M: deal.model, ST: deal.storage, DEAL: fmtK(deal.price), C: dp.catchTxt || 'Swaps accepted',
+      SAVE: dp.hasSave ? fmtK(std.save) : '0', STD: dp.hasSave ? fmtK(std[std.primary]) : '0', STDL: std.primaryLabel || '', BN: dp.hasBN ? fmtK(std.bn) : '0',
+      B: fmtK(deal.price < 1000000 ? ceilTo(deal.price + 1, 10000) : ceilTo(deal.price + 1, 50000))
+    };
+    var tpl = pickTemplate(r, T.DEAL.hooks, o.pidgin, function (x) {
+      return x.t === typeId && (!x.needSave || dp.hasSave) && (!x.noSave || !dp.hasSave) && (!x.needBN || dp.hasBN) && (!x.needC || dp.catchTxt);
+    }, used);
+    var res = { pattern: typeId, isDeal: true, dealRef: deal };
+    res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+    var lines = [];
+    if (isPhone && deal.price) {
+      var apple = dt.brand === 'Apple';
+      var cand = P.topups(dt, apple ? { base: true } : { iphone: false, base: true }).filter(function (x) { return x.s.w >= 0.3; });
+      if (cand.length < 3) cand = P.topups(dt, apple ? { base: true } : { iphone: false, base: true });
+      lines = pickLines(r, cand, 4);
+    }
+    res.swapLines = lines.map(lineText);
+    res.obs = fresh(r, DEAL_OPEN, used, 'o:');
+    var bait = fresh(r, DEAL_BAIT, used, 'b:');
+    res.bait = isPhone ? bait : bait.replace('your phone', 'the device you want to swap');
+    res.tags = dealHashtags(deal);
+    res.top = [res.hook, res.sub].filter(Boolean).join('\n');
+    res.bottom = [dp.head].concat(dp.cmpLine ? [dp.cmpLine] : [], res.swapLines).join('\n');
+    res.text = [res.obs, dp.body, res.bait, dp.tail, res.tags.join(' ')].join('\n\n');
+    return res;
+  }
+
+  /* Nigerian Used phones people trade in: what is it worth, what can it become */
+  T.SRC_WORTH = {
+    hooks: [
+      { p: 0, h: 'How much is your {S} worth? {TI}', s: 'In perfect condition. See what it becomes' },
+      { p: 0, h: 'Your {S} is worth {TI} with us', s: 'In perfect condition. See what you can swap it for' },
+      { p: 0, h: 'Before you sell your {S} to the first person that calls, check this', s: '{TI} in perfect condition, and it can go towards {aT}' },
+      { p: 0, h: 'Your {S} is worth {TI}. {aT} is only {TOPK} away', s: 'Swap list below' },
+      { p: 1, h: 'Your {S} still get value oh. {TI} in perfect condition', s: 'Come see how far it goes' }
+    ]
+  };
+  function srcDisplay(s) { return s.brand === 'Samsung' && /^Galaxy A\d/.test(s.name) ? 'Samsung ' + srcLabel(s) : srcLabel(s); }
+  function buildSource(P, src, pat, r, o, used) {
+    if (src.iphone) throw new Error('infeasible');
+    var D = P.D, ti = src.ti;
+    var cand = D.targets.filter(function (t) { return t.brand === 'Apple' && t.price - ti >= 20000 && t.price - ti <= 450000; });
+    var pop = cand.filter(function (t) { return t.w >= 0.5; });
+    var names = {}; pop.forEach(function (t) { names[t.name] = 1; });
+    var pool = Object.keys(names).length >= 4 ? pop : cand;
+    var byName = {};
+    pool.forEach(function (t) { if (!byName[t.name] || t.price < byName[t.name].price) byName[t.name] = t; });
+    var list = Object.keys(byName).map(function (k) { return byName[k]; }).sort(function (a, b) { return a.price - b.price; });
+    if (list.length < 3) throw new Error('infeasible');
+    var picks = [];
+    if (list.length <= 4) picks = list;
+    else [0, 1, 2, 3].forEach(function (i) {
+      var lo = Math.floor(list.length * i / 4), hi = Math.max(Math.floor(list.length * (i + 1) / 4), lo + 1);
+      picks.push(wpick(r, list.slice(lo, hi), function (t) { return Math.max(0.1, t.w); }));
+    });
+    var lines = picks.map(function (t) { return { t: t, top: t.price - ti }; });
+    var tops = lines.map(function (x) { return x.top; }).sort(function (a, b) { return a - b; });
+    var second = tops[1] || tops[0];
+    var nice = second <= 100000 ? ceilTo(second, 10000) : ceilTo(second, 50000);
+    var within = lines.filter(function (x) { return x.top <= nice; });
+    var feat = (pat === 'BUDGET' || pat === 'SRC_WORTH' ? within : lines).slice().sort(function (a, b) { return b.t.w - a.t.w; })[0];
+    var fits = lines.filter(function (x) { return x.top <= nice; }).length;
+    var ctx = { S: srcDisplay(src), SA: 'Android', T: feat.t.name, aT: (/^[aeiou]/i.test(feat.t.name) ? 'an ' : 'a ') + feat.t.name, P: fmtK(feat.t.price), PT: fmtK(feat.t.price), TI: fmtK(ti), TOPK: fmtK(feat.top), B: fmtK(nice), N: ['zero', 'one', 'two', 'three', 'four'][fits] || String(fits) };
+    var bank = pat === 'SRC_WORTH' ? T.SRC_WORTH.hooks : T[pat].hooks;
+    var tpl = pickTemplate(r, bank, o.pidgin, function () { return true; }, used);
+    var res = { pattern: pat };
+    res.hook = fill(tpl.h, ctx); res.sub = fill(tpl.s, ctx);
+    res.swapLines = lines.map(function (x) { return fmtK(x.top) + ' to ' + x.t.name + ' ' + x.t.cond; });
+    res.obs = fresh(r, OBS, used, 'o:');
+    res.bait = fresh(r, BAIT_OPEN, used, 'b:');
+    var sq = ctx.S.toLowerCase().replace(/[^a-z0-9]/g, '');
+    res.tags = ['#iphonenigeria', '#portharcourt', '#androidtoiphone', '#' + sq, '#swapphone'];
+    res.top = [res.hook, res.sub].filter(Boolean).join('\n');
+    res.bottom = [src.name.replace(/^Galaxy /, 'Galaxy ') + ' ' + src.storage].concat(res.swapLines).join('\n');
+    res.text = [res.obs, res.bait, res.tags.join(' ')].join('\n\n');
+    return res;
+  }
+
+  /* ---------- caption types shown to the user ---------- */
+  var TYPES = [
+    { id: 'QUIZ', pat: 'QUIZ', label: 'Guess The Phone', kinds: ['sale'], desc: 'Asks people to name three iPhones, with your device among them. Brings the most comments. Show three phones in the video.' },
+    { id: 'PROVERB', pat: 'PROVERB', label: 'Proverb', kinds: ['sale', 'source', 'deal'], desc: 'A familiar saying turned into a phone joke. The type people share the most.' },
+    { id: 'BUDGET', pat: 'BUDGET', label: 'Budget', kinds: ['sale', 'source', 'deal'], desc: 'Someone with an old Android and a small budget asks what they can get. Brings the "what about my phone" comments.' },
+    { id: 'TEASE', pat: 'TEASE', label: 'Friendly Tease', kinds: ['sale', 'source', 'deal'], desc: 'Gentle jokes about the old phone in your friend\'s pocket. Gets tagged and sent around.' },
+    { id: 'DEBATE', pat: 'DEBATE', label: 'Pick A Side', kinds: ['sale'], desc: 'Sets your device against a neighbour in the lineup and asks people to argue. Needs two phones in the video.' },
+    { id: 'POV', pat: 'POV', label: 'POV', kinds: ['sale', 'source', 'deal'], desc: 'A relatable moment for unboxing or swap videos.' },
+    { id: 'ANCHOR', pat: 'ANCHOR', label: 'Same Money, Newer Phone', kinds: ['sale'], desc: 'Compares your device with an older phone that costs nearly the same.' },
+    { id: 'PLAIN', pat: 'PLAIN', label: 'Straight Post', kinds: ['sale', 'deal'], desc: 'The phone and the price, plain. Your weakest type lately, but fine for stock updates.' },
+    { id: 'SRC_WORTH', pat: 'SRC_WORTH', label: 'What Is It Worth', kinds: ['source'], desc: 'For Nigerian Used phones. Says what the phone is worth in perfect condition and what it can become.' },
+    { id: 'DEAL_GAP', pat: 'DEAL_GAP', label: 'Price Gap', kinds: ['deal'], desc: 'Sets the deal against the standard UK Used, Active or Brand New price from the sheet. Only used when the deal is really cheaper.' },
+    { id: 'DEAL_GUESS', pat: 'DEAL_GUESS', label: 'Guess The Price', kinds: ['deal'], desc: 'Asks people to guess the deal price, with the standard price or the catch as a hint.' },
+    { id: 'DEAL_CATCH', pat: 'DEAL_CATCH', label: 'The Catch', kinds: ['deal'], desc: 'Says what is different about the deal upfront, so nobody feels tricked.' },
+    { id: 'DEAL_PLAIN', pat: 'DEAL_PLAIN', label: 'Just In', kinds: ['deal'], desc: 'A short post that the deal is in, with the price and what is different.' }
+  ];
+  var TYPE_BY = {}; TYPES.forEach(function (t) { TYPE_BY[t.id] = t; });
+
+  function resolveItem(D, item) {
+    var i;
+    if (item.kind === 'sale') {
+      for (i = 0; i < D.targets.length; i++) if (D.targets[i].id === item.id) { var t = D.targets[i]; return { kind: 'sale', t: t, label: t.name + ' ' + t.storage + ' · ' + t.cond + ' · ' + naira(t.price) }; }
+    } else if (item.kind === 'source') {
+      for (i = 0; i < D.sources.length; i++) if (D.sources[i].id === item.id) { var s = D.sources[i]; return { kind: 'source', s: s, label: srcDisplay(s) + ' ' + s.storage + ' · Nigerian Used · trade-in ' + naira(s.ti) }; }
+    } else if (item.kind === 'deal') {
+      for (i = 0; i < (D.deals || []).length; i++) if (D.deals[i].id === item.id) { var d = D.deals[i]; return { kind: 'deal', d: d, label: d.model + ' ' + d.storage + ' · Deal · ' + naira(d.price) }; }
+    }
+    return null;
+  }
+  function makeOne(P, dev, typeId, r, o, used) {
+    var pat = TYPE_BY[typeId].pat, post;
+    if (dev.kind === 'sale') post = buildPost(P, pat, r, o, used, dev.t);
+    else if (dev.kind === 'source') post = buildSource(P, dev.s, pat, r, o, used);
+    else {
+      if (/^DEAL_/.test(typeId)) post = buildDeal(P, dev.d, typeId, r, o, used);
+      else {
+        var dt = dealTarget(dev.d);
+        if (dt.rank < 0 && pat !== 'TEASE' && pat !== 'BUDGET' && pat !== 'PLAIN') throw new Error('infeasible');
+        if (dev.d.type !== 'Phones') throw new Error('infeasible');
+        post = dealify(buildPost(P, pat, r, o, used, dt), dev.d, o);
+      }
+    }
+    if (post.top === undefined) post.top = [post.hook, post.sub].filter(Boolean).join('\n');
+    if (post.bottom === undefined) post.bottom = post.swapBlock;
+    if (post.text === undefined) post.text = post.caption;
+    ['top', 'bottom', 'text'].forEach(function (k) { post[k] = String(post[k]).replace(/—/g, ','); });
+    post.typeId = typeId; post.typeLabel = TYPE_BY[typeId].label; post.typeDesc = TYPE_BY[typeId].desc;
+    return post;
+  }
+  // req: {items:[{kind:'sale'|'source'|'deal', id}], per:Number, types:[ids], seed:Number}
+  function generateFor(D, req) {
+    attachStd(D);
+    var o = { pidgin: 0.3, whatsapp: 'auto' };
+    var r = mulberry32(req.seed || 1);
+    var P = new Pool(D);
+    var stats = {}; D.patternStats.forEach(function (s) { stats[s.pattern] = s; });
+    var wOf = function (id) { var s = stats[TYPE_BY[id].pat]; return Math.max(8, s ? s.score : 40); };
+    var wanted = req.types && req.types.length ? req.types : TYPES.map(function (t) { return t.id; });
+    var used = {}, groups = [];
+    (req.items || []).forEach(function (item) {
+      var dev = resolveItem(D, item); if (!dev) return;
+      var order = wanted.filter(function (id) { return TYPE_BY[id].kinds.indexOf(dev.kind) >= 0; });
+      var group = { kind: dev.kind, label: dev.label, item: item, options: [], notFitting: [] }, bad = {}, seen = {}, guard = 0;
+      var allowed = order.slice();
+      while (group.options.length < (req.per || 1) && order.length && guard++ < 80) {
+        var pool = order.filter(function (id) { return !seen[id]; });
+        if (!pool.length) { seen = {}; pool = order.slice(); }
+        var id = wpick(r, pool, wOf), post = null;
+        try { post = makeOne(P, dev, id, r, o, used); } catch (e) { if (e.message !== 'infeasible') throw e; }
+        if (!post) { bad[id] = 1; order = order.filter(function (x) { return x !== id; }); continue; }
+        seen[id] = 1; group.options.push(post);
+      }
+      group.notFitting = allowed.filter(function (id) { return bad[id] && !group.options.some(function (p) { return p.typeId === id; }); }).map(function (id) { return TYPE_BY[id].label; });
+      groups.push(group);
+    });
+    return groups;
+  }
+  function regenerate(D, item, typeId, seed) {
+    var g = generateFor(D, { items: [item], per: 1, types: [typeId], seed: seed });
+    return g.length && g[0].options.length ? g[0].options[0] : null;
+  }
+
+  root.SwapEngine = {
+    generate: generate, generateFor: generateFor, regenerate: regenerate, TYPES: TYPES, srcDisplay: srcDisplay, fromSheet: fromSheet, standards: standards, attachStd: attachStd, ipkey: ipkey, calc: calc, fmtK: fmtK, naira: naira, srcLabel: srcLabel, srcFull: srcFull,
+    PATTERN_LABEL: PATTERN_LABEL, PATTERN_HINT: PATTERN_HINT, WHATSAPP: WHATSAPP, mulberry32: mulberry32,
+    _banks: { OBS: OBS, BAIT_OPEN: BAIT_OPEN, BAIT_TAG: BAIT_TAG, BAIT_DEBATE: BAIT_DEBATE, BAIT_QUIZ: BAIT_QUIZ, T: T, FEATS: FEATS }
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>(function(){
+var E=window.SwapEngine, D=DATA;
+var SHEET_ID='1eOwro6T_tjcz7Tfz-Ylhu_LT7_HEr5LLbcS5zIQW_V4';
+E.attachStd(D);
+function $(id){return document.getElementById(id)}
+function h(tag,attrs,kids){var e=document.createElement(tag);for(var k in (attrs||{})){if(k==='text')e.textContent=attrs[k];else if(k==='class')e.className=attrs[k];else e.setAttribute(k,attrs[k]);}(kids||[]).forEach(function(c){if(c)e.appendChild(c)});return e}
+var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},1500)}
+function copy(text,label){
+  function fb(){try{var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);toast(ok?label+' copied':'Select the text and copy it')}catch(e){toast('Select the text and copy it')}}
+  try{navigator.clipboard.writeText(text).then(function(){toast(label+' copied')},fb)}catch(e){fb()}
+}
+function naira(n){return E.naira(n)}
+
+/* ---------- state ---------- */
+var sel={};            // key 'kind:id' -> {kind,id}
+var filter='all';
+var per=2;
+var typeOn={};
+E.TYPES.forEach(function(t){typeOn[t.id]=true});
+
+function availDeals(){return (D.deals||[]).filter(function(d){return d.status==='Available'})}
+function saleCount(){return D.targets.length}
+function nuSources(){return D.sources.filter(function(s){return !s.iphone})}
+function key(kind,id){return kind+':'+id}
+function setUpd(){$('upd').textContent=D.updated}
+setUpd();
+
+/* ---------- step 1: devices ---------- */
+var FILTERS=[['all','All'],['deal','Deals'],['UK Used','UK Used'],['Active','Active'],['Brand New','Brand New'],['nu','Nigerian Used']];
+function renderFilters(){
+  var box=$('filters');box.textContent='';
+  FILTERS.forEach(function(f){
+    var n=countFor(f[0]);
+    var b=h('button',{type:'button',class:'chip','aria-pressed':String(filter===f[0]),text:f[1]+' '+n});
+    b.addEventListener('click',function(){filter=f[0];renderFilters();renderPicker()});
+    box.appendChild(b);
+  });
+}
+function countFor(f){
+  if(f==='all')return saleCount()+nuSources().length+availDeals().length;
+  if(f==='deal')return availDeals().length;
+  if(f==='nu')return nuSources().length;
+  return D.targets.filter(function(t){return t.cond===f}).length;
+}
+function matches(q,str){
+  if(!q)return true;
+  var s=str.toLowerCase();
+  return q.toLowerCase().split(/\s+/).every(function(w){return !w||s.indexOf(w)>=0});
+}
+function shown(){
+  var q=$('dq').value.trim(),out={sale:[],source:[],deal:[]};
+  if(filter==='all'||filter==='UK Used'||filter==='Active'||filter==='Brand New'){
+    D.targets.forEach(function(t){
+      if(filter!=='all'&&t.cond!==filter)return;
+      if(matches(q,t.name+' '+t.storage+' '+t.cond))out.sale.push(t);
+    });
+  }
+  if(filter==='all'||filter==='nu'){
+    nuSources().forEach(function(s){if(matches(q,E.srcDisplay(s)+' '+s.name+' '+s.storage+' nigerian used'))out.source.push(s)});
+  }
+  if(filter==='all'||filter==='deal'){
+    availDeals().forEach(function(d){if(matches(q,d.model+' '+d.storage+' '+(d.diff||'')+' deal'))out.deal.push(d)});
+  }
+  return out;
+}
+function allShownItems(s){
+  var a=[];
+  s.deal.forEach(function(d){a.push({kind:'deal',id:d.id})});
+  s.sale.forEach(function(t){a.push({kind:'sale',id:t.id})});
+  s.source.forEach(function(x){a.push({kind:'source',id:x.id})});
+  return a;
+}
+function pickBox(item,cls){
+  var k=key(item.kind,item.id),i=h('input',{type:'checkbox'});
+  i.checked=!!sel[k];
+  i.addEventListener('change',function(){if(i.checked)sel[k]=item;else delete sel[k];upd()});
+  return i;
+}
+function renderPicker(){
+  var box=$('picklist');box.textContent='';
+  var s=shown();
+  /* deals */
+  if(s.deal.length){
+    box.appendChild(h('div',{class:'ph2',text:'Deals From The Sheet'}));
+    var dl=h('div',{class:'dlist'});
+    s.deal.forEach(function(d){
+      var item={kind:'deal',id:d.id},inp=pickBox(item);
+      var tags=h('div',{class:'ds'});
+      var st=d.std;
+      if(st&&st.save>0)tags.appendChild(h('span',{class:'tag good',text:naira(st.save)+' less than '+st.primaryLabel}));
+      else if(!st||!st.primaryLabel)tags.appendChild(h('span',{class:'tag',text:'No standard price in sheet'}));
+      var row=h('label',{class:'dl'},[inp,h('span',{class:'dn',text:d.model+' '+d.storage}),h('span',{class:'dp',text:naira(d.price)}),h('span',{class:'dc',text:d.diff||'No catch listed'}),tags]);
+      dl.appendChild(row);
+    });
+    box.appendChild(dl);
+  }
+  /* sale phones, grouped by model */
+  if(s.sale.length){
+    box.appendChild(h('div',{class:'ph2',text:'Phones For Sale'}));
+    var groups={},ord=[];
+    s.sale.forEach(function(t){if(!groups[t.name]){groups[t.name]=[];ord.push(t.name)}groups[t.name].push(t)});
+    ord.sort(function(a,b){var ra=groups[a][0].rank,rb=groups[b][0].rank;if(ra<0&&rb<0)return a<b?-1:1;if(ra<0)return 1;if(rb<0)return -1;return rb-ra});
+    ord.forEach(function(n){
+      var g=h('div',{class:'pg'},[h('b',{text:n})]);
+      groups[n].forEach(function(t){
+        var inp=pickBox({kind:'sale',id:t.id});
+        g.appendChild(h('label',{class:'pv'},[inp,document.createTextNode(t.storage+' · '+t.cond+' · '+naira(t.price))]));
+      });
+      box.appendChild(g);
+    });
+  }
+  /* nigerian used */
+  if(s.source.length){
+    box.appendChild(h('div',{class:'ph2',text:'Nigerian Used'}));
+    var sg={},so=[];
+    s.source.forEach(function(x){var n=E.srcDisplay(x);if(!sg[n]){sg[n]=[];so.push(n)}sg[n].push(x)});
+    so.sort();
+    so.forEach(function(n){
+      var g=h('div',{class:'pg'},[h('b',{text:n})]);
+      sg[n].forEach(function(x){
+        var inp=pickBox({kind:'source',id:x.id});
+        g.appendChild(h('label',{class:'pv'},[inp,document.createTextNode(x.storage+' · trade-in '+naira(x.ti))]));
+      });
+      box.appendChild(g);
+    });
+  }
+  if(!s.sale.length&&!s.source.length&&!s.deal.length){
+    box.appendChild(h('p',{class:'empty',text:filter==='deal'&&!availDeals().length?'No deals are marked Available in the sheet right now.':'Nothing matches. Try a shorter search.'}));
+  }
+  upd();
+}
+$('dq').addEventListener('input',renderPicker);
+$('selshown').addEventListener('click',function(){allShownItems(shown()).forEach(function(i){sel[key(i.kind,i.id)]=i});renderPicker()});
+$('selclear').addEventListener('click',function(){sel={};renderPicker()});
+
+/* ---------- step 2: per device ---------- */
+(function(){
+  var box=$('per');
+  [1,2,3,4,5].forEach(function(n){
+    var b=h('button',{type:'button',class:'chip','aria-pressed':String(n===per),text:String(n)});
+    b.addEventListener('click',function(){per=n;Array.prototype.forEach.call(box.children,function(c,i){c.setAttribute('aria-pressed',String(i+1===per))});upd()});
+    box.appendChild(b);
+  });
+})();
+
+/* ---------- step 3: types ---------- */
+var WORKS={sale:'Phones for sale',source:'Nigerian Used',deal:'Deals'};
+function renderTypes(){
+  var box=$('types');box.textContent='';
+  var stats={};(D.patternStats||[]).forEach(function(p){stats[p.pattern]=p});
+  E.TYPES.forEach(function(t){
+    var inp=h('input',{type:'checkbox'});inp.checked=!!typeOn[t.id];
+    inp.addEventListener('change',function(){typeOn[t.id]=inp.checked;upd()});
+    var st=stats[t.pat];
+    var ev=t.kinds.map(function(k){return WORKS[k]}).join(', ');
+    if(st)ev+='  ·  Scores '+Math.round(st.score)+' of 100 in your posts';
+    box.appendChild(h('label',{class:'ty'},[inp,h('div',{class:'tb'},[h('b',{text:t.label}),h('span',{text:t.desc}),h('em',{text:ev})])]));
+  });
+}
+$('tyall').addEventListener('click',function(){E.TYPES.forEach(function(t){typeOn[t.id]=true});renderTypes();upd()});
+$('tynone').addEventListener('click',function(){E.TYPES.forEach(function(t){typeOn[t.id]=false});renderTypes();upd()});
+
+/* ---------- summary / generate ---------- */
+function chosenTypes(){return E.TYPES.filter(function(t){return typeOn[t.id]}).map(function(t){return t.id})}
+function selItems(){return Object.keys(sel).map(function(k){return sel[k]})}
+function upd(){
+  var n=selItems().length,ty=chosenTypes().length;
+  $('selinfo').textContent=n?n+(n===1?' device selected':' devices selected'):'None selected';
+  $('tyinfo').textContent=ty+' of '+E.TYPES.length+' on';
+  var g=$('gsum');
+  if(!n)g.textContent='Pick at least one device';
+  else if(!ty)g.textContent='Tick at least one caption type';
+  else g.textContent=n+(n===1?' device':' devices')+' × '+per+(per===1?' caption':' captions');
+}
+function block(label,text,noteCls){
+  var pre=noteCls==='ov'
+    ?h('div',{class:'ovs'},[h('div',{class:'ov',text:text})])
+    :h('pre',{class:noteCls||'',text:text});
+  var b=h('button',{type:'button',class:'btn sm',text:'Copy'});
+  b.addEventListener('click',function(){copy(text,label)});
+  return h('div',{class:'blk'},[h('div',{class:'bh'},[h('span',{class:'bl',text:label}),b]),pre]);
+}
+function optionCard(group,post,readOnly,onChange){
+  var card=h('div',{class:'opt'});
+  function fill(p){
+    card.textContent='';
+    var head=[h('div',{},[h('b',{text:p.typeLabel}),h('span',{text:p.typeDesc||''})])];
+    if(!readOnly){
+      var redo=h('button',{type:'button',class:'btn ghost sm',text:'Redo'});
+      redo.addEventListener('click',function(){
+        var np=null,tries=0;
+        while(tries++<6){var c=E.regenerate(D,group.item,p.typeId,Math.floor(Math.random()*1e9)+1);if(c){np=c;if(c.top!==p.top||c.text!==p.text)break}}
+        if(np){fill(np);if(onChange)onChange(np)}else toast('No other version fits this device');
+      });
+      head.push(redo);
+    }
+    card.appendChild(h('div',{class:'oh'},head));
+    card.appendChild(block('Top Caption',p.top,'ov'));
+    card.appendChild(block('Bottom Caption',p.bottom));
+    card.appendChild(block('Text Caption',p.text,'cap'));
+  }
+  fill(post);
+  return card;
+}
+/* the set currently on screen, kept so Save stores any Redo changes */
+var current=null,savedCurrent=false;
+function plain(p){return {typeId:p.typeId,typeLabel:p.typeLabel,typeDesc:p.typeDesc||'',top:p.top,bottom:p.bottom,text:p.text}}
+function saveBar(){
+  var b=h('button',{type:'button',class:'btn savebtn',text:'Save These Captions'});
+  b.addEventListener('click',saveCurrent);
+  return h('div',{class:'rbar'},[h('span',{class:'gsum',text:current.groups.length+(current.groups.length===1?' device':' devices')+', '+current.count+' captions'}),b]);
+}
+function renderResults(){
+  var out=$('out');out.textContent='';
+  if(!current)return;
+  out.appendChild(saveBar());
+  current.groups.forEach(function(g){
+    var sec=h('section',{class:'dg'},[h('h2',{text:g.label})]);
+    var list=h('div',{class:'opts'});
+    if(!g.options.length)list.appendChild(h('p',{class:'empty',text:'None of the selected types fit this device. Tick more types and try again.'}));
+    g.options.forEach(function(p,i){list.appendChild(optionCard(g,p,false,function(np){g.options[i]=np;savedCurrent=false;refreshSaveBtns()}))});
+    sec.appendChild(list);
+    if(g.notFitting&&g.notFitting.length)sec.appendChild(h('p',{class:'skip',text:'Skipped because they need something this device does not have: '+g.notFitting.join(', ')+'.'}));
+    out.appendChild(sec);
+  });
+  if(current.count>3)out.appendChild(saveBar());
+  refreshSaveBtns();
+}
+function refreshSaveBtns(){
+  Array.prototype.forEach.call(document.querySelectorAll('.savebtn'),function(b){
+    b.textContent=savedCurrent?'Saved':'Save These Captions';b.disabled=savedCurrent||!store;
+  });
+}
+$('go').addEventListener('click',function(){
+  var items=selItems(),types=chosenTypes();
+  if(!items.length){toast('Pick at least one device');return}
+  if(!types.length){toast('Tick at least one caption type');return}
+  var groups=E.generateFor(D,{items:items,per:per,types:types,seed:Math.floor(Math.random()*1e9)+1});
+  var count=0;groups.forEach(function(g){count+=g.options.length});
+  current={groups:groups,count:count};savedCurrent=false;
+  renderResults();
+  $('out').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ---------- sheet sync (Google Sheets connector, read only) ---------- */
+function getMcp(){
+  /* SwapDesk admin: read the sheet through the admin endpoint with the saved admin password. */
+  var key='';try{key=localStorage.getItem('swapdesk.admin.key')||''}catch(e){}
+  if(!key)return Promise.resolve(null);
+  return Promise.resolve({callTool:function(server,tool,args){
+    return fetch('https://script.google.com/macros/s/AKfycbxzQrWPBr0arYZgp5kCF48qTE-uNG8_iHEAyC3R6AttBNukQBz9E5wlF9sI9_h0E2jn/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'admin',key:key,op:'rows',range:args.range})})
+      .then(function(r){return r.json()}).then(function(j){if(!j.ok)throw {code:'tool_error',message:j.error};return {payload:{values:j.values}}});
+  }});
+}
+function syncError(e){
+  var c=e&&e.code;
+  if(c==='server_not_connected')return 'Google Sheets is not connected. Add it in claude.ai Settings, Connectors, then press Refresh.';
+  if(c==='needs_reauth')return 'Google Sheets needs you to sign in again. Reconnect it in claude.ai Settings, Connectors.';
+  if(c==='not_in_manifest'||c==='consent_required')return 'This page is not allowed to read Google Sheets. Allow it from the page Permissions menu, then press Refresh.';
+  if(c==='approval_required'||c==='cancelled')return 'The sheet read was not approved. Press Refresh and choose Allow.';
+  if(c==='tool_error')return 'The sheet would not open. '+(e.message||'Check that you can open the SwapDesk workbook.');
+  if(c==='empty')return 'The Devices tab came back empty. Nothing was changed.';
+  if(c==='server_unavailable'||c==='upstream_error'||c==='rate_limited')return 'Google Sheets did not answer. Try again in a moment.';
+  return 'Could not read the sheet'+(c?' ('+c+')':'')+'. Nothing was changed.';
+}
+function readRange(mcp,range){
+  return mcp.callTool('Google Sheets','get_values',{spreadsheetId:SHEET_ID,range:range},{cache:false}).then(function(r){
+    var p=r.payload;if(typeof p==='string'){try{p=JSON.parse(p)}catch(e){p=null}}
+    return (p&&p.values)||[];
+  });
+}
+function syncSheet(quiet){
+  var b=$('sync'),msg=$('syncmsg');b.disabled=true;
+  if(!quiet)msg.textContent='Reading the sheet...';
+  return getMcp().then(function(mcp){
+    if(!mcp){msg.textContent='Showing the saved sheet from '+D.updated+'. Open the admin site and sign in, then press Refresh.';return}
+    msg.textContent='Reading the sheet...';
+    return Promise.all([readRange(mcp,'Devices!B5:Z600'),readRange(mcp,'Deals!B5:O300'),readRange(mcp,'Deductions!B5:Q250')]).then(function(res){
+      if(!res[0].length)throw {code:'empty'};
+      var nd=E.fromSheet({devices:res[0],deals:res[1],deductions:res[2]},D);
+      var now=new Date();nd.updated=now.toLocaleDateString(undefined,{day:'numeric',month:'short'})+', '+now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      D=nd;E.attachStd(D);
+      var ok={};
+      D.targets.forEach(function(t){ok['sale:'+t.id]=1});D.sources.forEach(function(s){if(!s.iphone)ok['source:'+s.id]=1});availDeals().forEach(function(d){ok['deal:'+d.id]=1});
+      Object.keys(sel).forEach(function(k){if(!ok[k])delete sel[k]});
+      renderFilters();renderPicker();
+      msg.textContent='Synced from the sheet at '+D.updated+': '+D.targets.length+' phones for sale, '+nuSources().length+' Nigerian Used, '+availDeals().length+' deals.';
+      if(!quiet)toast('Sheet synced');
+    });
+  }).catch(function(e){msg.textContent=syncError(e)+' Showing the saved sheet from '+D.updated+'.'}).then(function(){b.disabled=false});
+}
+$('sync').addEventListener('click',function(){syncSheet(false)});
+
+/* ---------- tabs ---------- */
+function showTab(n){
+  ['gen','saved'].forEach(function(k){var on=k===n;$('t-'+k).setAttribute('aria-selected',String(on));$('p-'+k).hidden=!on});
+  window.scrollTo(0,0);
+}
+$('t-gen').addEventListener('click',function(){showTab('gen')});
+$('t-saved').addEventListener('click',function(){showTab('saved')});
+
+/* ---------- saved captions ----------
+   Stored in the page database, private to the person who saved them (data/users/<id>).
+   Outside Claude it falls back to this browser only. */
+var store=null,saves=[],storeKind='';
+var LS_KEY='swapdesk-caption-saves-v1';
+function lsRead(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch(e){return []}}
+function lsWrite(a){try{localStorage.setItem(LS_KEY,JSON.stringify(a));return true}catch(e){return false}}
+function getCap(name){try{if(window.claude&&window.claude.use)return window.claude.use(name)}catch(e){}return Promise.resolve(null)}
+function sdAdmin(op,extra){
+  var key='';try{key=localStorage.getItem('swapdesk.admin.key')||''}catch(e){}
+  var payload={action:'admin',key:key,op:op};for(var k in extra)payload[k]=extra[k];
+  return fetch('https://script.google.com/macros/s/AKfycbxzQrWPBr0arYZgp5kCF48qTE-uNG8_iHEAyC3R6AttBNukQBz9E5wlF9sI9_h0E2jn/exec',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(function(r){return r.json()}).then(function(j){if(!j.ok)throw {code:j.code||'tool_error',message:j.error};return j});
+}
+function initStore(){
+  var key='';try{key=localStorage.getItem('swapdesk.admin.key')||''}catch(e){}
+  if(!key)return initStoreEngine();
+  return sdAdmin('captions',{}).then(function(){
+    var listener=null;
+    function reload(){return sdAdmin('captions',{}).then(function(j){if(listener)listener(j.saves||[])})}
+    return {kind:'sheet',
+      load:function(cb,err){listener=cb;reload().catch(function(e){if(err)err(e)});return function(){listener=null}},
+      add:function(rec){return sdAdmin('saveCaption',{rec:rec}).then(reload)},
+      remove:function(id){return sdAdmin('deleteCaption',{id:id}).then(reload)}};
+  }).catch(function(){return initStoreEngine()});
+}
+function initStoreEngine(){
+  return Promise.all([getCap('db'),getCap('user')]).then(function(r){
+    var db=r[0],user=r[1];
+    if(db&&user&&user.id){
+      return user.id().then(function(uid){
+        if(!uid)return null;
+        var col=db.collection('data/users/'+uid);
+        return {kind:'db',
+          load:function(cb,err){return col.where('kind','==','caption-save').onSnapshot(function(s){cb(s.docs.map(function(d){var x=d.data()||{};x.id=d.id;return x}))},err)},
+          add:function(rec){return col.doc(rec.id).set(rec)},
+          remove:function(id){return col.doc(id).delete()}};
+      });
+    }
+    return null;
+  }).catch(function(){return null}).then(function(s){
+    if(s)return s;
+    var ok=lsWrite(lsRead());
+    if(!ok)return null;
+    var listeners=[];
+    return {kind:'local',
+      load:function(cb){cb(lsRead());return function(){}},
+      add:function(rec){var a=lsRead();a.push(rec);if(!lsWrite(a))return Promise.reject({code:'storage'});cbAll();return Promise.resolve()},
+      remove:function(id){lsWrite(lsRead().filter(function(x){return x.id!==id}));cbAll();return Promise.resolve()}};
+    function cbAll(){saves=lsRead();renderSaves()}
+  });
+}
+function fmtWhen(iso){
+  var d=new Date(iso);if(isNaN(d))return 'Unknown time';
+  return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' at '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+}
+function saveCurrent(){
+  if(!current||!store){toast('Saving is not available right now');return}
+  var groups=current.groups.filter(function(g){return g.options.length}).map(function(g){return {label:g.label,kind:g.kind,options:g.options.map(plain)}});
+  if(!groups.length){toast('Nothing to save');return}
+  var n=0;groups.forEach(function(g){n+=g.options.length});
+  var rec={id:'cap-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:'caption-save',savedAt:new Date().toISOString(),count:n,devices:groups.map(function(g){return g.label}),groups:groups};
+  Array.prototype.forEach.call(document.querySelectorAll('.savebtn'),function(b){b.disabled=true;b.textContent='Saving...'});
+  Promise.resolve(store.add(rec)).then(function(){
+    savedCurrent=true;refreshSaveBtns();toast('Saved. See the Saved Captions tab');
+  },function(e){
+    savedCurrent=false;refreshSaveBtns();
+    toast(e&&e.code==='quota_exceeded'?'Saved captions are full. Delete some first':'Could not save. Try again');
+  });
+}
+var pendingDel=null;
+function renderSaves(){
+  var box=$('saves');box.textContent='';
+  var list=saves.slice().sort(function(a,b){return a.savedAt<b.savedAt?1:-1});
+  $('savedn').textContent=list.length?'('+list.length+')':'';
+  $('svinfo').textContent=list.length?list.length+(list.length===1?' save':' saves'):'';
+  if(!store){$('svsub').textContent='Saving is not available in this view. Open the page in Claude to save captions.';return}
+  $('svsub').textContent=store.kind==='local'?'Saved on this browser only. Open the page in Claude to keep them with your account.':'Open a save to see its captions. Every caption still copies on its own.';
+  if(!list.length){box.appendChild(h('p',{class:'empty',text:'Nothing saved yet. Generate captions and press Save These Captions.'}));return}
+  list.forEach(function(s){
+    var det=h('details',{class:'sv'});
+    var devs=h('div',{class:'devs'});
+    (s.devices||[]).forEach(function(n){devs.appendChild(h('span',{class:'tag',text:n}))});
+    det.appendChild(h('summary',{},[h('span',{class:'when',text:fmtWhen(s.savedAt)}),h('span',{class:'meta',text:(s.devices||[]).length+((s.devices||[]).length===1?' device':' devices')+', '+(s.count||0)+' captions'}),devs]));
+    var filled=false;
+    det.addEventListener('toggle',function(){
+      if(!det.open||filled)return;filled=true;
+      var body=h('div',{class:'body'});
+      (s.groups||[]).forEach(function(g){
+        var sec=h('section',{class:'dg'},[h('h2',{text:g.label})]);
+        var l=h('div',{class:'opts'});
+        (g.options||[]).forEach(function(p){l.appendChild(optionCard(g,p,true))});
+        sec.appendChild(l);body.appendChild(sec);
+      });
+      var del=h('div',{class:'del'});
+      var db=h('button',{type:'button',class:'btn ghost sm',text:'Delete This Save'});
+      db.addEventListener('click',function(){
+        if(pendingDel!==s.id){pendingDel=s.id;db.textContent='Tap Again To Delete';del.insertBefore(h('span',{text:'This cannot be undone.'}),db);return}
+        pendingDel=null;db.disabled=true;
+        Promise.resolve(store.remove(s.id)).then(function(){toast('Deleted')},function(){db.disabled=false;toast('Could not delete')});
+      });
+      del.appendChild(db);body.appendChild(del);
+      det.appendChild(body);
+    });
+    box.appendChild(det);
+  });
+}
+function bindSaves(){
+  try{
+    store.load(function(a){saves=a;renderSaves()},function(){$('svsub').textContent='Could not load your saved captions.'});
+  }catch(e){$('svsub').textContent='Could not load your saved captions.'}
+}
+renderSaves();
+initStore().then(function(s){store=s;if(store)bindSaves();renderSaves();refreshSaveBtns()});
+
+renderFilters();renderPicker();renderTypes();upd();
+setTimeout(function(){syncSheet(true)},300);
+})();
+</script>
+
+
+</body>
+</html>
