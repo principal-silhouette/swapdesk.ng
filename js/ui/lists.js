@@ -248,7 +248,8 @@ export function listScreen(el, app, view, params) {
     const c = e.target.closest('.chip, .opt[data-k]');
     if (c && c.dataset.k) {
       const k = c.dataset.k;
-      if (k === 'deals') { f.cond = 'Deal'; f.search = ''; open = ''; drawChips(); drawList(); sync(); setTop(); return; }
+      // Deals have their own page now, with photos (31 Oct).
+      if (k === 'deals') { app.go('deals'); return; }
       f[k] = c.getAttribute('aria-pressed') === 'true' ? '' : c.dataset.v;
       if (k === 'brand' && !f.brand) f.cond = '';
       if (k === 'type') { f.brand = ''; f.cond = ''; }

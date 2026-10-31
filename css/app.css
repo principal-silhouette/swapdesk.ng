@@ -1251,9 +1251,6 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 .deals-pg .list-sub { color: rgba(255, 255, 255, 0.78) !important; }
 .deals-pg .list-sub strong { color: #fff; }
 .deals-pg .list-date { color: rgba(255, 255, 255, 0.55); }
-.dl-lockup { display: flex; flex-direction: column; align-items: center; line-height: 0.8 !important; margin-bottom: 14px !important; }
-.dl-shop { font: 400 2.1rem/1 "Great Vibes", "Snell Roundhand", cursive; color: #fff; margin-bottom: -0.5rem; position: relative; z-index: 1; letter-spacing: 0; }
-.dl-deals { font: 700 3.6rem/0.9 var(--brandface); color: #e3001b; letter-spacing: -0.02em; }
 .deals-pg .list-top { background: rgba(10, 10, 10, 0.88); }
 .deals-pg .field { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: #fff; }
 .deals-pg .field input { color: #fff; }
@@ -1261,9 +1258,11 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 .deals-pg .chips { justify-content: flex-start; }
 .deals-pg .chip { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
 .deals-pg .chip[aria-pressed="true"] { background: #e3001b; border-color: #e3001b; color: #fff; padding-right: 14px; }
-.deals-pg .series-h { background: rgba(10, 10, 10, 0.88); color: #fff; }
+.deals-pg .h-title { color: #fff; }
+/* Series names sit with their deals, not pinned under the search bar (Daniel, 31 Oct). */
+.deals-pg .series-h { position: static; background: none !important; color: #fff; padding-left: 2px; }
 .deals-pg .series-h::before { content: ""; display: inline-block; width: 4px; height: 0.95em; margin-right: 8px; border-radius: 2px; background: #e3001b; vertical-align: -0.1em; }
-@media (max-width: 600px) { .deals-pg .list-top, .deals-pg .series-h { background: #0a0a0a; } }
+@media (max-width: 600px) { .deals-pg .list-top { background: #0a0a0a; } }
 .deals-pg .empty { color: rgba(255, 255, 255, 0.75); }
 
 .dl-grid { display: grid; gap: 16px; }
@@ -1312,6 +1311,6 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 .dl-lbtrack { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .dl-lbtrack::-webkit-scrollbar { display: none; }
 .dl-lbtrack img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; }
-body.deals-mode .deals-pg .list-top, body.deals-mode .deals-pg .series-h { background: #0a0a0a !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.deals-mode .deals-pg .list-top { background: #0a0a0a !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.deals-mode .deals-pg .field, body.deals-mode .deals-pg .field input { background: #1a1a1a !important; border-color: rgba(255, 255, 255, 0.18) !important; color: #fff !important; }
 body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { color: rgba(255, 255, 255, 0.6); }

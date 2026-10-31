@@ -47,7 +47,7 @@ export function dealsScreen(el, app) {
   el.classList.add('wide', 'picking', 'deals-pg');
   el.innerHTML = `<div class="screen-main">
       <div class="list-head">
-        <h1 class="h-title dl-lockup" aria-label="Shop Deals"><span class="dl-shop" aria-hidden="true">Shop</span><span class="dl-deals" aria-hidden="true">deals</span></h1>
+        <h1 class="h-title">🔥 @shopdeals.ng</h1>
         <p class="list-sub">One unit each, with real photos of the actual device. <strong>What you see is what you swap into.</strong></p>
         <p class="list-date" data-count></p>
       </div>
