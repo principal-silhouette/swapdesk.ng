@@ -1229,14 +1229,10 @@ body.deals-mode { background: #000; }
 body.deals-mode .wave-a { content: url("../assets/wave-a-red.svg"); }
 body.deals-mode .wave-b { content: url("../assets/wave-b-red.svg"); }
 body.deals-mode .wave { opacity: 0.55; }
-/* The logo flips to shopdeals: the same two fonts as swapdesk, swapped round (script first, then the heavy face). */
-.sd-logo { display: none; white-space: nowrap; line-height: 1; text-align: center; }
-.sd-logo i { font: 400 62px/1 "Sacramento", cursive; font-style: normal; color: #fff; margin-right: 4px; }
-.sd-logo b { font: 900 46px/1 "League Spartan", var(--brandface); color: #e3001b; letter-spacing: -0.035em; }
-body.deals-mode .stage-logo { width: auto; text-decoration: none; }
-body.deals-mode .stage-logo img { display: none; }
-body.deals-mode .stage-logo .sd-logo { display: flex; align-items: baseline; justify-content: center; }
-@media (max-width: 600px) { .sd-logo i { font-size: 54px; } .sd-logo b { font-size: 40px; } }
+/* The logo flips to the shopdeals logo from the Canva design. */
+.stage-logo .sd-logo { display: none; }
+body.deals-mode .stage-logo img:not(.sd-logo) { display: none; }
+body.deals-mode .stage-logo .sd-logo { display: block; }
 body.deals-mode .stage-tag .t1, body.deals-mode .stage-tag .t2 { color: #fff; }
 body.deals-mode .stage-tag .t3 { color: #e3001b; }
 body.deals-mode .stage-arrows { filter: brightness(0) invert(1); }
@@ -1285,9 +1281,9 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 @media (hover: hover) and (pointer: fine) { .dl-gal:hover .dl-nav { display: grid; } }
 .dl-none { height: 100%; display: grid; place-items: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; }
 .dl-body { padding: 16px 16px 14px; display: grid; gap: 12px; color: #fff; }
-.dl-titlerow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.dl-titlerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .dl-name { margin: 0; font: 700 1.2rem/1.15 var(--display); letter-spacing: -0.018em; }
-.dl-sub { margin: 3px 0 0; font-size: 13.5px; color: rgba(255, 255, 255, 0.6); }
+.dl-sub { margin: -9px 0 0; font-size: 13.5px; color: rgba(255, 255, 255, 0.6); }
 .dl-price { margin: 0; font: 700 1.3rem/1.1 var(--brandface); color: #ff2a3d; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .dl-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 0; padding: 12px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.1); }
 .dl-specs div { min-width: 0; }
@@ -1321,10 +1317,11 @@ body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { co
 .dl-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 .dl-tile { display: flex; flex-direction: column; padding: 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; overflow: hidden; background: #141414; color: #fff; text-align: left; }
 .dl-tile img, .dl-tile .dl-none { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; display: block; background: #1e1e1e; font-size: 12.5px; }
-.dl-tt { display: grid; gap: 3px; padding: 9px 10px 11px; }
+.dl-tt { display: grid; gap: 4px; padding: 9px 10px 11px; }
+.dl-tn { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
 .dl-tt b { font-size: 14px; line-height: 1.2; font-weight: 600; }
 .dl-tt small { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
-.dl-tr { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 2px; }
+.dl-tr { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .dl-tp { font: 700 15px/1 var(--brandface); color: #ff2a3d; white-space: nowrap; }
 .dl-tr .bat { font-size: 11.5px; padding: 1px 7px; }
 .dl-tile:active { transform: scale(0.98); }

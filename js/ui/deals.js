@@ -4,8 +4,8 @@ import { matches } from '../engine.js';
 import { html, raw, naira, nairaK, $, $$ } from '../format.js';
 import { whatsappURL } from '../quote.js';
 import { ICON } from './icons.js';
-import { dealRows } from './lists.js?v=202';
-import { SCREENS } from './flow.js?v=202';
+import { dealRows } from './lists.js?v=203';
+import { SCREENS } from './flow.js?v=203';
 
 // Photos and listing dates, kept with the cropped photos in assets/deals.
 let EXTRA = null;
@@ -56,7 +56,7 @@ function card(d, x) {
   return html`<article class="dl-card" data-id="${d.id}">
     <div class="dl-gal">${gallery}${isNew ? raw('<span class="dl-new">New Today</span>') : ''}</div>
     <div class="dl-body">
-      <div class="dl-titlerow"><div><h3 class="dl-name">${d.model}</h3><p class="dl-sub">${d.storage} · ${kindOf(d).replace(/s$/, '')} Deal</p></div><p class="dl-price">${naira(d.price)}</p></div>
+      <div class="dl-titlerow"><h3 class="dl-name">${d.model}</h3><p class="dl-price">${naira(d.price)}</p></div><p class="dl-sub">${d.storage} · ${kindOf(d).replace(/s$/, '')} Deal</p>
       <dl class="dl-specs">
         <div><dt>Battery Health</dt><dd>${bh}</dd></div>
         <div><dt>Colour</dt><dd>${sw ? raw(`<span class="sw" style="background:${sw}"></span>`) : ''}${p.colour || '—'}</dd></div>
@@ -77,7 +77,7 @@ function tile(d, x) {
   const bh = p.bh ? html`<span class="bat ${p.bh >= 85 ? 'g' : p.bh >= 80 ? 'w' : 'l'}">${p.bh}%</span>` : p.newBattery ? raw('<span class="bat g">New</span>') : '';
   return html`<button class="dl-tile" type="button" data-open="${d.id}" aria-label="${d.model} ${d.storage}, ${naira(d.price)}. See this deal.">
     ${n ? html`<img src="${photos[0]}" alt="" loading="lazy" decoding="async" width="960" height="1200">` : raw('<span class="dl-none">Photos coming soon</span>')}
-    <span class="dl-tt"><b>${d.model}</b><small>${d.storage}${n ? ` · ${n} ${n === 1 ? 'photo' : 'photos'}` : ''}</small><span class="dl-tr"><span class="dl-tp">${nairaK(d.price)}</span>${bh}</span></span>
+    <span class="dl-tt"><span class="dl-tn"><b>${d.model}</b><span class="dl-tp">${nairaK(d.price)}</span></span><span class="dl-tr"><small>${d.storage}${n ? ` · ${n} ${n === 1 ? 'photo' : 'photos'}` : ''}</small>${bh}</span></span>
   </button>`;
 }
 
