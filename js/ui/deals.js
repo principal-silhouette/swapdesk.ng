@@ -1,7 +1,7 @@
 // Shop Deals: its own black-and-red pop-up (the @shopdeals.ng look), laid out like the Shop list:
 // series headings in the catalogue's order, one card per deal with its real photos (Daniel, 31 Oct).
 import { matches } from '../engine.js';
-import { html, raw, naira, $, $$ } from '../format.js';
+import { html, raw, naira, nairaK, $, $$ } from '../format.js';
 import { whatsappURL } from '../quote.js';
 import { ICON } from './icons.js';
 import { dealRows } from './lists.js';
@@ -47,7 +47,7 @@ export function dealsScreen(el, app) {
   el.classList.add('wide', 'picking', 'deals-pg');
   el.innerHTML = `<div class="screen-main">
       <div class="list-head">
-        <h1 class="h-title">🔥 @shopdeals.ng</h1>
+        <h1 class="h-title">🔥 @shopupgrade.ng</h1>
         <p class="list-sub">One unit each, with real photos of the actual device. <strong>What you see is what you swap into.</strong></p>
         <p class="list-date" data-count></p>
       </div>
@@ -98,6 +98,17 @@ export function dealsScreen(el, app) {
     </article>`;
   }
 
+  function tile(d, x) {
+    const photos = x?.photos || [];
+    const n = photos.length;
+    const p = parseNote(d.dealNote);
+    const bh = p.bh ? html`<span class="bat ${p.bh >= 85 ? 'g' : p.bh >= 80 ? 'w' : 'l'}">${p.bh}%</span>` : p.newBattery ? raw('<span class="bat g">New</span>') : '';
+    return html`<button class="dl-tile" type="button" data-jump="${d.id}" aria-label="${d.model} ${d.storage}, ${naira(d.price)}. Show details.">
+      ${n ? html`<img src="${photos[0]}" alt="" loading="lazy" decoding="async" width="960" height="1200">` : raw('<span class="dl-none">Photos coming soon</span>')}
+      <span class="dl-tt"><b>${d.model}</b><small>${d.storage}${n ? ` · ${n} ${n === 1 ? 'photo' : 'photos'}` : ''}</small><span class="dl-tr"><span class="dl-tp">${nairaK(d.price)}</span>${bh}</span></span>
+    </button>`;
+  }
+
   async function drawList() {
     const extra = await loadExtra();
     const rows = all.filter((d) => (!f.kind || kindOf(d) === f.kind) && matches(d, f.search));
@@ -112,9 +123,12 @@ export function dealsScreen(el, app) {
       const g = groups[groups.length - 1];
       if (g && g.series === d.series) g.rows.push(d); else groups.push({ series: d.series, rows: [d] });
     }
+    // Every deal as a small tile first (2 across, Daniel picked option B on 31 Oct); a tap jumps to its full card below.
     $('[data-list]', el).innerHTML = groups.length
-      ? groups.map((g) => html`<section class="series"><h2 class="series-h">${g.series}</h2><div class="dl-grid">${g.rows.map((d) => card(d, extra[d.id]))}</div></section>`).join('')
-      : html`<div class="empty"><p>${f.search ? 'No deals match. Try a shorter search.' : 'No deals right now. Check back soon, or follow @shopdeals.ng for new ones.'}</p></div>`.toString();
+      ? html`<div class="dl-tiles">${sorted.map((d) => tile(d, extra[d.id]))}</div>
+        <p class="dl-full">All deals in full</p>`.toString()
+        + groups.map((g) => html`<section class="series"><h2 class="series-h">${g.series}</h2><div class="dl-grid">${g.rows.map((d) => card(d, extra[d.id]))}</div></section>`).join('')
+      : html`<div class="empty"><p>${f.search ? 'No deals match. Try a shorter search.' : 'No deals right now. Check back soon, or follow @shopupgrade.ng for new ones.'}</p></div>`.toString();
     $$('[data-track]', el).forEach(wireGallery);
   }
 
@@ -162,6 +176,13 @@ export function dealsScreen(el, app) {
     t = setTimeout(() => { f.search = e.target.value; drawList(); }, 120);
   });
   el.addEventListener('click', (e) => {
+    const j = e.target.closest('[data-jump]');
+    if (j) {
+      const c = $(`.dl-card[data-id="${CSS.escape(j.dataset.jump)}"]`, el);
+      c?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      c?.classList.add('flash'); setTimeout(() => c?.classList.remove('flash'), 1600);
+      return;
+    }
     const k = e.target.closest('[data-kind]');
     if (k) { f.kind = k.dataset.kind; drawChips(); drawList(); return; }
     const nav = e.target.closest('[data-nav]');

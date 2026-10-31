@@ -1255,7 +1255,9 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 .deals-pg .field { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: #fff; }
 .deals-pg .field input { color: #fff; }
 .deals-pg .field input::placeholder { color: rgba(255, 255, 255, 0.5); }
-.deals-pg .chips { justify-content: flex-start; }
+/* Centred when they fit, still scrollable when they don't. */
+.deals-pg .chips { justify-content: safe center; }
+.deals-pg .chips > :first-child { margin-left: auto; } .deals-pg .chips > :last-child { margin-right: auto; }
 .deals-pg .chip { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
 .deals-pg .chip[aria-pressed="true"] { background: #e3001b; border-color: #e3001b; color: #fff; padding-right: 14px; }
 .deals-pg .h-title { color: #fff; }
@@ -1314,3 +1316,18 @@ body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 
 body.deals-mode .deals-pg .list-top { background: #0a0a0a !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.deals-mode .deals-pg .field, body.deals-mode .deals-pg .field input { background: #1a1a1a !important; border-color: rgba(255, 255, 255, 0.18) !important; color: #fff !important; }
 body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { color: rgba(255, 255, 255, 0.6); }
+
+/* Tiles (31 Oct, option B): every deal small first, 2 across; tap jumps to its card. */
+.dl-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.dl-tile { display: flex; flex-direction: column; padding: 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; overflow: hidden; background: #141414; color: #fff; text-align: left; }
+.dl-tile img, .dl-tile .dl-none { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; display: block; background: #1e1e1e; font-size: 12.5px; }
+.dl-tt { display: grid; gap: 3px; padding: 9px 10px 11px; }
+.dl-tt b { font-size: 14px; line-height: 1.2; font-weight: 600; }
+.dl-tt small { font-size: 12px; color: rgba(255, 255, 255, 0.6); }
+.dl-tr { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 2px; }
+.dl-tp { font: 700 15px/1 var(--brandface); color: #ff2a3d; white-space: nowrap; }
+.dl-tr .bat { font-size: 11.5px; padding: 1px 7px; }
+.dl-tile:active { transform: scale(0.98); }
+.dl-full { margin: 26px 0 0; font: 700 1.1rem/1.2 var(--display); color: #fff; text-align: left; }
+.dl-card { scroll-margin-top: calc(var(--list-top, 118px) + 14px); transition: box-shadow 0.3s; }
+.dl-card.flash { box-shadow: 0 0 0 2px #e3001b; }
