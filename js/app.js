@@ -3,13 +3,13 @@
 import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
-import { SCREENS, restoreState, saveState } from './ui/flow.js?v=204';
+import { SCREENS, restoreState, saveState } from './ui/flow.js?v=208';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
 // The site caches files for 4 hours. Screen modules carry the same ?v= as app.js in index.html, and every import
 // of one module must use the same URL (or it loads twice). Bump them all together: grep -rn "?v=" js index.html
-import { dealsScreen, dealScreen } from './ui/deals.js?v=204';
+import { dealsScreen, dealScreen } from './ui/deals.js?v=208';
 
 SCREENS.deals = dealsScreen;
 SCREENS.deal = dealScreen;
@@ -158,9 +158,12 @@ function show(screen, params, dir, inPlace = false) {
   if (ok === false) return;
   body.replaceChildren(el);
   current = el;
+  const lt = el.querySelector('.list-top');
+  if (lt) { const m = document.createElement('div'); m.className = 'stick-mark'; m.setAttribute('aria-hidden', 'true'); lt.before(m); }
+  popup.classList.remove('scrolled-in');
   if (!document.getElementById('mechip')?.hidden) app.paintChip();
   requestAnimationFrame(markOverflow);
-  if (inPlace) { scroller().scrollTop = y; return; }
+  if (inPlace) { scroller().scrollTop = y; popup.classList.toggle('scrolled-in', body.scrollTop > 2); requestAnimationFrame(markStuck); return; }
   body.scrollTop = 0; scrollTo(0, 0);
   if (dir !== 0 && !reducedMotion() && el.animate) {
     const dx = dir > 0 ? 28 : -28;
@@ -180,6 +183,15 @@ function markOverflow() {
   const sc = scroller();
   body.classList.toggle('overflowing', sc.scrollHeight > (phone.matches ? innerHeight : sc.clientHeight) + 1);
 }
+// Desktop: once the list scrolls, the pop-up's header strip takes the pinned bar's colour so nothing shows above it.
+// The search/filter bar is see-through until it actually pins to the top, then turns solid (no band mid-page).
+function markStuck() {
+  const lt = body.querySelector('.list-top');
+  const mark = body.querySelector('.stick-mark');
+  if (lt && mark) lt.classList.toggle('stuck', mark.getBoundingClientRect().top < lt.getBoundingClientRect().top - 1);
+}
+body.addEventListener('scroll', () => { popup.classList.toggle('scrolled-in', body.scrollTop > 2); markStuck(); }, { passive: true });
+addEventListener('scroll', markStuck, { passive: true });
 // The bar behind the logo and corner buttons only shows once the page has scrolled under it.
 addEventListener('scroll', () => document.body.classList.toggle('scrolled', phone.matches && scrollY > 8), { passive: true });
 new ResizeObserver(markOverflow).observe(body);

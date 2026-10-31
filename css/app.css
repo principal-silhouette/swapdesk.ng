@@ -1384,3 +1384,32 @@ body.deals-mode .screen-foot { background: linear-gradient(rgba(22, 18, 20, 0), 
 /* The page behind Shop Deals is black in light and dark mode (dark mode otherwise paints the page navy). */
 html:has(body.deals-mode) { background: #000; }
 body.deals-mode .wave { filter: none; }
+
+/* ---------- Spillover fixes (31 Oct) ----------
+   Wide list pages fill the pop-up, so the pinned search/filter bar reaches both edges (no square ends);
+   the header strip above it turns solid once the list scrolls; the bottom bar is solid behind the buttons. */
+.screen.wide { max-width: none; }
+.popup-head { z-index: 6; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; transition: background-color 0.15s; }
+.popup.scrolled-in .popup-head { background: var(--glass); }
+body.deals-mode .popup.scrolled-in .popup-head { background: #1d1416; }
+body.deals-mode .screen-foot { background: linear-gradient(rgba(22, 18, 20, 0), #161214 34%) !important; }
+.screen-foot { background: linear-gradient(rgba(232, 243, 255, 0), rgba(232, 243, 255, 0.98) 26px); }
+@media (prefers-color-scheme: dark) {
+  .popup.scrolled-in .popup-head { background: rgba(210, 223, 238, 0.97); }
+  .screen-foot { background: linear-gradient(rgba(210, 223, 238, 0), rgba(210, 223, 238, 0.99) 26px); }
+  body.deals-mode .popup.scrolled-in .popup-head { background: #0a0a0a; }
+  body.deals-mode .screen-foot { background: linear-gradient(rgba(10, 10, 10, 0), #0a0a0a 34%) !important; }
+}
+/* The deals bar is solid, so no frosted blur: the blur ghosted the tiles' edges just above it. */
+body.deals-mode .deals-pg .list-top { -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Pinned bars are see-through at rest and solid only once pinned (31 Oct). */
+.stick-mark { height: 0; }
+.list-top:not(.stuck) { background: transparent !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.deals-mode .deals-pg .list-top:not(.stuck) { background: transparent !important; }
+/* The strip's colour reaches 5px into the list so the very top edge of scrolled content never peeks through. */
+.popup.scrolled-in .popup-head { box-shadow: 0 5px 0 0 var(--glass); }
+body.deals-mode .popup.scrolled-in .popup-head { box-shadow: 0 5px 0 0 #1d1416; }
+@media (prefers-color-scheme: dark) {
+  .popup.scrolled-in .popup-head { box-shadow: 0 5px 0 0 rgba(210, 223, 238, 0.97); }
+  body.deals-mode .popup.scrolled-in .popup-head { box-shadow: 0 5px 0 0 #0a0a0a; }
+}
