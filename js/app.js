@@ -7,6 +7,9 @@ import { SCREENS, restoreState, saveState } from './ui/flow.js';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
+import { dealsScreen } from './ui/deals.js';
+
+SCREENS.deals = dealsScreen;
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
@@ -75,7 +78,7 @@ function toggleMenu() {
   const tile = (act, ico, label) => `<button class="me-tile mm-tile" type="button" role="menuitem" data-mm="${act}">${ico}<span>${label}</span></button>`;
   const USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>';
   menu.innerHTML = `<div class="mm-head"><b>${esc(m.name || '')}</b><span>${esc(showPhone(m.phone))}</span></div>
-    <div class="mm-wide">${wide('prices', 'Check for Prices', 'green')}${wide('trade', 'Check My Trade-In Value', '')}${wide('swap', 'Calculate My Swap Rate', 'blue')}</div>
+    <div class="mm-wide">${wide('prices', 'Brand New • UK Used', 'green')}${wide('deals', 'Shop Deals', '')}${wide('swap', 'Calculate My Swap Rate', 'blue')}</div>
     <div class="mm-tiles">${tile('me', USER, 'My Account')}${tile('codes', ICON.copy, 'My Swap Codes')}${tile('devices', ICON.Phones, 'My Devices')}
       ${tile('openq', ICON.search, 'Open a Quote')}${tile('chat', ICON.whatsapp, 'Chat With Us')}${tile('edit', ICON.edit, 'Edit Details')}</div>
     <button class="mm-item danger mm-out" type="button" role="menuitem" data-mm="signout">Sign Out</button>`;
@@ -94,6 +97,7 @@ menu?.addEventListener('click', (e) => {
   else if (act === 'swap') SCREENS.startFlow(app, 'swap');
   else if (act === 'trade') app.go('trade-in');
   else if (act === 'prices') app.go('prices');
+  else if (act === 'deals') app.go('deals');
   else if (act === 'openq') app.go('openq');
   else if (act === 'edit') app.go('signin', { form: 1 });
   else if (act === 'chat') location.href = whatsappURL(`Hi SwapDesk, this is ${m?.name || ''} (${showPhone(m?.phone || '')}).`);
@@ -108,6 +112,7 @@ function urlFor(screen, params) {
     p.set('view', screen);
     ['type', 'brand', 'cond', 'search'].forEach((k) => params[k] && p.set(k, params[k]));
   }
+  if (screen === 'deals') p.set('view', 'deals');
   if (screen === 'quote') {
     if (params.id) p.set('q', params.id);
     else if (params.packed) p.set('s', params.packed);
@@ -125,6 +130,7 @@ function fromURL() {
   if (v === 'prices' || v === 'trade-in') {
     return [v, { type: p.get('type') || '', brand: p.get('brand') || '', cond: p.get('cond') || '', search: p.get('search') || '' }];
   }
+  if (v === 'deals') return ['deals', {}];
   if (p.get('device')) return ['device', { id: p.get('device') }];
   return ['home', {}];
 }
@@ -135,6 +141,8 @@ function show(screen, params, dir, inPlace = false) {
   app.screen = screen;
   app.params = params;
   closeMenu();
+  // Shop Deals has its own look: the whole background turns black and red, like opening a separate pop-up.
+  document.body.classList.toggle('deals-mode', screen === 'deals');
   const y = body.scrollTop;
   const el = document.createElement('div');
   el.className = 'screen';
@@ -156,7 +164,7 @@ function show(screen, params, dir, inPlace = false) {
   }
   const h = el.querySelector('h1, h2');
   if (h && dir !== 0) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-  const titles = { prices: 'Shop', 'trade-in': 'Trade-In Values', quote: 'Swap Quote' };
+  const titles = { prices: 'Shop', deals: 'Shop Deals', 'trade-in': 'Trade-In Values', quote: 'Swap Quote' };
   document.title = titles[screen] ? `${titles[screen]} · SwapDesk` : '@the.swapdesk Trade Ins · Swap, Trade In, Upgrade';
 }
 
@@ -208,7 +216,7 @@ async function boot() {
   try {
     app.catalog = await loadCatalog((fresh) => {
       app.catalog = fresh;
-      if (['home', 'prices', 'trade-in'].includes(app.screen)) app.refresh();
+      if (['home', 'prices', 'trade-in', 'deals'].includes(app.screen)) app.refresh();
     });
     // Signed in: fetch their codes in the background, so My Account opens with everything already there.
     if (getMe() && (app.catalog.features || []).includes('customers')) setTimeout(() => syncCodes().catch(() => {}), 1500);

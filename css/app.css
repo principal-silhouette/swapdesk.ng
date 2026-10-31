@@ -1222,3 +1222,96 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select:
 .mm-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .mm-tile { min-height: 70px !important; font-size: 13.5px !important; }
 .mm-out { text-align: center !important; margin-top: 8px; font-weight: 600 !important; }
+
+/* ---------- Shop Deals (31 Oct): its own pop-up in the @shopdeals.ng look, black with red contours ---------- */
+body { transition: background-color 0.45s ease; }
+body.deals-mode { background: #000; }
+body.deals-mode .wave-a { content: url("../assets/wave-a-red.svg"); }
+body.deals-mode .wave-b { content: url("../assets/wave-b-red.svg"); }
+body.deals-mode .wave { opacity: 0.55; }
+/* The logo flips to shopdeals: the same two fonts as swapdesk, swapped round (script first, then the heavy face). */
+.sd-logo { display: none; white-space: nowrap; line-height: 1; text-align: center; }
+.sd-logo i { font: 400 62px/1 "Sacramento", cursive; font-style: normal; color: #fff; margin-right: 4px; }
+.sd-logo b { font: 900 46px/1 "League Spartan", var(--brandface); color: #e3001b; letter-spacing: -0.035em; }
+body.deals-mode .stage-logo { width: auto; text-decoration: none; }
+body.deals-mode .stage-logo img { display: none; }
+body.deals-mode .stage-logo .sd-logo { display: flex; align-items: baseline; justify-content: center; }
+@media (max-width: 600px) { .sd-logo i { font-size: 54px; } .sd-logo b { font-size: 40px; } }
+body.deals-mode .stage-tag .t1, body.deals-mode .stage-tag .t2 { color: #fff; }
+body.deals-mode .stage-tag .t3 { color: #e3001b; }
+body.deals-mode .stage-arrows { filter: brightness(0) invert(1); }
+body.deals-mode .me-chip { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: rgba(255, 255, 255, 0.22); }
+body.deals-mode .popup { background: rgba(10, 10, 10, 0.82); border-color: rgba(255, 255, 255, 0.08); color: #fff; }
+body.deals-mode .popup-head .grab { background: rgba(255, 255, 255, 0.25); }
+body.deals-mode .screen-foot { background: linear-gradient(rgba(10, 10, 10, 0), rgba(10, 10, 10, 0.92) 30%) !important; }
+body.deals-mode .screen-foot .pill:not(.go) { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.5) !important; }
+body.deals-mode .screen-foot .pill.go { background: #e3001b; border-color: #e3001b !important; }
+body.deals-mode .credit, body.deals-mode .credit b { color: rgba(255, 255, 255, 0.6); }
+
+.deals-pg .list-sub { color: rgba(255, 255, 255, 0.78) !important; }
+.deals-pg .list-sub strong { color: #fff; }
+.deals-pg .list-date { color: rgba(255, 255, 255, 0.55); }
+.dl-lockup { display: flex; flex-direction: column; align-items: center; line-height: 0.8 !important; margin-bottom: 14px !important; }
+.dl-shop { font: 400 2.1rem/1 "Great Vibes", "Snell Roundhand", cursive; color: #fff; margin-bottom: -0.5rem; position: relative; z-index: 1; letter-spacing: 0; }
+.dl-deals { font: 700 3.6rem/0.9 var(--brandface); color: #e3001b; letter-spacing: -0.02em; }
+.deals-pg .list-top { background: rgba(10, 10, 10, 0.88); }
+.deals-pg .field { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: #fff; }
+.deals-pg .field input { color: #fff; }
+.deals-pg .field input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.deals-pg .chips { justify-content: flex-start; }
+.deals-pg .chip { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
+.deals-pg .chip[aria-pressed="true"] { background: #e3001b; border-color: #e3001b; color: #fff; padding-right: 14px; }
+.deals-pg .series-h { background: rgba(10, 10, 10, 0.88); color: #fff; }
+.deals-pg .series-h::before { content: ""; display: inline-block; width: 4px; height: 0.95em; margin-right: 8px; border-radius: 2px; background: #e3001b; vertical-align: -0.1em; }
+@media (max-width: 600px) { .deals-pg .list-top, .deals-pg .series-h { background: #0a0a0a; } }
+.deals-pg .empty { color: rgba(255, 255, 255, 0.75); }
+
+.dl-grid { display: grid; gap: 16px; }
+.dl-card { background: #141414; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; overflow: hidden; text-align: left; }
+.dl-gal { position: relative; aspect-ratio: 4 / 5; background: #1e1e1e; }
+.dl-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.dl-track::-webkit-scrollbar { display: none; }
+.dl-slide { flex: 0 0 100%; height: 100%; padding: 0; border: 0; background: none; scroll-snap-align: center; cursor: zoom-in; }
+.dl-slide img { width: 100%; height: 100%; object-fit: cover; }
+.dl-count { position: absolute; top: 12px; left: 12px; padding: 6px 10px; border-radius: 999px; background: rgba(0, 0, 0, 0.62); color: #fff; font-size: 12.5px; font-weight: 600; letter-spacing: 0; font-variant-numeric: tabular-nums; pointer-events: none; }
+.dl-new { position: absolute; top: 12px; right: 12px; padding: 6px 10px; border-radius: 999px; background: #e3001b; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; pointer-events: none; }
+.dl-dots { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
+.dl-dots b { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); transition: transform 0.2s, background 0.2s; }
+.dl-dots b.on { background: #fff; transform: scale(1.25); }
+.dl-nav { position: absolute; top: 50%; translate: 0 -50%; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: #111; font-size: 22px; line-height: 1; display: none; place-items: center; }
+.dl-nav.prev { left: 10px; } .dl-nav.next { right: 10px; }
+.dl-nav:disabled { opacity: 0; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .dl-gal:hover .dl-nav { display: grid; } }
+.dl-none { height: 100%; display: grid; place-items: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; }
+.dl-body { padding: 16px 16px 14px; display: grid; gap: 12px; color: #fff; }
+.dl-titlerow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.dl-name { margin: 0; font: 700 1.2rem/1.15 var(--display); letter-spacing: -0.018em; }
+.dl-sub { margin: 3px 0 0; font-size: 13.5px; color: rgba(255, 255, 255, 0.6); }
+.dl-price { margin: 0; font: 700 1.3rem/1.1 var(--brandface); color: #ff2a3d; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dl-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin: 0; padding: 12px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.dl-specs div { min-width: 0; }
+.dl-specs dt { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); font-weight: 600; }
+.dl-specs dd { margin: 3px 0 0; font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.dl-specs .sw { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35); flex: none; }
+.bat { display: inline-block; padding: 2px 9px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.bat.g { background: rgba(52, 199, 89, 0.18); color: #4cd38a; }
+.bat.w { background: rgba(255, 159, 10, 0.2); color: #f0b44d; }
+.bat.l { background: rgba(255, 69, 58, 0.2); color: #ff8a76; }
+.dl-notes { display: flex; flex-wrap: wrap; gap: 6px; }
+.dl-notes span { font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 9px; background: rgba(227, 0, 27, 0.16); color: #ff6b78; }
+.dl-acts { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.dl-acts .btn { min-height: 50px; padding: 12px 18px; font-size: 15.5px; box-shadow: none; }
+.dl-acts .dl-swap { background: #e3001b; border-color: #e3001b; color: #fff; }
+.dl-acts .dl-wa { background: transparent; border-color: rgba(255, 255, 255, 0.3); color: #3fcf7a; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.dl-acts .dl-wa svg { width: 18px; height: 18px; }
+.dl-listed { margin: -2px 0 0; font-size: 12.5px; color: rgba(255, 255, 255, 0.5); }
+
+.dl-lb { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; }
+.dl-lbbar { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 600; padding: calc(12px + env(safe-area-inset-top)) 16px 12px; }
+.dl-lbbar button { background: rgba(255, 255, 255, 0.14); color: #fff; border: 0; border-radius: 999px; padding: 10px 16px; }
+.dl-lbtrack { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.dl-lbtrack::-webkit-scrollbar { display: none; }
+.dl-lbtrack img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; }
+body.deals-mode .deals-pg .list-top, body.deals-mode .deals-pg .series-h { background: #0a0a0a !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.deals-mode .deals-pg .field, body.deals-mode .deals-pg .field input { background: #1a1a1a !important; border-color: rgba(255, 255, 255, 0.18) !important; color: #fff !important; }
+body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { color: rgba(255, 255, 255, 0.6); }

@@ -179,8 +179,8 @@ function home(el, app) {
       <p class="lead">Trade in the Phone, Watch, Speaker, Console or AirPods you’ve got for the one you love 💙 and get your swap balance in under a minute.</p>
     </div>
     <div class="stack tight">
-      <button class="btn green" type="button" data-act="prices">Check for Prices</button>
-      <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
+      <button class="btn green" type="button" data-act="prices">Brand New • UK Used</button>
+      <button class="btn" type="button" data-act="deals">Shop Deals</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
     <div class="home-tail">
@@ -189,6 +189,7 @@ function home(el, app) {
   wire(el, app, {
     openq: () => app.go('openq'),
     prices: () => app.go('prices'),
+    deals: () => app.go('deals'),
     tradeList: () => app.go('trade-in'),
     trade: () => app.go('trade-in'),
     swap: () => startFlow(app, 'swap'),
