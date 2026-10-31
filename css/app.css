@@ -1329,3 +1329,58 @@ body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { co
 
 /* Home: Shop Deals carries the deals red, the way Brand New • UK Used carries green (Daniel, 31 Oct). */
 .btn.red, .mm-btn.red { color: #d0021b; border-color: #e3001b; }
+
+/* ---------- Phones: the page scrolls, not the pop-up (31 Oct) ----------
+   Scrolling the page itself lets Safari and Chrome tuck their address bar and toolbar away, giving the list more room.
+   The pop-up becomes a normal block that starts under the logo; a solid bar slides in behind the logo and corner
+   buttons once content scrolls under them, and the search/filters stick just below that bar. */
+.topbar { display: none; }
+@media (max-width: 600px) {
+  :root { --stick: calc(env(safe-area-inset-top, 0px) + 72px); }
+  html, body { height: auto; }
+  body { overflow: visible; overflow-x: clip; }
+  .popup {
+    position: relative; left: auto; right: auto; top: auto; bottom: auto; translate: none; width: 100%;
+    height: auto; min-height: 88svh; margin-top: 12svh;
+  }
+  .popup-body { flex: 1 0 auto; overflow: visible; }
+  .topbar {
+    display: block; position: fixed; z-index: 15; left: 0; right: 0; top: 0; height: var(--stick);
+    background: #fff; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  body.scrolled .topbar { opacity: 1; }
+  .stage-logo { position: fixed; }
+  .list-top, .pick-search { top: calc(var(--stick) - 4px); }
+  .series-h { top: calc(var(--stick) + var(--list-top, 118px)); }
+  body.deals-mode .topbar { background: #000; }
+}
+@media (max-width: 600px) and (prefers-color-scheme: dark) { .topbar { background: #0E2238; } body.deals-mode .topbar { background: #000; } }
+
+/* Shop Deals: one slim row (Search button + filters) instead of a full search bar (31 Oct). */
+.deals-pg .dl-top { padding-top: 8px; padding-bottom: 8px; gap: 8px; }
+.dl-find {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.1); color: #fff; font-size: 13.5px; font-weight: 600;
+}
+.dl-find .ico, .dl-find svg { width: 15px; height: 15px; }
+.deals-pg .chips .chip { min-height: 32px; height: 32px; padding-block: 0; display: inline-flex; align-items: center; }
+
+/* Bottom buttons sit a little lower (31 Oct). */
+@media (max-width: 600px) {
+  .screen-foot { padding-top: 16px; padding-bottom: calc(6px + env(safe-area-inset-bottom) * 0.7); gap: 8px; }
+}
+
+/* Shop Deals pop-up: light mode is the wine-to-black fade; dark mode keeps the near-black (Daniel, 31 Oct). */
+body.deals-mode .popup { background: linear-gradient(#3a0f15, #161214 300px); border-color: rgba(255, 120, 130, 0.16); }
+body.deals-mode .deals-pg .list-top { background: #1d1416 !important; }
+body.deals-mode .screen-foot { background: linear-gradient(rgba(22, 18, 20, 0), rgba(22, 18, 20, 0.96) 30%) !important; }
+.deals-pg .dl-tile, .deals-pg .dl-card { background: #1f1a1b; }
+@media (prefers-color-scheme: dark) {
+  body.deals-mode .popup { background: rgba(10, 10, 10, 0.82); border-color: rgba(255, 255, 255, 0.08); }
+  body.deals-mode .deals-pg .list-top { background: #0a0a0a !important; }
+  body.deals-mode .screen-foot { background: linear-gradient(rgba(10, 10, 10, 0), rgba(10, 10, 10, 0.92) 30%) !important; }
+  .deals-pg .dl-tile, .deals-pg .dl-card { background: #141414; }
+}
+/* The page behind Shop Deals is black in light and dark mode (dark mode otherwise paints the page navy). */
+html:has(body.deals-mode) { background: #000; }
+body.deals-mode .wave { filter: none; }

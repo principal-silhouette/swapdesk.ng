@@ -10,8 +10,8 @@ import { animateNumber, haptic } from './motion.js';
 import {
   buildQuote, saveQuote, summaryText, whatsappMessage, whatsappURL, share, copy, answersText,
 } from '../quote.js';
-import { listScreen, listRows, dealRows } from './lists.js?v=203';
-import { quoteScreen } from './quoteView.js?v=203';
+import { listScreen, listRows, dealRows } from './lists.js?v=204';
+import { quoteScreen } from './quoteView.js?v=204';
 import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, syncCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
@@ -453,13 +453,13 @@ function picker(el, app, params) {
       else { app.back(); return; }
       if (st.brand && brands.size <= 1 && !st.model) { st.brand = ''; st.type = ''; }
       draw();
-      el.closest('.popup-body').scrollTop = 0;
+      el.closest('.popup-body').scrollTop = 0; scrollTo(0, 0);
       return;
     }
     const a = e.target.closest('[data-act]');
     if (!a) return;
     const v = a.dataset.v;
-    const top = () => { el.closest('.popup-body').scrollTop = 0; };
+    const top = () => { el.closest('.popup-body').scrollTop = 0; scrollTo(0, 0); };
     switch (a.dataset.act) {
       case 'type': st.type = v; st.brand = ''; st.model = ''; draw(); top(); break;
       case 'brand': st.brand = v; st.model = ''; draw(); top(); break;
@@ -1301,7 +1301,7 @@ export function sharePage(el, app, { saved, onBack, quote }) {
       ${opt('copy', ICON.link, 'Copy Link', 'Come back to it anytime.')}
     </div>`, pills(backPill())).toString();
   el.classList.add('share-pg');
-  document.getElementById('body')?.scrollTo(0, 0);
+  document.getElementById('body')?.scrollTo(0, 0); scrollTo(0, 0);
   // Keep every title and note on one line, shrinking slightly on narrow phones.
   requestAnimationFrame(() => el.querySelectorAll('.share-pg .q-opts .tt, .share-pg .q-opts .sub').forEach((n) => {
     let fs = parseFloat(getComputedStyle(n).fontSize);

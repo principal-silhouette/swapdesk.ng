@@ -125,15 +125,15 @@ function render(el, app, p, q) {
       if (r) location.href = whatsappURL(whatsappMessage(q, r.link, q.city));
     }
     if (act === 'share') {
-      const { sharePage } = await import('./flow.js?v=203');
+      const { sharePage } = await import('./flow.js?v=204');
       const html0 = el.innerHTML, click0 = el.onclick, cls0 = el.className;
       sharePage(el, app, {
         saved: () => shortLink(true),
-        onBack: () => { el.className = cls0; el.innerHTML = html0; el.onclick = click0; document.getElementById('body')?.scrollTo(0, 0); },
+        onBack: () => { el.className = cls0; el.innerHTML = html0; el.onclick = click0; document.getElementById('body')?.scrollTo(0, 0); scrollTo(0, 0); },
       });
     }
     if (act === 'today' || act === 'edit') {
-      const { freshAnswers } = await import('./flow.js?v=203');
+      const { freshAnswers } = await import('./flow.js?v=204');
       // Put the quote back into the swap flow: every trade-in device with its answers, and the swap devices still on sale.
       const ui = (a = {}) => ({
         ...freshAnswers(),

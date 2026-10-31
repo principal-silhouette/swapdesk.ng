@@ -3,19 +3,22 @@
 import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
-import { SCREENS, restoreState, saveState } from './ui/flow.js?v=203';
+import { SCREENS, restoreState, saveState } from './ui/flow.js?v=204';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
 // The site caches files for 4 hours. Screen modules carry the same ?v= as app.js in index.html, and every import
 // of one module must use the same URL (or it loads twice). Bump them all together: grep -rn "?v=" js index.html
-import { dealsScreen, dealScreen } from './ui/deals.js?v=203';
+import { dealsScreen, dealScreen } from './ui/deals.js?v=204';
 
 SCREENS.deals = dealsScreen;
 SCREENS.deal = dealScreen;
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
+// On phones the page itself scrolls (not the pop-up), so the browser's bars can tuck away (Daniel, 31 Oct).
+const phone = matchMedia('(max-width: 600px)');
+const scroller = () => (phone.matches ? document.scrollingElement : body);
 
 export const app = {
   catalog: null,
@@ -147,7 +150,7 @@ function show(screen, params, dir, inPlace = false) {
   closeMenu();
   // Shop Deals has its own look: the whole background turns black and red, like opening a separate pop-up.
   document.body.classList.toggle('deals-mode', screen === 'deals' || screen === 'deal');
-  const y = body.scrollTop;
+  const y = scroller().scrollTop;
   const el = document.createElement('div');
   el.className = 'screen';
   // A screen may redirect (return false) after calling app.go itself.
@@ -157,8 +160,8 @@ function show(screen, params, dir, inPlace = false) {
   current = el;
   if (!document.getElementById('mechip')?.hidden) app.paintChip();
   requestAnimationFrame(markOverflow);
-  if (inPlace) { body.scrollTop = y; return; }
-  body.scrollTop = 0;
+  if (inPlace) { scroller().scrollTop = y; return; }
+  body.scrollTop = 0; scrollTo(0, 0);
   if (dir !== 0 && !reducedMotion() && el.animate) {
     const dx = dir > 0 ? 28 : -28;
     el.animate([{ transform: `translateX(${dx}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
@@ -173,7 +176,12 @@ function show(screen, params, dir, inPlace = false) {
 }
 
 // The pinned footer only needs its backing when content scrolls under it.
-function markOverflow() { body.classList.toggle('overflowing', body.scrollHeight > body.clientHeight + 1); }
+function markOverflow() {
+  const sc = scroller();
+  body.classList.toggle('overflowing', sc.scrollHeight > (phone.matches ? innerHeight : sc.clientHeight) + 1);
+}
+// The bar behind the logo and corner buttons only shows once the page has scrolled under it.
+addEventListener('scroll', () => document.body.classList.toggle('scrolled', phone.matches && scrollY > 8), { passive: true });
 new ResizeObserver(markOverflow).observe(body);
 new MutationObserver(() => requestAnimationFrame(markOverflow)).observe(body, { childList: true, subtree: true });
 
@@ -201,7 +209,7 @@ function riseIn() {
   const phone = matchMedia('(max-width: 600px)').matches;
   if (reducedMotion()) { document.body.classList.replace('intro', 'ready'); return; }
   const h = popup.offsetHeight;
-  const from = phone ? h : 60;
+  const from = phone ? Math.min(h, innerHeight) : 60;
   popup.style.transform = `translate3d(0, ${from}px, 0)`;
   popup.style.opacity = phone ? '1' : '0';
   spring({

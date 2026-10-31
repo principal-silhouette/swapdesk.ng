@@ -4,8 +4,8 @@ import { matches } from '../engine.js';
 import { html, raw, naira, nairaK, $, $$ } from '../format.js';
 import { whatsappURL } from '../quote.js';
 import { ICON } from './icons.js';
-import { dealRows } from './lists.js?v=203';
-import { SCREENS } from './flow.js?v=203';
+import { dealRows } from './lists.js?v=204';
+import { SCREENS } from './flow.js?v=204';
 
 // Photos and listing dates, kept with the cropped photos in assets/deals.
 let EXTRA = null;
@@ -146,10 +146,10 @@ export function dealsScreen(el, app) {
         <p class="list-sub">One unit each, with real photos of the actual device. <strong>What you see is what you swap into.</strong></p>
         <p class="list-date" data-count></p>
       </div>
-      <div class="list-top">
-        <label class="field"><span class="visually-hidden">Search deals</span>${ICON.search}
+      <div class="list-top dl-top">
+        <label class="field" data-field hidden><span class="visually-hidden">Search deals</span>${ICON.search}
           <input type="search" data-search placeholder="Search, e.g. 16 pro max" autocomplete="off" enterkeyhint="search">
-          <button class="clear" type="button" data-act="clear" aria-label="Clear search">${ICON.clear}</button></label>
+          <button class="clear" type="button" data-act="clear" aria-label="Close search">${ICON.clear}</button></label>
         <div class="chips" data-kinds></div>
       </div>
       <div data-list></div>
@@ -158,9 +158,9 @@ export function dealsScreen(el, app) {
 
   const kinds = [...new Set(all.map(kindOf))];
   const drawChips = () => {
-    $('[data-kinds]', el).innerHTML = kinds.length > 1
-      ? ['', ...kinds].map((k) => html`<button class="chip" type="button" aria-pressed="${f.kind === k ? 'true' : 'false'}" data-kind="${k}">${k || 'All Deals'}</button>`).join('')
-      : '';
+    // Search is a small button at the start of the row, like the corner buttons; it opens the field (31 Oct).
+    $('[data-kinds]', el).innerHTML = html`<button class="dl-find" type="button" data-act="find" aria-label="Search deals">${raw(ICON.search)} Search</button>`
+      + (kinds.length > 1 ? ['', ...kinds].map((k) => html`<button class="chip" type="button" aria-pressed="${f.kind === k ? 'true' : 'false'}" data-kind="${k}">${k || 'All Deals'}</button>`).join('') : '');
   };
 
   async function drawList() {
@@ -192,7 +192,8 @@ export function dealsScreen(el, app) {
     const a = e.target.closest('[data-act]');
     if (!a) return;
     if (a.dataset.act === 'home') app.back();
-    else if (a.dataset.act === 'clear') { f.search = ''; $('[data-search]', el).value = ''; drawList(); }
+    else if (a.dataset.act === 'find') { $('[data-field]', el).hidden = false; $('[data-search]', el).focus(); }
+    else if (a.dataset.act === 'clear') { e.preventDefault(); f.search = ''; $('[data-search]', el).value = ''; $('[data-field]', el).hidden = true; drawList(); }
     else if (a.dataset.act === 'swap') SCREENS.startFlow(app, 'swap');
   });
   wireCard(el, app);
