@@ -7,7 +7,8 @@ import { SCREENS, restoreState, saveState } from './ui/flow.js';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
-import { dealsScreen } from './ui/deals.js';
+// Versioned like app.js in index.html: the site caches files for 4 hours, so bump this with each Shop Deals change.
+import { dealsScreen } from './ui/deals.js?v=200';
 
 SCREENS.deals = dealsScreen;
 
