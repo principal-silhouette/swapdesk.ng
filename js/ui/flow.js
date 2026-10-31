@@ -10,8 +10,8 @@ import { animateNumber, haptic } from './motion.js';
 import {
   buildQuote, saveQuote, summaryText, whatsappMessage, whatsappURL, share, copy, answersText,
 } from '../quote.js';
-import { listScreen, listRows, dealRows } from './lists.js?v=208';
-import { quoteScreen } from './quoteView.js?v=208';
+import { listScreen, listRows, dealRows } from './lists.js?v=209';
+import { quoteScreen } from './quoteView.js?v=209';
 import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, syncCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';

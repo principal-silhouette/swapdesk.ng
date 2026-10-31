@@ -3,16 +3,18 @@
 import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
-import { SCREENS, restoreState, saveState } from './ui/flow.js?v=208';
+import { SCREENS, restoreState, saveState } from './ui/flow.js?v=209';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
 // The site caches files for 4 hours. Screen modules carry the same ?v= as app.js in index.html, and every import
 // of one module must use the same URL (or it loads twice). Bump them all together: grep -rn "?v=" js index.html
-import { dealsScreen, dealScreen } from './ui/deals.js?v=208';
+import { dealsScreen, dealScreen } from './ui/deals.js?v=209';
 
 SCREENS.deals = dealsScreen;
 SCREENS.deal = dealScreen;
+// Links always point at the site root, even when a page opens on a path like /deals/… (31 Oct).
+if (/^https?:$/.test(location.protocol)) CONFIG.site = `${location.origin}/`;
 
 const body = document.getElementById('body');
 const popup = document.getElementById('popup');
@@ -118,8 +120,9 @@ function urlFor(screen, params) {
     p.set('view', screen);
     ['type', 'brand', 'cond', 'search'].forEach((k) => params[k] && p.set(k, params[k]));
   }
-  if (screen === 'deals' || screen === 'deal') p.set('view', 'deals');
-  if (screen === 'deal' && params.id) p.set('deal', params.id);
+  // Shop Deals has clean links: /deals, and /deals/iphone-16-pro-max-029 for one deal (31 Oct).
+  if (screen === 'deals') return '/deals';
+  if (screen === 'deal') return `/deals/${dealSlug(params.id)}`;
   if (screen === 'quote') {
     if (params.id) p.set('q', params.id);
     else if (params.packed) p.set('s', params.packed);
@@ -128,8 +131,19 @@ function urlFor(screen, params) {
   return `./${qs ? `?${qs}` : ''}`;
 }
 app.urlFor = urlFor;
+/** deal-029 → iphone-16-pro-max-029 (the model name is only for people; the number finds the deal). */
+function dealSlug(id = '') {
+  const d = app.catalog?.byId.get(id);
+  const name = (d?.model || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const n = String(id).replace(/^deal-/, '');
+  return name ? `${name}-${n}` : n;
+}
 
 function fromURL() {
+  const path = location.pathname.replace(/\/+$/, '');
+  if (path === '/deals') return ['deals', {}];
+  const m = path.match(/^\/deals\/(?:.*-)?(\d+)$/);
+  if (m) return ['deal', { id: `deal-${m[1]}` }];
   const p = new URLSearchParams(location.search);
   if (p.get('q')) return ['quote', { id: p.get('q') }];
   if (p.get('s')) return ['quote', { packed: p.get('s') }];
@@ -266,7 +280,9 @@ async function boot() {
     show('home', {}, 0);
     return;
   }
-  history.replaceState({ screen, params, d: 0 }, '', location.search ? location.href : './');
+  // Old ?view=deals links switch to the clean /deals address.
+  const here = screen === 'deals' || screen === 'deal' ? urlFor(screen, params) : location.search ? location.href : './';
+  history.replaceState({ screen, params, d: 0 }, '', here);
   show(screen, params, 0);
   if (!reducedMotion()) body.firstElementChild?.animate?.([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
   if (CONFIG.gaId) loadAnalytics(CONFIG.gaId);
