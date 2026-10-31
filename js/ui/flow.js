@@ -10,8 +10,8 @@ import { animateNumber, haptic } from './motion.js';
 import {
   buildQuote, saveQuote, summaryText, whatsappMessage, whatsappURL, share, copy, answersText,
 } from '../quote.js';
-import { listScreen, listRows, dealRows } from './lists.js';
-import { quoteScreen } from './quoteView.js';
+import { listScreen, listRows, dealRows } from './lists.js?v=202';
+import { quoteScreen } from './quoteView.js?v=202';
 import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, syncCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
@@ -180,7 +180,7 @@ function home(el, app) {
     </div>
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Brand New • UK Used</button>
-      <button class="btn" type="button" data-act="deals">Shop Deals</button>
+      <button class="btn red" type="button" data-act="deals">Shop Deals</button>
       <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
     </div>
     <div class="home-tail">

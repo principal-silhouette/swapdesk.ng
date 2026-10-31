@@ -1328,6 +1328,7 @@ body.deals-mode .deals-pg .field .ico, body.deals-mode .deals-pg .field svg { co
 .dl-tp { font: 700 15px/1 var(--brandface); color: #ff2a3d; white-space: nowrap; }
 .dl-tr .bat { font-size: 11.5px; padding: 1px 7px; }
 .dl-tile:active { transform: scale(0.98); }
-.dl-full { margin: 26px 0 0; font: 700 1.1rem/1.2 var(--display); color: #fff; text-align: left; }
-.dl-card { scroll-margin-top: calc(var(--list-top, 118px) + 14px); transition: box-shadow 0.3s; }
-.dl-card.flash { box-shadow: 0 0 0 2px #e3001b; }
+.deal-one .screen-main { padding-top: 8px; }
+
+/* Home: Shop Deals carries the deals red, the way Brand New • UK Used carries green (Daniel, 31 Oct). */
+.btn.red, .mm-btn.red { color: #d0021b; border-color: #e3001b; }
