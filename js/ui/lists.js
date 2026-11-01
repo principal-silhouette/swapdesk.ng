@@ -272,8 +272,8 @@ export function listScreen(el, app, view, params) {
       case 'clear': f.search = ''; $('[data-search]', el).value = ''; drawList(); sync(); break;
       case 'nocond': f.cond = ''; drawChips(); drawList(); sync(); break;
       case 'reset': Object.assign(f, { type: '', brand: '', cond: '', search: '' }); $('[data-search]', el).value = ''; drawChips(); drawList(); sync(); break;
-      case 'value': (await import('./flow.js?v=210')).SCREENS.startFlow(app, 'trade'); break;
-      case 'valueThis': app.s.mode = 'trade'; history.replaceState(history.state, '', app.urlFor(view, f)); (await import('./flow.js?v=210')).SCREENS.startWith(app, id); break;
+      case 'value': (await import('./flow.js?v=211')).SCREENS.startFlow(app, 'trade'); break;
+      case 'valueThis': app.s.mode = 'trade'; history.replaceState(history.state, '', app.urlFor(view, f)); (await import('./flow.js?v=211')).SCREENS.startWith(app, id); break;
       case 'addCmp': {
         const max = Number(catalog.settings['compare.maxDevices']) || 6;
         if (app.s.compare.includes(id)) { app.s.compare = app.s.compare.filter((x) => x !== id); app.s.saved = null; app.save(); app.toast('Removed from your swap comparison.'); drawList(); break; }
@@ -285,7 +285,7 @@ export function listScreen(el, app, view, params) {
       }
       case 'goCmp':
         app.s.mode = 'swap'; app.save();
-        if (app.s.deviceId || app.s.compare.length) app.go('compare'); else (await import('./flow.js?v=210')).SCREENS.startFlow(app, 'swap');
+        if (app.s.deviceId || app.s.compare.length) app.go('compare'); else (await import('./flow.js?v=211')).SCREENS.startFlow(app, 'swap');
         break;
       case 'copy': await copy(listText(catalog, view, current(), f)); app.toast('List copied. Paste it into WhatsApp.'); break;
       case 'share': {

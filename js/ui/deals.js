@@ -4,8 +4,8 @@ import { matches } from '../engine.js';
 import { html, raw, naira, nairaK, $, $$ } from '../format.js';
 import { whatsappURL } from '../quote.js';
 import { ICON } from './icons.js';
-import { dealRows } from './lists.js?v=210';
-import { SCREENS } from './flow.js?v=210';
+import { dealRows } from './lists.js?v=211';
+import { SCREENS } from './flow.js?v=211';
 
 // Photos and listing dates, kept with the cropped photos in assets/deals.
 let EXTRA = null;
@@ -37,10 +37,26 @@ function parseNote(note = '') {
   }
   return out;
 }
+/**
+ * Names on the deals (Daniel, 1 Nov): "iPhone" goes when two or more words follow it (17 Pro Max, SE (2nd Gen)),
+ * so only one-word names keep it (iPhone Air, iPhone 13). Screen sizes move to the line underneath:
+ * "iPad Pro 13-inch (M4)" → name "iPad Pro M4", size 13".
+ */
+function dealName(model = '') {
+  let name = model;
+  let size = '';
+  const inch = name.match(/\s*(\d+(?:\.\d+)?)-inch\b/i);
+  if (inch) { size = `${inch[1]}"`; name = name.replace(inch[0], ''); }
+  name = name.replace(/\((M\d+\w*)\)/, '$1').replace(/\s+/g, ' ').trim();
+  const rest = name.match(/^iPhone (.+)$/);
+  if (rest && rest[1].split(' ').length >= 2) name = rest[1];
+  return { name, size };
+}
 const dayLabel = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 const todayISO = () => new Date().toLocaleDateString('en-CA');
 
 function card(d, x) {
+  const nm = dealName(d.model);
   const photos = x?.photos || [];
   const n = photos.length;
   const p = parseNote(d.dealNote);
@@ -56,7 +72,7 @@ function card(d, x) {
   return html`<article class="dl-card" data-id="${d.id}">
     <div class="dl-gal">${gallery}${isNew ? raw('<span class="dl-new">New Today</span>') : ''}</div>
     <div class="dl-body">
-      <div class="dl-titlerow"><h3 class="dl-name">${d.model}</h3><p class="dl-price">${naira(d.price)}</p></div><p class="dl-sub">${d.storage} · ${kindOf(d).replace(/s$/, '')} Deal</p>
+      <div class="dl-titlerow"><h3 class="dl-name">${nm.name}</h3><p class="dl-price">${naira(d.price)}</p></div><p class="dl-sub">${[nm.size, d.storage].filter(Boolean).join(' · ')} · ${kindOf(d).replace(/s$/, '')} Deal</p>
       <dl class="dl-specs">
         <div><dt>Battery Health</dt><dd>${bh}</dd></div>
         <div><dt>Colour</dt><dd>${sw ? raw(`<span class="sw" style="background:${sw}"></span>`) : ''}${p.colour || '—'}</dd></div>
@@ -71,13 +87,14 @@ function card(d, x) {
 }
 
 function tile(d, x) {
+  const nm = dealName(d.model);
   const photos = x?.photos || [];
   const n = photos.length;
   const p = parseNote(d.dealNote);
   const bh = p.bh ? html`<span class="bat ${p.bh >= 85 ? 'g' : p.bh >= 80 ? 'w' : 'l'}">${p.bh}%</span>` : p.newBattery ? raw('<span class="bat g">New</span>') : '';
   return html`<button class="dl-tile" type="button" data-open="${d.id}" aria-label="${d.model} ${d.storage}, ${naira(d.price)}. See this deal.">
     ${n ? html`<img src="${photos[0]}" alt="" loading="lazy" decoding="async" width="960" height="1200">` : raw('<span class="dl-none">Photos coming soon</span>')}
-    <span class="dl-tt"><span class="dl-tn"><b>${d.model}</b><span class="dl-tp">${nairaK(d.price)}</span></span><span class="dl-tr"><small>${d.storage}${n ? ` · ${n} ${n === 1 ? 'photo' : 'photos'}` : ''}</small>${bh}</span></span>
+    <span class="dl-tt"><span class="dl-tn"><b>${nm.name}</b><span class="dl-tp">${nairaK(d.price)}</span></span><span class="dl-tr"><small>${[nm.size, d.storage].filter(Boolean).join(' · ')}${n ? ` · ${n} ${n === 1 ? 'photo' : 'photos'}` : ''}</small>${bh}</span></span>
   </button>`;
 }
 
