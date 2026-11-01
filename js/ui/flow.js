@@ -10,8 +10,8 @@ import { animateNumber, haptic } from './motion.js';
 import {
   buildQuote, saveQuote, summaryText, whatsappMessage, whatsappURL, share, copy, answersText,
 } from '../quote.js';
-import { listScreen, listRows, dealRows } from './lists.js?v=211';
-import { quoteScreen } from './quoteView.js?v=211';
+import { listScreen, listRows, dealRows } from './lists.js?v=212';
+import { quoteScreen } from './quoteView.js?v=212';
 import { getMe, setMe, updateMe, signOut, isGuest, setGuest, normPhone, showPhone, firstName, rememberCode, markMine, saveCustomer, fetchCodes, syncCodes, savePin, signInRemote } from '../me.js';
 
 const KEY = 'swapdesk.state.v2';
@@ -181,7 +181,7 @@ function home(el, app) {
     <div class="stack tight">
       <button class="btn green" type="button" data-act="prices">Brand New • UK Used</button>
       <button class="btn red" type="button" data-act="deals">Shop Deals</button>
-      <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
+      <button class="btn blue" type="button" data-act="swap">Check My Swap Rate</button>
     </div>
     <div class="home-tail">
       <p class="home-note">Get an honest value in minutes, compare up to ${max} devices side by side, then swap in Port Harcourt, Abuja, Lagos, Uyo or Yenagoa, or send your device in from anywhere.</p>
@@ -1718,7 +1718,7 @@ function meScreen(el, app, params = {}) {
       <div class="stack tight me-actions">
         <button class="btn green" type="button" data-act="prices">Check for Prices</button>
         <button class="btn" type="button" data-act="trade">Check My Trade-In Value</button>
-        <button class="btn blue" type="button" data-act="swap">Calculate My Swap Rate</button>
+        <button class="btn blue" type="button" data-act="swap">Check My Swap Rate</button>
       </div>
       <div class="me-tiles">
         ${tile('openq', ICON.search, 'Open a Quote')}

@@ -4,8 +4,8 @@ import { matches } from '../engine.js';
 import { html, raw, naira, nairaK, $, $$ } from '../format.js';
 import { whatsappURL } from '../quote.js';
 import { ICON } from './icons.js';
-import { dealRows } from './lists.js?v=211';
-import { SCREENS } from './flow.js?v=211';
+import { dealRows } from './lists.js?v=212';
+import { SCREENS } from './flow.js?v=212';
 
 // Photos and listing dates, kept with the cropped photos in assets/deals.
 let EXTRA = null;

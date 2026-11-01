@@ -3,13 +3,13 @@
 import { loadCatalog } from './data.js';
 import { CONFIG } from './config.js';
 import { spring, reducedMotion } from './ui/motion.js';
-import { SCREENS, restoreState, saveState } from './ui/flow.js?v=211';
+import { SCREENS, restoreState, saveState } from './ui/flow.js?v=212';
 import { getMe, firstName, showPhone, signOut, syncCodes } from './me.js';
 import { whatsappURL } from './quote.js';
 import { ICON } from './ui/icons.js';
 // The site caches files for 4 hours. Screen modules carry the same ?v= as app.js in index.html, and every import
 // of one module must use the same URL (or it loads twice). Bump them all together: grep -rn "?v=" js index.html
-import { dealsScreen, dealScreen } from './ui/deals.js?v=211';
+import { dealsScreen, dealScreen } from './ui/deals.js?v=212';
 
 SCREENS.deals = dealsScreen;
 SCREENS.deal = dealScreen;
@@ -86,7 +86,7 @@ function toggleMenu() {
   const tile = (act, ico, label) => `<button class="me-tile mm-tile" type="button" role="menuitem" data-mm="${act}">${ico}<span>${label}</span></button>`;
   const USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg>';
   menu.innerHTML = `<div class="mm-head"><b>${esc(m.name || '')}</b><span>${esc(showPhone(m.phone))}</span></div>
-    <div class="mm-wide">${wide('prices', 'Brand New • UK Used', 'green')}${wide('deals', 'Shop Deals', 'red')}${wide('swap', 'Calculate My Swap Rate', 'blue')}</div>
+    <div class="mm-wide">${wide('prices', 'Brand New • UK Used', 'green')}${wide('deals', 'Shop Deals', 'red')}${wide('swap', 'Check My Swap Rate', 'blue')}</div>
     <div class="mm-tiles">${tile('me', USER, 'My Account')}${tile('codes', ICON.copy, 'My Swap Codes')}${tile('devices', ICON.Phones, 'My Devices')}
       ${tile('openq', ICON.search, 'Open a Quote')}${tile('chat', ICON.whatsapp, 'Chat With Us')}${tile('edit', ICON.edit, 'Edit Details')}</div>
     <button class="mm-item danger mm-out" type="button" role="menuitem" data-mm="signout">Sign Out</button>`;
